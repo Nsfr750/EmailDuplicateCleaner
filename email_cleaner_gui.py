@@ -581,7 +581,7 @@ Supported Email Clients:
 - Microsoft Outlook
 - Generic mbox/maildir formats
 
-© 2025 Replit"""
+© 2025 """
         
         messagebox.showinfo("About Email Duplicate Cleaner", about_text)
     
