@@ -1,0 +1,54 @@
+
+.console-output {
+    max-height: 200px;
+    overflow-y: scroll;
+    font-family: monospace;
+}
+
+.folder-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.duplicate-group {
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.group-header {
+    background-color: #f8f9fa;
+    padding: 10px 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.email-item {
+    padding: 10px 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.email-item:hover {
+    background-color: #f5f5f5;
+}
+
+.email-item.original {
+    background-color: #e7f7e7;
+}
+
+.email-item:last-child {
+    border-bottom: none;
+}
+
+.email-meta {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.email-subject {
+    font-weight: bold;
+}
+
+.check-column {
+    width: 40px;
+}

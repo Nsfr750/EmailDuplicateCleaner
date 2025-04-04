@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Duplicate Cleaner - Settings</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="my-4">
+            <h1>Email Duplicate Cleaner</h1>
+            <p class="lead">Scan and remove duplicate emails from various email clients</p>
+        </header>
+
+        <nav>
+            <ul class="nav nav-tabs" id="navTabs">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Scanner</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/history">History</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/settings">Settings</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/help">Help</a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="tab-content mt-3">
+            <div class="tab-pane active">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h2>User Settings</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="settingsForm" action="/api/save_settings" method="post">
+                            {% if save_success %}
+                                <div class="alert alert-success">
+                                    Settings saved successfully!
+                                </div>
+                            {% endif %}
+                            
+                            <div class="mb-3">
+                                <label for="defaultClient" class="form-label">Default Email Client</label>
+                                <select class="form-select" id="defaultClient" name="default_client">
+                                    <option value="all" {% if settings.default_client == 'all' %}selected{% endif %}>All Clients</option>
+                                    <option value="thunderbird" {% if settings.default_client == 'thunderbird' %}selected{% endif %}>Mozilla Thunderbird</option>
+                                    <option value="apple_mail" {% if settings.default_client == 'apple_mail' %}selected{% endif %}>Apple Mail</option>
+                                    <option value="outlook" {% if settings.default_client == 'outlook' %}selected{% endif %}>Microsoft Outlook</option>
+                                    <option value="generic" {% if settings.default_client == 'generic' %}selected{% endif %}>Generic Mailbox</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="defaultCriteria" class="form-label">Default Duplicate Detection Criteria</label>
+                                <select class="form-select" id="defaultCriteria" name="default_criteria">
+                                    <option value="strict" {% if settings.default_criteria == 'strict' %}selected{% endif %}>Strict (Message-ID + Date + From + Subject + Body)</option>
+                                    <option value="content" {% if settings.default_criteria == 'content' %}selected{% endif %}>Content Only (Body hash)</option>
+                                    <option value="headers" {% if settings.default_criteria == 'headers' %}selected{% endif %}>Headers (Message-ID + Date + From + Subject)</option>
+                                    <option value="subject-sender" {% if settings.default_criteria == 'subject-sender' %}selected{% endif %}>Subject + Sender Only</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="autoClean" name="auto_clean" {% if settings.auto_clean %}checked{% endif %}>
+                                <label class="form-check-label" for="autoClean">Auto-clean duplicates after scanning (keeps oldest emails)</label>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="lastCustomFolder" class="form-label">Last Custom Folder Path</label>
+                                <input type="text" class="form-control" id="lastCustomFolder" name="last_custom_folder" value="{{ settings.last_custom_folder or '' }}">
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">Save Settings</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="my-4 text-center text-muted">
+            <p>Email Duplicate Cleaner - Web Interface</p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
