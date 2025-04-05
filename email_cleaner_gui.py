@@ -246,7 +246,7 @@ class EmailCleanerGUI:
         
         # Create treeview with scrollbar
         self.results_tree = ttk.Treeview(self.results_frame, columns=("date", "from", "subject", "folder"),
-                                    show="tree headings")
+                                    show="tree headings", selectmode="extended")
         
         # Set column headings
         self.results_tree.heading("#0", text="Group")
@@ -272,14 +272,40 @@ class EmailCleanerGUI:
         y_scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
         x_scrollbar.grid(row=1, column=0, sticky=(tk.E, tk.W))
         
+        # Add right-click menu for viewing email content
+        self.email_menu = tk.Menu(self.results_tree, tearoff=0)
+        self.email_menu.add_command(label="View Email Content", command=self.view_email_content)
+        
+        # Bind right-click and double-click events
+        self.results_tree.bind("<Button-3>", self.show_email_menu)
+        self.results_tree.bind("<Double-1>", self.on_item_double_click)
+        
+        # Print debug information
+        print(f"Treeview initialized: {self.results_tree}")
+        
         # Button frame
         button_frame = ttk.Frame(self.results_tab)
         button_frame.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=10)
         
-        ttk.Button(button_frame, text="Clean Selected Groups", 
-                  command=self.clean_selected_groups).pack(side=tk.LEFT, padx=5)
-        ttk.Button(button_frame, text="Clean All Groups", 
-                  command=self.clean_all_groups).pack(side=tk.LEFT, padx=5)
+        # Group management buttons
+        group_buttons_frame = ttk.LabelFrame(button_frame, text="Group Management")
+        group_buttons_frame.pack(side=tk.LEFT, padx=10, fill=tk.X)
+        
+        ttk.Button(group_buttons_frame, text="Expand All Groups", 
+                  command=self.expand_all_groups).pack(side=tk.LEFT, padx=5, pady=5)
+        ttk.Button(group_buttons_frame, text="Collapse All Groups", 
+                  command=self.collapse_all_groups).pack(side=tk.LEFT, padx=5, pady=5)
+        
+        # Email action buttons
+        action_buttons_frame = ttk.LabelFrame(button_frame, text="Email Actions")
+        action_buttons_frame.pack(side=tk.LEFT, padx=10, fill=tk.X)
+        
+        ttk.Button(action_buttons_frame, text="View Selected Email", 
+                  command=self.view_email_content).pack(side=tk.LEFT, padx=5, pady=5)
+        ttk.Button(action_buttons_frame, text="Clean Selected Groups", 
+                  command=self.clean_selected_groups).pack(side=tk.LEFT, padx=5, pady=5)
+        ttk.Button(action_buttons_frame, text="Clean All Groups", 
+                  command=self.clean_all_groups).pack(side=tk.LEFT, padx=5, pady=5)
     
     def create_console(self):
         """Create the output console area"""
@@ -581,7 +607,7 @@ Supported Email Clients:
 - Microsoft Outlook
 - Generic mbox/maildir formats
 
-© 2025 """
+© 2025 by Tuxxle"""
         
         messagebox.showinfo("About Email Duplicate Cleaner", about_text)
     
@@ -595,7 +621,8 @@ Supported Email Clients:
 4. Select folders you want to scan
 5. Click "Scan Selected" to find duplicates
 6. Review duplicate groups in the Results tab
-7. Select groups and click "Clean Selected Groups" 
+7. Double-click on any email or click "View Selected Email" to view the full content
+8. Select groups and click "Clean Selected Groups" 
    or "Clean All Groups" to remove duplicates
 
 Detection Criteria:
@@ -604,9 +631,166 @@ Detection Criteria:
 - Headers: Uses Message-ID, Date, From, and Subject
 - Subject+Sender: Only compares Subject and From fields
 
-Note: The tool always keeps at least one copy of each email."""
+Note: The tool always keeps at least one copy of each email.
+You can also right-click on any email to view its full content."""
         
         messagebox.showinfo("Help", help_text)
+    
+    def expand_all_groups(self):
+        """Expand all groups in the results tree"""
+        try:
+            print("Expanding all groups...")
+            children = self.results_tree.get_children()
+            print(f"Found {len(children)} top-level items")
+            
+            for item in children:
+                print(f"Expanding item: {self.results_tree.item(item, 'text')}")
+                self.results_tree.item(item, open=True)
+                
+            self.set_status("All groups expanded")
+        except Exception as e:
+            print(f"Error expanding groups: {e}")
+            self.show_error(f"Error expanding groups: {str(e)}")
+    
+    def collapse_all_groups(self):
+        """Collapse all groups in the results tree"""
+        try:
+            print("Collapsing all groups...")
+            children = self.results_tree.get_children()
+            print(f"Found {len(children)} top-level items")
+            
+            for item in children:
+                print(f"Collapsing item: {self.results_tree.item(item, 'text')}")
+                self.results_tree.item(item, open=False)
+                
+            self.set_status("All groups collapsed")
+        except Exception as e:
+            print(f"Error collapsing groups: {e}")
+            self.show_error(f"Error collapsing groups: {str(e)}")
+        
+    def show_email_menu(self, event):
+        """Show the context menu for email items"""
+        # Get the item under cursor
+        item = self.results_tree.identify_row(event.y)
+        if item:
+            # Only show menu for email items (not group items)
+            if self.results_tree.parent(item) != "":
+                self.results_tree.selection_set(item)
+                self.email_menu.post(event.x_root, event.y_root)
+    
+    def on_item_double_click(self, event):
+        """Handle double-click on tree items"""
+        # Get the item under cursor
+        item = self.results_tree.identify_row(event.y)
+        if not item:
+            return
+            
+        # If it's a group item (parent is ""), toggle expand/collapse
+        if self.results_tree.parent(item) == "":
+            # Check if the item is already open
+            if self.results_tree.item(item, "open"):
+                self.results_tree.item(item, open=False)  # Collapse
+            else:
+                self.results_tree.item(item, open=True)   # Expand
+                
+        # If it's an email item (has a parent), view the email content
+        else:
+            self.results_tree.selection_set(item)
+            self.view_email_content()
+    
+    def view_email_content(self):
+        """View the content of the selected email"""
+        selected_items = self.results_tree.selection()
+        if not selected_items:
+            messagebox.showwarning("No Selection", "Please select an email to view")
+            return
+        
+        # Get the first selected item
+        item_id = selected_items[0]
+        
+        # Only proceed if it's an email item (not a group)
+        if self.results_tree.parent(item_id) == "":
+            messagebox.showwarning("Invalid Selection", "Please select an email (not a group) to view")
+            return
+        
+        # Get the parent item (group) and the index in the group
+        parent_id = self.results_tree.parent(item_id)
+        group_text = self.results_tree.item(parent_id)['text']  # "Group X"
+        
+        # Get group index (X-1 because our display is 1-based, but code is 0-based)
+        group_idx = int(group_text.split()[1]) - 1
+        
+        # Get email index from the item text
+        email_idx_text = self.results_tree.item(item_id)['text']  # "Y"
+        email_idx = int(email_idx_text) - 1  # Convert to 0-based index
+        
+        try:
+            # Get email content
+            email_content = self.duplicate_finder.get_email_content(group_idx, email_idx)
+            
+            # Create email viewer window
+            viewer = tk.Toplevel(self.root)
+            viewer.title(f"Email Content - {email_content['subject']}")
+            viewer.geometry("700x500")
+            viewer.minsize(500, 400)
+            
+            # Make it modal
+            viewer.transient(self.root)
+            viewer.grab_set()
+            
+            # Configure grid
+            viewer.columnconfigure(0, weight=1)
+            viewer.rowconfigure(1, weight=1)
+            
+            # Header frame
+            header_frame = ttk.LabelFrame(viewer, text="Email Headers")
+            header_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=5)
+            
+            # Header grid
+            header_frame.columnconfigure(1, weight=1)
+            row = 0
+            
+            # Add headers
+            for header, value in [
+                ("From", email_content['from']),
+                ("To", email_content.get('to', 'N/A')),
+                ("Date", email_content['date']),
+                ("Subject", email_content['subject']),
+                ("Message-ID", email_content.get('message_id', 'N/A'))
+            ]:
+                ttk.Label(header_frame, text=f"{header}:", font=("TkDefaultFont", 9, "bold")).grid(
+                    row=row, column=0, sticky="w", padx=5, pady=2)
+                ttk.Label(header_frame, text=value, wraplength=500).grid(
+                    row=row, column=1, sticky="w", padx=5, pady=2)
+                row += 1
+            
+            # Body frame
+            body_frame = ttk.LabelFrame(viewer, text="Email Body")
+            body_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=5)
+            
+            body_frame.columnconfigure(0, weight=1)
+            body_frame.rowconfigure(0, weight=1)
+            
+            # Body text widget
+            body_text = scrolledtext.ScrolledText(body_frame, wrap=tk.WORD, 
+                                               font=("TkDefaultFont", 10))
+            body_text.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+            
+            # Insert email body
+            body_text.insert(tk.END, email_content.get('body', 'No content'))
+            body_text.configure(state="disabled")  # Read-only
+            
+            # Button frame
+            button_frame = ttk.Frame(viewer)
+            button_frame.grid(row=2, column=0, sticky="ew", padx=10, pady=10)
+            
+            ttk.Button(button_frame, text="Close", command=viewer.destroy).pack(side=tk.RIGHT)
+            
+            # Set focus to the viewer window
+            viewer.focus_set()
+            
+        except Exception as e:
+            self.show_error(f"Error viewing email content: {str(e)}")
     
     def on_closing(self):
         """Clean up when closing the application"""

@@ -104,4 +104,3 @@ The tool offers several methods for identifying duplicates:
 - Original emails can be restored from your email client's trash folder if needed
 
 **Note:** Always backup your email client's data files before using this tool on real emails.
-# EmailDuplicateCleaner

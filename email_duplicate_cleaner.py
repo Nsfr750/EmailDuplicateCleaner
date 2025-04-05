@@ -574,6 +574,7 @@ class DuplicateEmailFinder:
         self.console = Console() if RICH_AVAILABLE else None
         self.duplicate_groups = []
         self.current_folder = None
+        self.email_cache = {}  # Cache to store email content by group and index
         
     def compute_email_hash(self, msg: email.message.Message, method: str) -> str:
         """
@@ -834,6 +835,88 @@ class DuplicateEmailFinder:
                     print(f"   Subject: {msg['subject']}")
                     print(f"   Folder: {msg['folder']}")
                     print()
+    
+    def get_email_content(self, group_idx: int, msg_idx: int) -> Dict[str, Any]:
+        """
+        Get the full content of an email in a duplicate group.
+        
+        Args:
+            group_idx: Index of the duplicate group
+            msg_idx: Index of the message within the group
+            
+        Returns:
+            Dictionary with email headers and content
+        """
+        if not self.duplicate_groups:
+            return {"error": "No duplicate groups available"}
+            
+        if group_idx < 0 or group_idx >= len(self.duplicate_groups):
+            return {"error": f"Invalid group index: {group_idx}"}
+            
+        group = self.duplicate_groups[group_idx]
+        messages = group['messages']
+        
+        if msg_idx < 0 or msg_idx >= len(messages):
+            return {"error": f"Invalid message index: {msg_idx}"}
+            
+        msg_info = messages[msg_idx]
+        message = msg_info['message']
+        
+        # Get all headers
+        headers = {}
+        for header in message.keys():
+            headers[header] = message[header]
+        
+        # Get body content
+        body_parts = []
+        
+        try:
+            if message.is_multipart():
+                for part in message.walk():
+                    if part.get_content_maintype() == 'text':
+                        content = part.get_payload(decode=True)
+                        charset = part.get_content_charset() or 'utf-8'
+                        try:
+                            decoded_content = content.decode(charset, errors='replace')
+                            body_parts.append({
+                                'content_type': part.get_content_type(),
+                                'content': decoded_content
+                            })
+                        except Exception as e:
+                            body_parts.append({
+                                'content_type': part.get_content_type(),
+                                'content': f"Error decoding content: {str(e)}"
+                            })
+            else:
+                content = message.get_payload(decode=True)
+                charset = message.get_content_charset() or 'utf-8'
+                try:
+                    decoded_content = content.decode(charset, errors='replace')
+                    body_parts.append({
+                        'content_type': message.get_content_type(),
+                        'content': decoded_content
+                    })
+                except Exception as e:
+                    body_parts.append({
+                        'content_type': message.get_content_type(),
+                        'content': f"Error decoding content: {str(e)}"
+                    })
+        except Exception as e:
+            body_parts.append({
+                'content_type': 'text/plain',
+                'content': f"Error extracting message content: {str(e)}"
+            })
+        
+        return {
+            'group_index': group_idx,
+            'message_index': msg_idx,
+            'headers': headers,
+            'body_parts': body_parts,
+            'subject': msg_info['subject'],
+            'from': msg_info['from'],
+            'date': msg_info['date'],
+            'folder': msg_info['folder']
+        }
     
     def delete_duplicates(self, group_indices: List[int], 
                           selection_method: str = 'keep-first') -> Tuple[int, List[str]]:
@@ -1441,3 +1524,85 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+    def get_email_content(self, group_idx: int, msg_idx: int) -> Dict[str, Any]:
+        """
+        Get the full content of an email in a duplicate group.
+        
+        Args:
+            group_idx: Index of the duplicate group
+            msg_idx: Index of the message within the group
+            
+        Returns:
+            Dictionary with email headers and content
+        """
+        if group_idx < 0 or group_idx >= len(self.duplicate_groups):
+            return {'error': f'Invalid group index: {group_idx}'}
+            
+        group = self.duplicate_groups[group_idx]
+        
+        if msg_idx < 0 or msg_idx >= len(group['messages']):
+            return {'error': f'Invalid message index: {msg_idx}'}
+            
+        msg_info = group['messages'][msg_idx]
+        
+        try:
+            # Open the email file
+            if self.is_demo_mode:
+                # In demo mode, construct a simpler representation
+                headers = {
+                    'From': msg_info['from'],
+                    'To': 'recipient@example.com',
+                    'Date': msg_info['date'],
+                    'Subject': msg_info['subject'],
+                    'Message-ID': msg_info.get('message_id', '<demo_id>'),
+                }
+                
+                # Get pre-defined body based on the subject
+                if 'Monthly Report' in msg_info['subject']:
+                    body = 'This is the monthly report for March 2025.\n\nSales have increased by 15% compared to last month.\n\nPlease review the attached spreadsheet for details.'
+                elif 'Meeting' in msg_info['subject']:
+                    body = 'Let\'s meet to discuss the project status.\n\nProposed agenda:\n1. Project timeline\n2. Budget allocation\n3. Resource planning'
+                elif 'Reminder' in msg_info['subject']:
+                    body = 'Just a reminder about the upcoming deadline on Friday.\n\nPlease submit your reports by end of day.'
+                else:
+                    body = f'This is a demo email with subject: {msg_info["subject"]}\n\nThe content is generated for demonstration purposes.'
+                
+            else:
+                # For real emails, read from the file
+                filepath = msg_info['filepath']
+                
+                if not os.path.exists(filepath):
+                    return {'error': f'Email file not found: {filepath}'}
+                
+                # Parse the email file
+                with open(filepath, 'rb') as f:
+                    msg = email.message_from_binary_file(f)
+                
+                # Extract headers
+                headers = {
+                    'From': msg.get('From', ''),
+                    'To': msg.get('To', ''),
+                    'Cc': msg.get('Cc', ''),
+                    'Date': msg.get('Date', ''),
+                    'Subject': msg.get('Subject', ''),
+                    'Message-ID': msg.get('Message-ID', ''),
+                }
+                
+                # Extract body
+                if msg.is_multipart():
+                    body = ''
+                    for part in msg.get_payload():
+                        if part.get_content_type() == 'text/plain':
+                            body += part.get_payload(decode=True).decode('utf-8', errors='replace')
+                else:
+                    body = msg.get_payload(decode=True).decode('utf-8', errors='replace')
+            
+            return {
+                'headers': headers,
+                'body': body,
+                'subject': msg_info['subject']
+            }
+            
+        except Exception as e:
+            return {'error': f'Error retrieving email content: {str(e)}'}

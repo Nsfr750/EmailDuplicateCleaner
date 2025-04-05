@@ -14,7 +14,7 @@ from models import db, ScanHistory, EmailCleanRecord, UserSettings
 def create_app():
     """Create and configure the Flask application"""
     app = Flask(__name__)
-    
+   
     # Configure the database
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False

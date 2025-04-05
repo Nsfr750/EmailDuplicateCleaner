@@ -260,7 +260,7 @@ with open('templates/index.html', 'w') as f:
 
         <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
             <div class="col-md-6 d-flex align-items-center">
-                <span class="text-muted">Email Duplicate Cleaner &copy; 2025</span>
+                <span class="text-muted">Email Duplicate Cleaner &copy; 2025 by Tuxxle</span>
             </div>
             <div class="col-md-6 d-flex justify-content-end">
                 <span class="text-muted" id="status-text">Ready</span>
@@ -1024,6 +1024,44 @@ def api_get_results():
         return jsonify({
             'success': False,
             'message': f"Error getting results: {str(e)}"
+        })
+
+@app.route('/api/view_email/<int:group_index>/<int:email_index>', methods=['GET'])
+def api_view_email(group_index, email_index):
+    """Get full content of a specific email"""
+    try:
+        if not global_state['duplicate_groups']:
+            return jsonify({
+                'success': False,
+                'message': 'No duplicate groups available'
+            })
+            
+        if group_index < 0 or group_index >= len(global_state['duplicate_groups']):
+            return jsonify({
+                'success': False,
+                'message': f'Invalid group index: {group_index}'
+            })
+            
+        group = global_state['duplicate_groups'][group_index]
+        
+        if email_index < 0 or email_index >= group['count']:
+            return jsonify({
+                'success': False,
+                'message': f'Invalid email index: {email_index}'
+            })
+        
+        # Get the email content using DuplicateEmailFinder's method
+        email_content = global_state['duplicate_finder'].get_email_content(group_index, email_index)
+        
+        return jsonify({
+            'success': True,
+            'email': email_content
+        })
+    except Exception as e:
+        logger.error(f"Error viewing email: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f"Error viewing email: {str(e)}"
         })
 
 @app.route('/api/clean_groups', methods=['POST'])
