@@ -596,7 +596,7 @@ class EmailCleanerGUI:
         """Show the about dialog"""
         about_text = """Email Duplicate Cleaner
 
-Version 1.0
+Version 1.0.1
 
 A tool to scan, identify, and remove duplicate emails
 from various email clients.
