@@ -29,6 +29,8 @@ from db_init import (
     create_app, init_db, add_scan_history, add_clean_record, 
     get_user_settings, update_user_settings, get_scan_history
 )
+from flask import redirect, url_for
+from models import ScanHistory, EmailCleanRecord, UserSettings
 
 # Create Flask app
 app = create_app()  # Use the app from db_init that has database setup
@@ -86,6 +88,8 @@ with open('templates/index.html', 'w') as f:
             <ul class="nav nav-pills">
                 <li class="nav-item"><a href="#" class="nav-link active" id="scan-tab">Scan</a></li>
                 <li class="nav-item"><a href="#" class="nav-link" id="results-tab">Results</a></li>
+                <li class="nav-item"><a href="#" class="nav-link" id="history-tab">History</a></li>
+                <li class="nav-item"><a href="#" class="nav-link" id="settings-tab">Settings</a></li>
                 <li class="nav-item"><a href="#" class="nav-link" id="help-tab">Help</a></li>
             </ul>
         </header>
@@ -107,38 +111,38 @@ with open('templates/index.html', 'w') as f:
                                             <div class="btn-group" role="group">
                                                 <input type="radio" class="btn-check" name="client" id="all" value="all" checked>
                                                 <label class="btn btn-outline-primary" for="all">All Clients</label>
-                                                
+
                                                 <input type="radio" class="btn-check" name="client" id="thunderbird" value="thunderbird">
                                                 <label class="btn btn-outline-primary" for="thunderbird">Thunderbird</label>
-                                                
+
                                                 <input type="radio" class="btn-check" name="client" id="apple_mail" value="apple_mail">
                                                 <label class="btn btn-outline-primary" for="apple_mail">Apple Mail</label>
-                                                
+
                                                 <input type="radio" class="btn-check" name="client" id="outlook" value="outlook">
                                                 <label class="btn btn-outline-primary" for="outlook">Outlook</label>
-                                                
+
                                                 <input type="radio" class="btn-check" name="client" id="generic" value="generic">
                                                 <label class="btn btn-outline-primary" for="generic">Generic</label>
                                             </div>
                                         </div>
-                                        
+
                                         <div class="mb-3">
                                             <label class="form-label">Detection Criteria:</label>
                                             <div class="btn-group" role="group">
                                                 <input type="radio" class="btn-check" name="criteria" id="strict" value="strict" checked>
                                                 <label class="btn btn-outline-primary" for="strict">Strict</label>
-                                                
+
                                                 <input type="radio" class="btn-check" name="criteria" id="content" value="content">
                                                 <label class="btn btn-outline-primary" for="content">Content Only</label>
-                                                
+
                                                 <input type="radio" class="btn-check" name="criteria" id="headers" value="headers">
                                                 <label class="btn btn-outline-primary" for="headers">Headers</label>
-                                                
+
                                                 <input type="radio" class="btn-check" name="criteria" id="subject-sender" value="subject-sender">
                                                 <label class="btn btn-outline-primary" for="subject-sender">Subject+Sender</label>
                                             </div>
                                         </div>
-                                        
+
                                         <div class="mb-3">
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" id="auto-clean" name="auto-clean">
@@ -147,7 +151,7 @@ with open('templates/index.html', 'w') as f:
                                                 </label>
                                             </div>
                                         </div>
-                                        
+
                                         <div class="d-flex justify-content-between">
                                             <button type="button" id="find-folders-btn" class="btn btn-primary">Find Folders</button>
                                             <button type="button" id="custom-folder-btn" class="btn btn-secondary">Custom Folder</button>
@@ -158,7 +162,7 @@ with open('templates/index.html', 'w') as f:
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row mb-3">
                         <div class="col-md-12">
                             <div class="card">
@@ -177,7 +181,7 @@ with open('templates/index.html', 'w') as f:
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-12">
                             <div class="card">
@@ -191,7 +195,7 @@ with open('templates/index.html', 'w') as f:
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Results Tab -->
                 <div class="tab-pane" id="results-content">
                     <div class="row mb-3">
@@ -211,7 +215,7 @@ with open('templates/index.html', 'w') as f:
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Help Tab -->
                 <div class="tab-pane" id="help-content">
                     <div class="row mb-3">
@@ -223,7 +227,7 @@ with open('templates/index.html', 'w') as f:
                                 <div class="card-body">
                                     <h4>Email Duplicate Cleaner</h4>
                                     <p>This tool helps you find and remove duplicate emails from various email clients.</p>
-                                    
+
                                     <h5>Using the Web Interface</h5>
                                     <ol>
                                         <li>Select an email client or "All Clients"</li>
@@ -234,7 +238,7 @@ with open('templates/index.html', 'w') as f:
                                         <li>Review duplicate groups in the Results tab</li>
                                         <li>Select groups and click "Clean Selected" or "Clean All" to remove duplicates</li>
                                     </ol>
-                                    
+
                                     <h5>Detection Criteria</h5>
                                     <ul>
                                         <li><strong>Strict:</strong> Uses Message-ID, Date, From, Subject, and content</li>
@@ -242,12 +246,12 @@ with open('templates/index.html', 'w') as f:
                                         <li><strong>Headers:</strong> Uses Message-ID, Date, From, and Subject</li>
                                         <li><strong>Subject+Sender:</strong> Only compares Subject and From fields</li>
                                     </ul>
-                                    
+
                                     <div class="alert alert-warning">
                                         <strong>Note:</strong> The tool always keeps at least one copy of each email.
                                         Always backup your email client's data files before using this tool on real emails.
                                     </div>
-                                    
+
                                     <h5>Demo Mode</h5>
                                     <p>Click "Run Demo" to create a temporary mailbox with sample emails containing duplicates for testing.</p>
                                 </div>
@@ -260,7 +264,7 @@ with open('templates/index.html', 'w') as f:
 
         <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
             <div class="col-md-6 d-flex align-items-center">
-                <span class="text-muted">Email Duplicate Cleaner &copy; 2025 by Nsfr750</span>
+                <span class="text-muted">Email Duplicate Cleaner v2.0.1 &copy; 2025 by Nsfr750</span>
             </div>
             <div class="col-md-6 d-flex justify-content-end">
                 <span class="text-muted" id="status-text">Ready</span>
@@ -380,12 +384,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Tab navigation
     const scanTab = document.getElementById('scan-tab');
     const resultsTab = document.getElementById('results-tab');
+    const hystoryTab = document.getElementById('hystory-tab');
+    const settingsTab = document.getElementById('settings-tab');
     const helpTab = document.getElementById('help-tab');
-    
+
     const scanContent = document.getElementById('scan-content');
     const resultsContent = document.getElementById('results-content');
-    const helpContent = document.getElementById('help-content');
-    
+    const hystoryContent = document.getElementById('hystory-content');
+    const settingsContent = document.getElementById('settings-content');
+	const helpContent = document.getElementById('help-content');
+
     // Buttons
     const findFoldersBtn = document.getElementById('find-folders-btn');
     const customFolderBtn = document.getElementById('custom-folder-btn');
@@ -395,48 +403,52 @@ document.addEventListener('DOMContentLoaded', function() {
     const cleanSelectedBtn = document.getElementById('clean-selected-btn');
     const cleanAllBtn = document.getElementById('clean-all-btn');
     const submitCustomFolderBtn = document.getElementById('submit-custom-folder');
-    
+
     // Console output
     const consoleOutput = document.getElementById('console-output');
     const statusText = document.getElementById('status-text');
-    
+
     // Bootstrap modals
     const customFolderModal = new bootstrap.Modal(document.getElementById('customFolderModal'));
     const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
     const confirmMessage = document.getElementById('confirm-message');
     const confirmAction = document.getElementById('confirm-action');
-    
+
     // Tab switching
     scanTab.addEventListener('click', function(e) {
         e.preventDefault();
         setActiveTab('scan');
     });
-    
+
     resultsTab.addEventListener('click', function(e) {
         e.preventDefault();
         setActiveTab('results');
     });
-    
+
     helpTab.addEventListener('click', function(e) {
         e.preventDefault();
         setActiveTab('help');
     });
-    
+
     function setActiveTab(tabName) {
         // Reset all tabs
         scanTab.classList.remove('active');
         resultsTab.classList.remove('active');
+        hystoryTab.classList.remove('active');
+        settingsTab.classList.remove('active');		
         helpTab.classList.remove('active');
-        
+
         scanContent.classList.remove('active');
         resultsContent.classList.remove('active');
+		hystoryContent.classList.remove('active');
+		settingsContent.classList.remove('active');
         helpContent.classList.remove('active');
-        
+
         // Set active class
         document.getElementById(tabName + '-tab').classList.add('active');
         document.getElementById(tabName + '-content').classList.add('active');
     }
-    
+
     // Console polling
     function pollConsole() {
         fetch('/api/get_logs')
@@ -449,7 +461,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.status) {
                     statusText.textContent = data.status;
                 }
-                
+
                 // Check if scanning is complete to switch to results tab
                 if (data.scan_complete) {
                     resultsTab.click();
@@ -458,15 +470,15 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => console.error('Error polling console:', error));
     }
-    
+
     // Start console polling
     setInterval(pollConsole, 1000);
-    
+
     // Find folders
     findFoldersBtn.addEventListener('click', function() {
         const client = document.querySelector('input[name="client"]:checked').value;
         setStatus('Searching for mail folders...');
-        
+
         fetch('/api/find_folders', {
             method: 'POST',
             headers: {
@@ -488,21 +500,21 @@ document.addEventListener('DOMContentLoaded', function() {
             setStatus('Error: Could not find mail folders');
         });
     });
-    
+
     // Custom folder modal
     customFolderBtn.addEventListener('click', function() {
         customFolderModal.show();
     });
-    
+
     // Submit custom folder
     submitCustomFolderBtn.addEventListener('click', function() {
         const folderPath = document.getElementById('folder-path').value;
         if (!folderPath) {
             return;
         }
-        
+
         customFolderModal.hide();
-        
+
         fetch('/api/scan_custom_folder', {
             method: 'POST',
             headers: {
@@ -524,13 +536,13 @@ document.addEventListener('DOMContentLoaded', function() {
             setStatus('Error: Could not scan custom folder');
         });
     });
-    
+
     // Run demo
     demoBtn.addEventListener('click', function() {
         confirmMessage.textContent = 'This will create a temporary mailbox with sample emails for demonstration. Continue?';
         confirmAction.onclick = function() {
             confirmModal.hide();
-            
+
             fetch('/api/run_demo')
                 .then(response => response.json())
                 .then(data => {
@@ -548,7 +560,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         confirmModal.show();
     });
-    
+
     // Select all folders
     selectAllBtn.addEventListener('click', function() {
         const checkboxes = document.querySelectorAll('.folder-checkbox');
@@ -556,7 +568,7 @@ document.addEventListener('DOMContentLoaded', function() {
             checkbox.checked = true;
         });
     });
-    
+
     // Scan selected folders
     scanSelectedBtn.addEventListener('click', function() {
         const checkboxes = document.querySelectorAll('.folder-checkbox:checked');
@@ -564,13 +576,13 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Please select at least one folder to scan');
             return;
         }
-        
+
         const folderIndices = Array.from(checkboxes).map(checkbox => parseInt(checkbox.value));
         const criteria = document.querySelector('input[name="criteria"]:checked').value;
         const autoClean = document.getElementById('auto-clean').checked;
-        
+
         setStatus(`Scanning ${folderIndices.length} folders...`);
-        
+
         fetch('/api/scan_folders', {
             method: 'POST',
             headers: {
@@ -595,7 +607,7 @@ document.addEventListener('DOMContentLoaded', function() {
             setStatus('Error: Could not scan folders');
         });
     });
-    
+
     // Update results
     function updateResults() {
         fetch('/api/get_results')
@@ -607,55 +619,57 @@ document.addEventListener('DOMContentLoaded', function() {
                         resultsContainer.innerHTML = '<div class="alert alert-info">No duplicate emails found.</div>';
                         return;
                     }
-                    
+
                     let html = '';
                     data.groups.forEach((group, groupIndex) => {
                         html += `
-                            <div class="duplicate-group" data-group-index="${groupIndex}">
-                                <div class="group-header d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <input type="checkbox" class="form-check-input group-checkbox" value="${groupIndex}">
-                                        <span class="ms-2">Group ${groupIndex + 1} (${group.emails.length} emails)</span>
+                            <div class="duplicate-group shadow-sm" data-group-index="${groupIndex}">
+                                <div class="group-header d-flex justify-content-between align-items-center bg-light">
+                                    <div class="d-flex align-items-center">
+                                        <input type="checkbox" class="form-check-input group-checkbox ms-2" value="${groupIndex}">
+                                        <span class="ms-3 fw-bold">Group ${groupIndex + 1}</span>
+                                        <span class="ms-2 badge bg-primary">${group.emails.length} emails</span>
                                     </div>
-                                    <button class="btn btn-sm btn-outline-warning clean-group-btn" data-group-index="${groupIndex}">
-                                        Clean Group
+                                    <button class="btn btn-sm btn-warning clean-group-btn me-2" data-group-index="${groupIndex}">
+                                        <i class="fas fa-broom"></i> Clean Group
                                     </button>
                                 </div>
                                 <div class="email-list">`;
-                        
+
                         group.emails.forEach((email, emailIndex) => {
                             const isOriginal = emailIndex === 0;
                             html += `
-                                <div class="email-item ${isOriginal ? 'original' : ''}">
+                                <div class="email-item p-3 border-bottom ${isOriginal ? 'original bg-light' : ''} hover-highlight">
                                     <div class="d-flex">
-                                        <div class="email-meta me-3">
-                                            ${emailIndex + 1}${isOriginal ? ' (orig)' : ''}
+                                        <div class="email-meta me-3 text-center">
+                                            <span class="badge ${isOriginal ? 'bg-success' : 'bg-secondary'}">${emailIndex + 1}</span>
+                                            ${isOriginal ? '<br><small class="text-success">Original</small>' : ''}
                                         </div>
                                         <div class="flex-grow-1">
-                                            <div class="email-subject">${email.subject}</div>
-                                            <div class="d-flex justify-content-between mt-1">
-                                                <div class="email-meta">
-                                                    <strong>From:</strong> ${email.from}
+                                            <div class="email-subject h6 mb-2">${email.subject}</div>
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <div class="email-meta text-muted">
+                                                    <i class="fas fa-user me-1"></i> ${email.from}
                                                 </div>
-                                                <div class="email-meta">
-                                                    <strong>Date:</strong> ${email.date}
+                                                <div class="email-meta text-muted">
+                                                    <i class="fas fa-calendar me-1"></i> ${email.date}
                                                 </div>
                                             </div>
-                                            <div class="email-meta mt-1">
-                                                <strong>Folder:</strong> ${email.folder_path}
+                                            <div class="email-meta text-muted">
+                                                <i class="fas fa-folder me-1"></i> ${email.folder_path}
                                             </div>
                                         </div>
                                     </div>
                                 </div>`;
                         });
-                        
+
                         html += `
                                 </div>
                             </div>`;
                     });
-                    
+
                     resultsContainer.innerHTML = html;
-                    
+
                     // Add listeners for individual group clean buttons
                     document.querySelectorAll('.clean-group-btn').forEach(button => {
                         button.addEventListener('click', function() {
@@ -663,7 +677,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             cleanGroups([groupIndex]);
                         });
                     });
-                    
+
                     setStatus(`Found ${data.groups.length} duplicate groups`);
                 } else {
                     setStatus(data.message || 'Error getting results');
@@ -674,7 +688,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 setStatus('Error: Could not load results');
             });
     }
-    
+
     // Clean selected groups
     cleanSelectedBtn.addEventListener('click', function() {
         const checkboxes = document.querySelectorAll('.group-checkbox:checked');
@@ -682,9 +696,9 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Please select at least one group to clean');
             return;
         }
-        
+
         const groupIndices = Array.from(checkboxes).map(checkbox => parseInt(checkbox.value));
-        
+
         confirmMessage.textContent = `This will delete duplicates from ${groupIndices.length} selected groups, keeping the oldest email in each group. Continue?`;
         confirmAction.onclick = function() {
             confirmModal.hide();
@@ -692,13 +706,13 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         confirmModal.show();
     });
-    
+
     // Clean all groups
     cleanAllBtn.addEventListener('click', function() {
         confirmMessage.textContent = 'This will delete duplicates from ALL groups, keeping the oldest email in each group. Continue?';
         confirmAction.onclick = function() {
             confirmModal.hide();
-            
+
             fetch('/api/clean_all_groups')
                 .then(response => response.json())
                 .then(data => {
@@ -715,11 +729,11 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         confirmModal.show();
     });
-    
+
     // Clean groups helper function
     function cleanGroups(groupIndices) {
         setStatus(`Cleaning ${groupIndices.length} groups...`);
-        
+
         fetch('/api/clean_groups', {
             method: 'POST',
             headers: {
@@ -740,7 +754,7 @@ document.addEventListener('DOMContentLoaded', function() {
             setStatus('Error: Could not clean groups');
         });
     }
-    
+
     // Update folder list helper function
     function updateFolderList(folders) {
         const folderList = document.getElementById('folder-list');
@@ -748,7 +762,7 @@ document.addEventListener('DOMContentLoaded', function() {
             folderList.innerHTML = '<div class="alert alert-warning">No mail folders found.</div>';
             return;
         }
-        
+
         let html = '<div class="list-group">';
         folders.forEach((folder, index) => {
             html += `
@@ -764,10 +778,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>`;
         });
         html += '</div>';
-        
+
         folderList.innerHTML = html;
     }
-    
+
     // Set status helper function
     function setStatus(message) {
         statusText.textContent = message;
@@ -778,23 +792,23 @@ document.addEventListener('DOMContentLoaded', function() {
 # Custom stream handler to capture console output
 class WebConsoleHandler:
     """Custom handler to capture console output for web display"""
-    
+
     def __init__(self):
         self.buffer = StringIO()
-    
+
     def write(self, message):
         if isinstance(message, bytes):
             message = message.decode('utf-8')
-        
+
         if message and message.strip():  # Skip empty lines
             self.buffer.write(message)
-    
+
     def flush(self):
         pass
-    
+
     def get_logs(self):
         return self.buffer.getvalue()
-    
+
     def clear(self):
         self.buffer = StringIO()
 
@@ -811,20 +825,20 @@ def index():
     # Load user settings for default values
     with app.app_context():
         settings = get_user_settings()
-    
+
     return render_template('index.html', settings=settings)
 
 @app.route('/api/find_folders', methods=['POST'])
 def api_find_folders():
     """Find mail folders for the selected email client"""
     client = request.json.get('client', 'all')
-    
+
     try:
         if client == 'all':
             global_state['mail_folders'] = global_state['client_manager'].get_all_mail_folders()
         else:
             global_state['mail_folders'] = global_state['client_manager'].get_client_folders(client)
-        
+
         return jsonify({
             'success': True,
             'folders': [{'display_name': folder['display_name']} for folder in global_state['mail_folders']]
@@ -840,20 +854,20 @@ def api_find_folders():
 def api_scan_custom_folder():
     """Scan a custom folder path for mail folders"""
     folder_path = request.json.get('folder_path')
-    
+
     if not folder_path or '..' in folder_path or not os.path.isabs(folder_path):
         return jsonify({
             'success': False,
             'message': 'Invalid folder path provided'
         })
-    
+
     try:
         # Create a generic mail handler for this path
         custom_handler = GenericMailHandler()
         custom_handler.profile_paths = [folder_path]
-        
+
         global_state['mail_folders'] = custom_handler.find_mail_folders()
-        
+
         return jsonify({
             'success': True,
             'folders': [{'display_name': folder['display_name']} for folder in global_state['mail_folders']]
@@ -870,17 +884,17 @@ def api_run_demo():
     """Run the application in demo mode with test emails"""
     try:
         print("Running in demo mode with test emails...")
-        
+
         # Create test mailbox
         global_state['temp_dir'], profile_path = create_test_mailbox()
-        
+
         # Set up a generic mail handler for this path
         custom_handler = GenericMailHandler()
         custom_handler.profile_paths = [profile_path]
-        
+
         # Find mail folders
         global_state['mail_folders'] = custom_handler.find_mail_folders()
-        
+
         return jsonify({
             'success': True,
             'folders': [{'display_name': folder['display_name']} for folder in global_state['mail_folders']]
@@ -898,46 +912,46 @@ def api_scan_folders():
     folder_indices = request.json.get('folder_indices', [])
     criteria = request.json.get('criteria', 'strict')
     auto_clean = request.json.get('auto_clean', False)
-    
+
     if not folder_indices:
         return jsonify({
             'success': False,
             'message': 'No folders selected'
         })
-    
+
     try:
         # Get selected folders
         global_state['selected_folders'] = [global_state['mail_folders'][i] for i in folder_indices]
-        
+
         # Reset scan state
         global_state['duplicate_groups'] = []
         global_state['scanning'] = True
         global_state['scan_complete'] = False
-        
+
         # Start scanning thread
         def scan_folders_thread():
             try:
                 print(f"Scanning {len(global_state['selected_folders'])} folders...")
                 print(f"Using criteria: {criteria}")
-                
+
                 for folder in global_state['selected_folders']:
                     print(f"Scanning folder: {folder['display_name']}")
                     groups = global_state['duplicate_finder'].scan_folder(folder, criteria)
-                    
+
                     if groups:
                         for group in groups:
                             global_state['duplicate_groups'].append(group)
-                
+
                 total_dupes = sum(group['count'] - 1 for group in global_state['duplicate_groups'])
                 groups_count = len(global_state['duplicate_groups'])
-                
+
                 print(f"Found {groups_count} duplicate groups with {total_dupes} duplicate emails")
-                
+
                 # Add scan to database history
                 client_type = request.json.get('client', 'all')
-                total_emails = sum(group['count'] for group in global_state['duplicate_groups'])
+                total_emails = sum(len(group['messages']) for group in global_state['duplicate_groups'])
                 folder_paths = ', '.join([f['display_name'] for f in global_state['selected_folders']])
-                
+
                 # Add record to scan history
                 with app.app_context():
                     scan_id = add_scan_history(
@@ -948,7 +962,7 @@ def api_scan_folders():
                         duplicate_groups=groups_count,
                         duplicate_emails=total_dupes
                     )
-                
+
                 # Auto-clean if requested
                 if auto_clean and global_state['duplicate_groups']:
                     print("Auto-cleaning duplicates...")
@@ -956,14 +970,14 @@ def api_scan_folders():
                         list(range(len(global_state['duplicate_groups']))), selection_method='keep-first'
                     )
                     print(f"Deleted {deleted} duplicate emails")
-                    
+
                     if errors:
                         print("Some errors occurred during deletion:")
                         for error in errors[:5]:
                             print(f"  - {error}")
                         if len(errors) > 5:
                             print(f"  ... and {len(errors) - 5} more errors")
-                    
+
                     # Add cleaning record to database
                     with app.app_context():
                         add_clean_record(
@@ -972,17 +986,17 @@ def api_scan_folders():
                             error_count=len(errors),
                             selection_method='keep-first'
                         )
-                
+
                 global_state['scanning'] = False
                 global_state['scan_complete'] = True
             except Exception as e:
                 print(f"Error scanning folders: {str(e)}")
                 global_state['scanning'] = False
-        
+
         global_state['scan_thread'] = threading.Thread(target=scan_folders_thread)
         global_state['scan_thread'].daemon = True
         global_state['scan_thread'].start()
-        
+
         return jsonify({
             'success': True
         })
@@ -998,23 +1012,23 @@ def api_get_results():
     """Get scanning results"""
     try:
         groups_data = []
-        
+
         for group in global_state['duplicate_groups']:
             emails_data = []
-            
-            for email in group['emails']:
+
+            for email in group['messages']:  # Changed from 'emails' to 'messages'
                 emails_data.append({
-                    'date': email['date'],
-                    'from': email['from'],
-                    'subject': email['subject'],
-                    'folder_path': email['folder_path']
+                    'date': email.get('date', ''),
+                    'from': email.get('from', ''),
+                    'subject': email.get('subject', ''),
+                    'folder_path': email.get('folder', '')  # Changed from folder_path to folder
                 })
-            
+
             groups_data.append({
-                'count': group['count'],
+                'count': len(group['messages']),  # Calculate count from messages length
                 'emails': emails_data
             })
-        
+
         return jsonify({
             'success': True,
             'groups': groups_data
@@ -1035,27 +1049,30 @@ def api_view_email(group_index, email_index):
                 'success': False,
                 'message': 'No duplicate groups available'
             })
-            
+
         if group_index < 0 or group_index >= len(global_state['duplicate_groups']):
             return jsonify({
                 'success': False,
                 'message': f'Invalid group index: {group_index}'
             })
-            
+
         group = global_state['duplicate_groups'][group_index]
-        
+
         if email_index < 0 or email_index >= group['count']:
             return jsonify({
                 'success': False,
                 'message': f'Invalid email index: {email_index}'
             })
-        
+
         # Get the email content using DuplicateEmailFinder's method
-        email_content = global_state['duplicate_finder'].get_email_content(group_index, email_index)
-        
+        msg_info = group['messages'][email_index]
+        message = msg_info.get('message')
+        if not message:
+            return {"error": "Message content not available"}
+
         return jsonify({
             'success': True,
-            'email': email_content
+            'email': message
         })
     except Exception as e:
         logger.error(f"Error viewing email: {str(e)}")
@@ -1068,34 +1085,34 @@ def api_view_email(group_index, email_index):
 def api_clean_groups():
     """Clean duplicates from selected groups"""
     group_indices = request.json.get('group_indices', [])
-    
+
     if not group_indices:
         return jsonify({
             'success': False,
             'message': 'No groups selected'
         })
-    
+
     try:
         # Start cleaning thread
         global_state['cleaning'] = True
-        
+
         def clean_groups_thread():
             try:
                 print(f"Cleaning {len(group_indices)} groups...")
-                
+
                 deleted, errors = global_state['duplicate_finder'].delete_duplicates(
                     group_indices, selection_method='keep-first'
                 )
-                
+
                 print(f"Deleted {deleted} duplicate emails")
-                
+
                 if errors:
                     print("Some errors occurred during deletion:")
                     for error in errors[:5]:
                         print(f"  - {error}")
                     if len(errors) > 5:
                         print(f"  ... and {len(errors) - 5} more errors")
-                        
+
                 # Record cleaning operation in database
                 with app.app_context():
                     # Get the latest scan history record to associate with this cleaning operation
@@ -1108,27 +1125,27 @@ def api_clean_groups():
                             error_count=len(errors),
                             selection_method='keep-first'
                         )
-                
+
                 # Refresh duplicate groups
                 global_state['duplicate_groups'] = []
                 print("Rescanning folders after cleaning...")
-                
+
                 for folder in global_state['selected_folders']:
                     groups = global_state['duplicate_finder'].scan_folder(folder, 'strict')
-                    
+
                     if groups:
                         for group in groups:
                             global_state['duplicate_groups'].append(group)
-                
+
                 global_state['cleaning'] = False
             except Exception as e:
                 print(f"Error cleaning groups: {str(e)}")
                 global_state['cleaning'] = False
-        
+
         global_state['clean_thread'] = threading.Thread(target=clean_groups_thread)
         global_state['clean_thread'].daemon = True
         global_state['clean_thread'].start()
-        
+
         return jsonify({
             'success': True
         })
@@ -1147,7 +1164,7 @@ def api_clean_all_groups():
             'success': False,
             'message': 'No duplicate groups to clean'
         })
-    
+
     try:
         all_indices = list(range(len(global_state['duplicate_groups'])))
         return api_clean_groups()
@@ -1162,7 +1179,7 @@ def api_clean_all_groups():
 def api_get_logs():
     """Get console output logs"""
     status = "Ready"
-    
+
     if global_state['scanning']:
         status = "Scanning in progress..."
     elif global_state['cleaning']:
@@ -1170,7 +1187,7 @@ def api_get_logs():
     elif global_state['scan_complete']:
         total_dupes = sum(group['count'] - 1 for group in global_state['duplicate_groups']) if global_state['duplicate_groups'] else 0
         status = f"Found {len(global_state['duplicate_groups'])} duplicate groups with {total_dupes} duplicate emails"
-    
+
     return jsonify({
         'logs': console_handler.get_logs(),
         'status': status,
@@ -1189,7 +1206,7 @@ def history():
 def settings():
     """Show settings page"""
     save_success = False
-    
+
     if request.method == 'POST':
         # Save settings to database
         settings_dict = {
@@ -1201,10 +1218,10 @@ def settings():
         with app.app_context():
             update_user_settings(settings_dict)
         save_success = True
-    
+
     with app.app_context():
         settings = get_user_settings()
-    
+
     return render_template('settings.html', settings=settings, save_success=save_success)
 
 @app.route('/help')
@@ -1221,10 +1238,10 @@ def api_save_settings():
         'auto_clean': request.form.get('auto_clean') == 'on',
         'last_custom_folder': request.form.get('last_custom_folder', '')
     }
-    
+
     with app.app_context():
         update_user_settings(settings_dict)
-    
+
     return redirect(url_for('settings', save_success=True))
 
 @app.teardown_appcontext
@@ -1237,7 +1254,7 @@ def cleanup(exception=None):
             print("Cleaned up demo environment")
         except Exception as e:
             print(f"Could not clean up demo directory: {str(e)}")
-    
+
     # Restore original stdout
     sys.stdout = original_stdout
 

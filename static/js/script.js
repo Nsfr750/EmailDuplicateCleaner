@@ -3,11 +3,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Tab navigation
     const scanTab = document.getElementById('scan-tab');
     const resultsTab = document.getElementById('results-tab');
+    const hystoryTab = document.getElementById('hystory-tab');
+    const settingsTab = document.getElementById('settings-tab');
     const helpTab = document.getElementById('help-tab');
 
     const scanContent = document.getElementById('scan-content');
     const resultsContent = document.getElementById('results-content');
-    const helpContent = document.getElementById('help-content');
+    const hystoryContent = document.getElementById('hystory-content');
+    const settingsContent = document.getElementById('settings-content');
+	const helpContent = document.getElementById('help-content');
 
     // Buttons
     const findFoldersBtn = document.getElementById('find-folders-btn');
@@ -49,10 +53,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // Reset all tabs
         scanTab.classList.remove('active');
         resultsTab.classList.remove('active');
+        hystoryTab.classList.remove('active');
+        settingsTab.classList.remove('active');		
         helpTab.classList.remove('active');
 
         scanContent.classList.remove('active');
         resultsContent.classList.remove('active');
+		hystoryContent.classList.remove('active');
+		settingsContent.classList.remove('active');
         helpContent.classList.remove('active');
 
         // Set active class
@@ -234,14 +242,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     let html = '';
                     data.groups.forEach((group, groupIndex) => {
                         html += `
-                            <div class="duplicate-group" data-group-index="${groupIndex}">
-                                <div class="group-header d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <input type="checkbox" class="form-check-input group-checkbox" value="${groupIndex}">
-                                        <span class="ms-2">Group ${groupIndex + 1} (${group.emails.length} emails)</span>
+                            <div class="duplicate-group shadow-sm" data-group-index="${groupIndex}">
+                                <div class="group-header d-flex justify-content-between align-items-center bg-light">
+                                    <div class="d-flex align-items-center">
+                                        <input type="checkbox" class="form-check-input group-checkbox ms-2" value="${groupIndex}">
+                                        <span class="ms-3 fw-bold">Group ${groupIndex + 1}</span>
+                                        <span class="ms-2 badge bg-primary">${group.emails.length} emails</span>
                                     </div>
-                                    <button class="btn btn-sm btn-outline-warning clean-group-btn" data-group-index="${groupIndex}">
-                                        Clean Group
+                                    <button class="btn btn-sm btn-warning clean-group-btn me-2" data-group-index="${groupIndex}">
+                                        <i class="fas fa-broom"></i> Clean Group
                                     </button>
                                 </div>
                                 <div class="email-list">`;
@@ -249,23 +258,24 @@ document.addEventListener('DOMContentLoaded', function() {
                         group.emails.forEach((email, emailIndex) => {
                             const isOriginal = emailIndex === 0;
                             html += `
-                                <div class="email-item ${isOriginal ? 'original' : ''}">
+                                <div class="email-item p-3 border-bottom ${isOriginal ? 'original bg-light' : ''} hover-highlight">
                                     <div class="d-flex">
-                                        <div class="email-meta me-3">
-                                            ${emailIndex + 1}${isOriginal ? ' (orig)' : ''}
+                                        <div class="email-meta me-3 text-center">
+                                            <span class="badge ${isOriginal ? 'bg-success' : 'bg-secondary'}">${emailIndex + 1}</span>
+                                            ${isOriginal ? '<br><small class="text-success">Original</small>' : ''}
                                         </div>
                                         <div class="flex-grow-1">
-                                            <div class="email-subject">${email.subject}</div>
-                                            <div class="d-flex justify-content-between mt-1">
-                                                <div class="email-meta">
-                                                    <strong>From:</strong> ${email.from}
+                                            <div class="email-subject h6 mb-2">${email.subject}</div>
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <div class="email-meta text-muted">
+                                                    <i class="fas fa-user me-1"></i> ${email.from}
                                                 </div>
-                                                <div class="email-meta">
-                                                    <strong>Date:</strong> ${email.date}
+                                                <div class="email-meta text-muted">
+                                                    <i class="fas fa-calendar me-1"></i> ${email.date}
                                                 </div>
                                             </div>
-                                            <div class="email-meta mt-1">
-                                                <strong>Folder:</strong> ${email.folder_path}
+                                            <div class="email-meta text-muted">
+                                                <i class="fas fa-folder me-1"></i> ${email.folder_path}
                                             </div>
                                         </div>
                                     </div>
