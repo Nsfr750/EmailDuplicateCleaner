@@ -1,10 +1,13 @@
-Add database functionality for tracking scans and user settings. Includes a new database schema and associated API endpoints.
-Add email viewing functionality to web interface and GUI. 
-Allow opening group an selection of individual emails in results view
-Allows users to view the full content of individual emails before deleting duplicates.
-Fix GUI button functionality by adding error handling and debug print statements.
-Add button to enable/disble debug mode
-Improve the visual design and add dark mode toggle
+* Add database functionality for tracking scans and user settings. 
+  Includes a new database schema and associated API endpoints.
+
+* Add email viewing functionality to web interface and GUI. 
+
+* Fix function to allows users to view the full content of individual emails before deleting duplicates.
+* Fix GUI button functionality by adding error handling and debug print statements.
+
+* Add button to enable/disble debug mode in web version
+* Improve the visual design and add dark mode toggle in web version
 
 *** FIX web version ***
 
