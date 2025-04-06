@@ -38,38 +38,38 @@
                                             <div class="btn-group" role="group">
                                                 <input type="radio" class="btn-check" name="client" id="all" value="all" checked>
                                                 <label class="btn btn-outline-primary" for="all">All Clients</label>
-                                                
+
                                                 <input type="radio" class="btn-check" name="client" id="thunderbird" value="thunderbird">
                                                 <label class="btn btn-outline-primary" for="thunderbird">Thunderbird</label>
-                                                
+
                                                 <input type="radio" class="btn-check" name="client" id="apple_mail" value="apple_mail">
                                                 <label class="btn btn-outline-primary" for="apple_mail">Apple Mail</label>
-                                                
+
                                                 <input type="radio" class="btn-check" name="client" id="outlook" value="outlook">
                                                 <label class="btn btn-outline-primary" for="outlook">Outlook</label>
-                                                
+
                                                 <input type="radio" class="btn-check" name="client" id="generic" value="generic">
                                                 <label class="btn btn-outline-primary" for="generic">Generic</label>
                                             </div>
                                         </div>
-                                        
+
                                         <div class="mb-3">
                                             <label class="form-label">Detection Criteria:</label>
                                             <div class="btn-group" role="group">
                                                 <input type="radio" class="btn-check" name="criteria" id="strict" value="strict" checked>
                                                 <label class="btn btn-outline-primary" for="strict">Strict</label>
-                                                
+
                                                 <input type="radio" class="btn-check" name="criteria" id="content" value="content">
                                                 <label class="btn btn-outline-primary" for="content">Content Only</label>
-                                                
+
                                                 <input type="radio" class="btn-check" name="criteria" id="headers" value="headers">
                                                 <label class="btn btn-outline-primary" for="headers">Headers</label>
-                                                
+
                                                 <input type="radio" class="btn-check" name="criteria" id="subject-sender" value="subject-sender">
                                                 <label class="btn btn-outline-primary" for="subject-sender">Subject+Sender</label>
                                             </div>
                                         </div>
-                                        
+
                                         <div class="mb-3">
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" id="auto-clean" name="auto-clean">
@@ -78,7 +78,7 @@
                                                 </label>
                                             </div>
                                         </div>
-                                        
+
                                         <div class="d-flex justify-content-between">
                                             <button type="button" id="find-folders-btn" class="btn btn-primary">Find Folders</button>
                                             <button type="button" id="custom-folder-btn" class="btn btn-secondary">Custom Folder</button>
@@ -89,7 +89,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row mb-3">
                         <div class="col-md-12">
                             <div class="card">
@@ -108,7 +108,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-12">
                             <div class="card">
@@ -122,7 +122,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Results Tab -->
                 <div class="tab-pane" id="results-content">
                     <div class="row mb-3">
@@ -142,7 +142,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Help Tab -->
                 <div class="tab-pane" id="help-content">
                     <div class="row mb-3">
@@ -154,7 +154,7 @@
                                 <div class="card-body">
                                     <h4>Email Duplicate Cleaner</h4>
                                     <p>This tool helps you find and remove duplicate emails from various email clients.</p>
-                                    
+
                                     <h5>Using the Web Interface</h5>
                                     <ol>
                                         <li>Select an email client or "All Clients"</li>
@@ -165,7 +165,7 @@
                                         <li>Review duplicate groups in the Results tab</li>
                                         <li>Select groups and click "Clean Selected" or "Clean All" to remove duplicates</li>
                                     </ol>
-                                    
+
                                     <h5>Detection Criteria</h5>
                                     <ul>
                                         <li><strong>Strict:</strong> Uses Message-ID, Date, From, Subject, and content</li>
@@ -173,12 +173,12 @@
                                         <li><strong>Headers:</strong> Uses Message-ID, Date, From, and Subject</li>
                                         <li><strong>Subject+Sender:</strong> Only compares Subject and From fields</li>
                                     </ul>
-                                    
+
                                     <div class="alert alert-warning">
                                         <strong>Note:</strong> The tool always keeps at least one copy of each email.
                                         Always backup your email client's data files before using this tool on real emails.
                                     </div>
-                                    
+
                                     <h5>Demo Mode</h5>
                                     <p>Click "Run Demo" to create a temporary mailbox with sample emails containing duplicates for testing.</p>
                                 </div>
@@ -191,7 +191,7 @@
 
         <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
             <div class="col-md-6 d-flex align-items-center">
-                <span class="text-muted">Email Duplicate Cleaner &copy; 2025</span>
+                <span class="text-muted">Email Duplicate Cleaner &copy; 2025 by Nsfr750</span>
             </div>
             <div class="col-md-6 d-flex justify-content-end">
                 <span class="text-muted" id="status-text">Ready</span>

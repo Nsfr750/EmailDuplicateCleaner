@@ -4,11 +4,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const scanTab = document.getElementById('scan-tab');
     const resultsTab = document.getElementById('results-tab');
     const helpTab = document.getElementById('help-tab');
-    
+
     const scanContent = document.getElementById('scan-content');
     const resultsContent = document.getElementById('results-content');
     const helpContent = document.getElementById('help-content');
-    
+
     // Buttons
     const findFoldersBtn = document.getElementById('find-folders-btn');
     const customFolderBtn = document.getElementById('custom-folder-btn');
@@ -18,48 +18,48 @@ document.addEventListener('DOMContentLoaded', function() {
     const cleanSelectedBtn = document.getElementById('clean-selected-btn');
     const cleanAllBtn = document.getElementById('clean-all-btn');
     const submitCustomFolderBtn = document.getElementById('submit-custom-folder');
-    
+
     // Console output
     const consoleOutput = document.getElementById('console-output');
     const statusText = document.getElementById('status-text');
-    
+
     // Bootstrap modals
     const customFolderModal = new bootstrap.Modal(document.getElementById('customFolderModal'));
     const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
     const confirmMessage = document.getElementById('confirm-message');
     const confirmAction = document.getElementById('confirm-action');
-    
+
     // Tab switching
     scanTab.addEventListener('click', function(e) {
         e.preventDefault();
         setActiveTab('scan');
     });
-    
+
     resultsTab.addEventListener('click', function(e) {
         e.preventDefault();
         setActiveTab('results');
     });
-    
+
     helpTab.addEventListener('click', function(e) {
         e.preventDefault();
         setActiveTab('help');
     });
-    
+
     function setActiveTab(tabName) {
         // Reset all tabs
         scanTab.classList.remove('active');
         resultsTab.classList.remove('active');
         helpTab.classList.remove('active');
-        
+
         scanContent.classList.remove('active');
         resultsContent.classList.remove('active');
         helpContent.classList.remove('active');
-        
+
         // Set active class
         document.getElementById(tabName + '-tab').classList.add('active');
         document.getElementById(tabName + '-content').classList.add('active');
     }
-    
+
     // Console polling
     function pollConsole() {
         fetch('/api/get_logs')
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.status) {
                     statusText.textContent = data.status;
                 }
-                
+
                 // Check if scanning is complete to switch to results tab
                 if (data.scan_complete) {
                     resultsTab.click();
@@ -81,15 +81,15 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => console.error('Error polling console:', error));
     }
-    
+
     // Start console polling
     setInterval(pollConsole, 1000);
-    
+
     // Find folders
     findFoldersBtn.addEventListener('click', function() {
         const client = document.querySelector('input[name="client"]:checked').value;
         setStatus('Searching for mail folders...');
-        
+
         fetch('/api/find_folders', {
             method: 'POST',
             headers: {
@@ -111,21 +111,21 @@ document.addEventListener('DOMContentLoaded', function() {
             setStatus('Error: Could not find mail folders');
         });
     });
-    
+
     // Custom folder modal
     customFolderBtn.addEventListener('click', function() {
         customFolderModal.show();
     });
-    
+
     // Submit custom folder
     submitCustomFolderBtn.addEventListener('click', function() {
         const folderPath = document.getElementById('folder-path').value;
         if (!folderPath) {
             return;
         }
-        
+
         customFolderModal.hide();
-        
+
         fetch('/api/scan_custom_folder', {
             method: 'POST',
             headers: {
@@ -147,13 +147,13 @@ document.addEventListener('DOMContentLoaded', function() {
             setStatus('Error: Could not scan custom folder');
         });
     });
-    
+
     // Run demo
     demoBtn.addEventListener('click', function() {
         confirmMessage.textContent = 'This will create a temporary mailbox with sample emails for demonstration. Continue?';
         confirmAction.onclick = function() {
             confirmModal.hide();
-            
+
             fetch('/api/run_demo')
                 .then(response => response.json())
                 .then(data => {
@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         confirmModal.show();
     });
-    
+
     // Select all folders
     selectAllBtn.addEventListener('click', function() {
         const checkboxes = document.querySelectorAll('.folder-checkbox');
@@ -179,7 +179,7 @@ document.addEventListener('DOMContentLoaded', function() {
             checkbox.checked = true;
         });
     });
-    
+
     // Scan selected folders
     scanSelectedBtn.addEventListener('click', function() {
         const checkboxes = document.querySelectorAll('.folder-checkbox:checked');
@@ -187,13 +187,13 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Please select at least one folder to scan');
             return;
         }
-        
+
         const folderIndices = Array.from(checkboxes).map(checkbox => parseInt(checkbox.value));
         const criteria = document.querySelector('input[name="criteria"]:checked').value;
         const autoClean = document.getElementById('auto-clean').checked;
-        
+
         setStatus(`Scanning ${folderIndices.length} folders...`);
-        
+
         fetch('/api/scan_folders', {
             method: 'POST',
             headers: {
@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', function() {
             setStatus('Error: Could not scan folders');
         });
     });
-    
+
     // Update results
     function updateResults() {
         fetch('/api/get_results')
@@ -230,7 +230,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         resultsContainer.innerHTML = '<div class="alert alert-info">No duplicate emails found.</div>';
                         return;
                     }
-                    
+
                     let html = '';
                     data.groups.forEach((group, groupIndex) => {
                         html += `
@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     </button>
                                 </div>
                                 <div class="email-list">`;
-                        
+
                         group.emails.forEach((email, emailIndex) => {
                             const isOriginal = emailIndex === 0;
                             html += `
@@ -271,14 +271,14 @@ document.addEventListener('DOMContentLoaded', function() {
                                     </div>
                                 </div>`;
                         });
-                        
+
                         html += `
                                 </div>
                             </div>`;
                     });
-                    
+
                     resultsContainer.innerHTML = html;
-                    
+
                     // Add listeners for individual group clean buttons
                     document.querySelectorAll('.clean-group-btn').forEach(button => {
                         button.addEventListener('click', function() {
@@ -286,7 +286,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             cleanGroups([groupIndex]);
                         });
                     });
-                    
+
                     setStatus(`Found ${data.groups.length} duplicate groups`);
                 } else {
                     setStatus(data.message || 'Error getting results');
@@ -297,7 +297,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 setStatus('Error: Could not load results');
             });
     }
-    
+
     // Clean selected groups
     cleanSelectedBtn.addEventListener('click', function() {
         const checkboxes = document.querySelectorAll('.group-checkbox:checked');
@@ -305,9 +305,9 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Please select at least one group to clean');
             return;
         }
-        
+
         const groupIndices = Array.from(checkboxes).map(checkbox => parseInt(checkbox.value));
-        
+
         confirmMessage.textContent = `This will delete duplicates from ${groupIndices.length} selected groups, keeping the oldest email in each group. Continue?`;
         confirmAction.onclick = function() {
             confirmModal.hide();
@@ -315,13 +315,13 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         confirmModal.show();
     });
-    
+
     // Clean all groups
     cleanAllBtn.addEventListener('click', function() {
         confirmMessage.textContent = 'This will delete duplicates from ALL groups, keeping the oldest email in each group. Continue?';
         confirmAction.onclick = function() {
             confirmModal.hide();
-            
+
             fetch('/api/clean_all_groups')
                 .then(response => response.json())
                 .then(data => {
@@ -338,11 +338,11 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         confirmModal.show();
     });
-    
+
     // Clean groups helper function
     function cleanGroups(groupIndices) {
         setStatus(`Cleaning ${groupIndices.length} groups...`);
-        
+
         fetch('/api/clean_groups', {
             method: 'POST',
             headers: {
@@ -363,7 +363,7 @@ document.addEventListener('DOMContentLoaded', function() {
             setStatus('Error: Could not clean groups');
         });
     }
-    
+
     // Update folder list helper function
     function updateFolderList(folders) {
         const folderList = document.getElementById('folder-list');
@@ -371,7 +371,7 @@ document.addEventListener('DOMContentLoaded', function() {
             folderList.innerHTML = '<div class="alert alert-warning">No mail folders found.</div>';
             return;
         }
-        
+
         let html = '<div class="list-group">';
         folders.forEach((folder, index) => {
             html += `
@@ -387,10 +387,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>`;
         });
         html += '</div>';
-        
+
         folderList.innerHTML = html;
     }
-    
+
     // Set status helper function
     function setStatus(message) {
         statusText.textContent = message;

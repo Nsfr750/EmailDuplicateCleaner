@@ -19,7 +19,7 @@ class ScanHistory(db.Model):
     """Model for tracking scan history"""
     id = db.Column(db.Integer, primary_key=True)
     client_type = db.Column(db.String(50), nullable=False)
-    folder_path = db.Column(db.String(255), nullable=False)
+    folder_path = db.Column(db.String(1024), nullable=False)
     criteria = db.Column(db.String(50), nullable=False, default='strict')
     total_emails = db.Column(db.Integer, default=0)
     duplicate_groups = db.Column(db.Integer, default=0)
