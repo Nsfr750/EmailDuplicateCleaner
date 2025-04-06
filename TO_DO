@@ -6,4 +6,6 @@ Fix GUI button functionality by adding error handling and debug print statements
 Add button to enable/disble debug mode
 Improve the visual design and add dark mode toggle
 
+*** FIX web version ***
+
 Add Various BUG
