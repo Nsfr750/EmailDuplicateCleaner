@@ -5,6 +5,8 @@ Email Duplicate Cleaner - Web Interface
 A web-based interface for the Email Duplicate Cleaner tool.
 This interface provides easy access to the functionality for scanning and removing
 duplicate emails from various email clients.
+
+©2025 by Nsfr750
 """
 
 import os
@@ -264,7 +266,9 @@ with open('templates/index.html', 'w') as f:
 
         <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
             <div class="col-md-6 d-flex align-items-center">
-                <span class="text-muted">Email Duplicate Cleaner v2.0.1 &copy; 2025 by Nsfr750</span>
+                <span class="text-muted">Email Duplicate Cleaner v2.0.1 &copy; 2025 by Nsfr750 </span>
+                <span class="text-muted"> - <a href="https://patreon.com/Nsfr750?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink
+" target="_blank">Patreon</a> - <a href="https://github.com/Nsfr750" target="_blank">GitHub</a></span>
             </div>
             <div class="col-md-6 d-flex justify-content-end">
                 <span class="text-muted" id="status-text">Ready</span>
@@ -384,14 +388,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Tab navigation
     const scanTab = document.getElementById('scan-tab');
     const resultsTab = document.getElementById('results-tab');
-    const hystoryTab = document.getElementById('hystory-tab');
-    const settingsTab = document.getElementById('settings-tab');
     const helpTab = document.getElementById('help-tab');
 
     const scanContent = document.getElementById('scan-content');
     const resultsContent = document.getElementById('results-content');
-    const hystoryContent = document.getElementById('hystory-content');
-    const settingsContent = document.getElementById('settings-content');
 	const helpContent = document.getElementById('help-content');
 
     // Buttons
@@ -434,14 +434,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Reset all tabs
         scanTab.classList.remove('active');
         resultsTab.classList.remove('active');
-        hystoryTab.classList.remove('active');
-        settingsTab.classList.remove('active');		
         helpTab.classList.remove('active');
 
         scanContent.classList.remove('active');
         resultsContent.classList.remove('active');
-		hystoryContent.classList.remove('active');
-		settingsContent.classList.remove('active');
         helpContent.classList.remove('active');
 
         // Set active class

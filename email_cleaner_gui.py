@@ -5,6 +5,8 @@ Email Duplicate Cleaner - GUI Interface
 A graphical user interface for the Email Duplicate Cleaner tool.
 This GUI provides easy access to the functionality for scanning and removing
 duplicate emails from various email clients.
+
+©2025 by Nsfr750
 """
 
 import os
@@ -663,7 +665,12 @@ Supported Email Clients:
 - Microsoft Outlook
 - Generic mbox/maildir formats
 
-© 2025 by Nsfr750"""
+© 2025 by Nsfr750
+
+Patreon: https://patreon.com/Nsfr750 
+GitHub: https://github.com/Nsfr750
+
+"""
         
         messagebox.showinfo("About Email Duplicate Cleaner", about_text)
     
