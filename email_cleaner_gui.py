@@ -14,8 +14,15 @@ import sys
 import logging
 import threading
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox, scrolledtext
+from tkinter import ttk, filedialog, messagebox, scrolledtext, Button, Tk, Label
 import queue
+
+root = Tk()
+root.geometry("300x150")
+root.title("Sponsor")
+
+title_label = Label(root, text="Socials", font=("Arial", 16))
+title_label.pack(pady=10)
 
 # Configure logging
 logging.basicConfig(
@@ -671,7 +678,7 @@ Patreon: https://patreon.com/Nsfr750
 GitHub: https://github.com/Nsfr750
 
 """
-        
+
         messagebox.showinfo("About Email Duplicate Cleaner", about_text)
     
     def show_help(self):
@@ -875,6 +882,20 @@ You can also right-click on any email to view its full content."""
         
         self.root.destroy()
 
+def open_patreon():
+    import webbrowser
+    webbrowser.open("https://www.patreon.com/Nsfr750")
+
+def open_github():
+    import webbrowser
+    webbrowser.open("https://github.com/Nsfr750")
+        
+# Create and place buttons
+patreon_button = Button(root, text="Join the Patreon!", command=open_patreon)
+patreon_button.pack(pady=10)
+
+github_button = Button(root, text="GitHub", command=open_github)
+github_button.pack(pady=10)
 
 def main():
     """Main function to run the GUI application"""
