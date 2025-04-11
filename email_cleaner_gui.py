@@ -166,7 +166,7 @@ class EmailCleanerGUI:
         
         self.root.config(menu=menu_bar)
     
-    def show_sponsor(self):
+def show_sponsor(self):
     """Display sponsor information in a popup dialog"""
     sponsor_window = tk.Toplevel(self.root)
     sponsor_window.title("Sponsor")
