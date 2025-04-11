@@ -166,7 +166,36 @@ class EmailCleanerGUI:
         
         self.root.config(menu=menu_bar)
     
-    def create_tabs(self):
+    def show_sponsor(self):
+    """Display sponsor information in a popup dialog"""
+    sponsor_window = tk.Toplevel(self.root)
+    sponsor_window.title("Sponsor")
+    sponsor_window.geometry("300x200")
+    
+    title_label = tk.Label(sponsor_window, text="Sponsor Us", font=("Arial", 16))
+    title_label.pack(pady=10)
+    
+    message_label = tk.Label(
+        sponsor_window,
+        text="Support our project by sponsoring us!\nVisit our Patreon or GitHub Sponsors.",
+        justify="center",
+        wraplength=250
+    )
+    message_label.pack(pady=10)
+    
+    sponsor_button = tk.Button(
+        sponsor_window,
+        text="Sponsor Us",
+        command=lambda: self.open_sponsor_link("https://patreon.com/Nsfr750")
+    )
+    sponsor_button.pack(pady=10)
+    
+def open_sponsor_link(self, url):
+    """Open the sponsor link in the default web browser"""
+    import webbrowser
+    webbrowser.open(url)
+    
+def create_tabs(self):
         """Create the main tab structure"""
         self.notebook = ttk.Notebook(self.main_frame)
         self.notebook.grid(row=0, column=0, sticky=(tk.N, tk.S, tk.E, tk.W))
