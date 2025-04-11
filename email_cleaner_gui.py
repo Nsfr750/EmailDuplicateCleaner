@@ -5,8 +5,6 @@ Email Duplicate Cleaner - GUI Interface
 A graphical user interface for the Email Duplicate Cleaner tool.
 This GUI provides easy access to the functionality for scanning and removing
 duplicate emails from various email clients.
-
-©2025 by Nsfr750
 """
 
 import os
@@ -14,15 +12,8 @@ import sys
 import logging
 import threading
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox, scrolledtext, Button, Tk, Label
+from tkinter import ttk, filedialog, messagebox, scrolledtext
 import queue
-
-root = Tk()
-root.geometry("300x200")
-root.title("Sponsor")
-
-title_label = Label(root, text="Socials", font=("Arial", 16))
-title_label.pack(pady=10)
 
 # Configure logging
 logging.basicConfig(
@@ -166,36 +157,7 @@ class EmailCleanerGUI:
         
         self.root.config(menu=menu_bar)
     
-def show_sponsor(self):
-    """Display sponsor information in a popup dialog"""
-    sponsor_window = tk.Toplevel(self.root)
-    sponsor_window.title("Sponsor")
-    sponsor_window.geometry("300x200")
-    
-    title_label = tk.Label(sponsor_window, text="Sponsor Us", font=("Arial", 16))
-    title_label.pack(pady=10)
-    
-    message_label = tk.Label(
-        sponsor_window,
-        text="Support our project by sponsoring us!\nVisit our Patreon or GitHub Sponsors.",
-        justify="center",
-        wraplength=250
-    )
-    message_label.pack(pady=10)
-    
-    sponsor_button = tk.Button(
-        sponsor_window,
-        text="Sponsor Us",
-        command=lambda: self.open_sponsor_link("https://patreon.com/Nsfr750")
-    )
-    sponsor_button.pack(pady=10)
-    
-def open_sponsor_link(self, url):
-    """Open the sponsor link in the default web browser"""
-    import webbrowser
-    webbrowser.open(url)
-    
-def create_tabs(self):
+    def create_tabs(self):
         """Create the main tab structure"""
         self.notebook = ttk.Notebook(self.main_frame)
         self.notebook.grid(row=0, column=0, sticky=(tk.N, tk.S, tk.E, tk.W))
@@ -701,13 +663,8 @@ Supported Email Clients:
 - Microsoft Outlook
 - Generic mbox/maildir formats
 
-© 2025 by Nsfr750
-
-Patreon: https://patreon.com/Nsfr750 
-GitHub: https://github.com/Nsfr750
-
-"""
-
+© 2025 by Nsfr750"""
+        
         messagebox.showinfo("About Email Duplicate Cleaner", about_text)
     
     def show_help(self):
@@ -911,27 +868,6 @@ You can also right-click on any email to view its full content."""
         
         self.root.destroy()
 
-def open_patreon():
-    import webbrowser
-    webbrowser.open("https://www.patreon.com/Nsfr750")
-
-def open_github():
-    import webbrowser
-    webbrowser.open("https://github.com/Nsfr750")
-
-def open_discord():    
-    import webbrowser
-    webbrowser.open("https://discord.gg/q5Pcgrju")
-        
-# Create and place buttons
-patreon_button = Button(root, text="Join the Patreon!", command=open_patreon)
-patreon_button.pack(pady=10)
-
-github_button = Button(root, text="GitHub", command=open_github)
-github_button.pack(pady=10)
-
-discord_button = Button(root, text="Discord", command=open_discord)
-discord_button.pack(pady=10)
 
 def main():
     """Main function to run the GUI application"""
