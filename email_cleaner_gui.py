@@ -652,7 +652,7 @@ class EmailCleanerGUI:
         """Show the about dialog"""
         about_text = """Email Duplicate Cleaner
 
-Version 2.0.1
+Version 2.2.1
 
 A tool to scan, identify, and remove duplicate emails
 from various email clients.
@@ -786,7 +786,7 @@ You can also right-click on any email to view its full content."""
             
             # Create email viewer window
             viewer = tk.Toplevel(self.root)
-            viewer.title(f"Email Content - {self.duplicate_groups[group_idx]['emails'][email_idx]['subject']}")
+            viewer.title(f"Email Content - {self.duplicate_groups[group_idx]['messages'][email_idx]['subject']}")
             viewer.geometry("700x500")
             viewer.minsize(500, 400)
             
@@ -799,48 +799,65 @@ You can also right-click on any email to view its full content."""
             viewer.rowconfigure(1, weight=1)
             
             # Header frame
-            header_frame = ttk.LabelFrame(viewer, text="Email Headers")
-            header_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=5)
+            header_frame = ttk.LabelFrame(viewer, text="Email Headers", padding="5")
+            header_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), padx=5, pady=5)
             
-            # Header grid
-            header_frame.columnconfigure(1, weight=1)
-            row = 0
+            # Add header information
+            email_info = self.duplicate_groups[group_idx]['messages'][email_idx]
+            headers = [
+                ("From:", email_info['from']),
+                ("To:", email_info.get('to', 'N/A')),
+                ("Date:", email_info['date']),
+                ("Subject:", email_info['subject']),
+                ("Folder:", email_info['folder'])
+            ]
             
-            # Add headers
-            for header, value in [
-                ("From", email_content['from']),
-                ("To", email_content.get('to', 'N/A')),
-                ("Date", email_content['date']),
-                ("Subject", email_content['subject']),
-                ("Message-ID", email_content.get('message_id', 'N/A'))
-            ]:
-                ttk.Label(header_frame, text=f"{header}:", font=("TkDefaultFont", 9, "bold")).grid(
-                    row=row, column=0, sticky="w", padx=5, pady=2)
+            for i, (label, value) in enumerate(headers):
+                ttk.Label(header_frame, text=label, font=('Arial', 10, 'bold')).grid(
+                    row=i, column=0, sticky=tk.W, padx=(0, 10))
                 ttk.Label(header_frame, text=value, wraplength=500).grid(
-                    row=row, column=1, sticky="w", padx=5, pady=2)
-                row += 1
+                    row=i, column=1, sticky=tk.W)
             
-            # Body frame
-            body_frame = ttk.LabelFrame(viewer, text="Email Body")
-            body_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=5)
+            # Content frame
+            content_frame = ttk.LabelFrame(viewer, text="Email Content", padding="5")
+            content_frame.grid(row=1, column=0, sticky=(tk.N, tk.S, tk.E, tk.W), padx=5, pady=5)
+            content_frame.columnconfigure(0, weight=1)
+            content_frame.rowconfigure(0, weight=1)
             
-            body_frame.columnconfigure(0, weight=1)
-            body_frame.rowconfigure(0, weight=1)
+            # Email content text widget
+            content_text = scrolledtext.ScrolledText(
+                content_frame, wrap=tk.WORD, font=('Arial', 10),
+                width=80, height=20
+            )
+            content_text.grid(row=0, column=0, sticky=(tk.N, tk.S, tk.E, tk.W))
             
-            # Body text widget
-            body_text = scrolledtext.ScrolledText(body_frame, wrap=tk.WORD, 
-                                               font=("TkDefaultFont", 10))
-            body_text.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+            # Insert email content
+            if isinstance(email_content, bytes):
+                try:
+                    email_content = email_content.decode('utf-8')
+                except UnicodeDecodeError:
+                    try:
+                        email_content = email_content.decode('latin-1')
+                    except UnicodeDecodeError:
+                        email_content = str(email_content)
             
-            # Insert email body
-            body_text.insert(tk.END, email_content.get('body', 'No content'))
-            body_text.configure(state="disabled")  # Read-only
+            content_text.insert('1.0', email_content)
+            content_text.configure(state='disabled')  # Make read-only
             
             # Button frame
             button_frame = ttk.Frame(viewer)
-            button_frame.grid(row=2, column=0, sticky="ew", padx=10, pady=10)
+            button_frame.grid(row=2, column=0, sticky=(tk.E, tk.W), padx=5, pady=5)
             
+            # Close button
             ttk.Button(button_frame, text="Close", command=viewer.destroy).pack(side=tk.RIGHT)
+            
+            # Center the window on screen
+            viewer.update_idletasks()
+            width = viewer.winfo_width()
+            height = viewer.winfo_height()
+            x = (viewer.winfo_screenwidth() // 2) - (width // 2)
+            y = (viewer.winfo_screenheight() // 2) - (height // 2)
+            viewer.geometry(f"{width}x{height}+{x}+{y}")
             
             # Set focus to the viewer window
             viewer.focus_set()
