@@ -14,6 +14,16 @@ A Python tool to scan, identify, and remove duplicate emails from various email 
 
 ## Getting Started
 
+### Installation
+
+1. Clone this repository
+2. Install the required dependencies:
+```
+pip install -r requirements.txt
+```
+
+### Running the Application
+
 1. Click the Run button to start in demo mode
 2. Choose an interface:
    - Web: Access via port 5000
