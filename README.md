@@ -76,3 +76,10 @@ python email_duplicate_cleaner.py --demo
 - Help: Shows usage information 
 - GUI Mode: Launches desktop interface
 - Web Mode: Starts web server
+
+## Social Links
+
+- [Patreon](https://www.patreon.com/Nsfr750)
+- [GitHub](https://github.com/Nsfr750)
+- [Discord](https://discord.gg/BvvkUEP9)
+- [Payapal](https://paypal.me/3dmega)
