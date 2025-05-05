@@ -79,7 +79,14 @@ python email_duplicate_cleaner.py --demo
 
 ## Social Links
 
+<<<<<<< HEAD
 - [GitHub](https://github.com/Nsfr750)
 - [Patreon](https://www.patreon.com/Nsfr750)
 - [Discord](https://discord.gg/BvvkUEP9)
 - [Paypal](https://paypal.me/3dmega)
+=======
+- [Patreon](https://www.patreon.com/Nsfr750)
+- [GitHub](https://github.com/Nsfr750)
+- [Discord](https://discord.gg/BvvkUEP9)
+- [Payapal](https://paypal.me/3dmega)
+>>>>>>> 6739661d04695ad084125677d7e26bb86239d054
