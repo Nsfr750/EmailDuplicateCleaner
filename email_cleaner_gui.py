@@ -56,6 +56,12 @@ class Sponsor:
 
         sponsor_root.mainloop()
         
+    def show_sponsor_menu(self):
+        """Display the Sponsor window"""
+        sponsor = Sponsor()
+        sponsor.show_sponsor_window()
+
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -195,7 +201,12 @@ class EmailCleanerGUI:
         help_menu.add_command(label="About", command=self.show_about)
         help_menu.add_command(label="Help", command=self.show_help)
         menu_bar.add_cascade(label="Help", menu=help_menu)
-        
+
+        # Sponsor menu
+        sponsor_menu = tk.Menu(menu_bar, tearoff=0)
+        sponsor_menu.add_command(label="Support Us", command=self.show_sponsor_menu)
+        menu_bar.add_cascade(label="Sponsor", menu=sponsor_menu)
+
         self.root.config(menu=menu_bar)
     
     def create_tabs(self):
