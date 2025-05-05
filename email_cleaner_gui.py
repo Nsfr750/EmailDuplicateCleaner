@@ -12,8 +12,10 @@ import sys
 import logging
 import threading
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox, scrolledtext
+from tkinter import ttk, filedialog, messagebox, scrolledtext, Toplevel
 import queue
+import sqlite3
+
 
 # Sponsor Class
 class Sponsor:
@@ -56,12 +58,6 @@ class Sponsor:
 
         sponsor_root.mainloop()
         
-    def show_sponsor_menu(self):
-        """Display the Sponsor window"""
-        sponsor = Sponsor()
-        sponsor.show_sponsor_window()
-
-
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -204,7 +200,8 @@ class EmailCleanerGUI:
 
         # Sponsor menu
         sponsor_menu = tk.Menu(menu_bar, tearoff=0)
-        sponsor_menu.add_command(label="Support Us", command=self.show_sponsor_menu)
+        sponsor = Sponsor()
+        sponsor_menu.add_command(label="Sponsor Us", command=sponsor.show_sponsor_window)
         menu_bar.add_cascade(label="Sponsor", menu=sponsor_menu)
 
         self.root.config(menu=menu_bar)
@@ -704,7 +701,7 @@ class EmailCleanerGUI:
         """Show the about dialog"""
         about_text = """Email Duplicate Cleaner
 
-Version 2.2.1
+Version 2.2.3
 
 A tool to scan, identify, and remove duplicate emails
 from various email clients.
@@ -917,6 +914,11 @@ You can also right-click on any email to view its full content."""
         except Exception as e:
             self.show_error(f"Error viewing email content: {str(e)}")
     
+    def show_sponsor_menu(self):
+        """Display the Sponsor window"""
+        sponsor = Sponsor()
+        sponsor.show_sponsor_window()
+        
     def on_closing(self):
         """Clean up when closing the application"""
         # Restore stdout
@@ -948,7 +950,6 @@ def main():
     
     # Start the GUI event loop
     root.mainloop()
-
 
 if __name__ == "__main__":
     main()
