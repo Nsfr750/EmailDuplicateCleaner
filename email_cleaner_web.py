@@ -55,11 +55,8 @@ global_state = {
     'scan_complete': False
 }
 
-# Create templates directory if it doesn't exist
+# Ensure required directories exist
 os.makedirs('templates', exist_ok=True)
-
-# Create static directory if it doesn't exist
-os.makedirs('static', exist_ok=True)
 os.makedirs('static/css', exist_ok=True)
 os.makedirs('static/js', exist_ok=True)
 
@@ -67,9 +64,11 @@ os.makedirs('static/js', exist_ok=True)
 with app.app_context():
     init_db()
 
-# Create HTML templates
-with open('templates/index.html', 'w') as f:
-    f.write('''
+# Only create template files if they don't exist
+def create_template_files():
+    if not os.path.exists('templates/index.html'):
+        with open('templates/index.html', 'w') as f:
+            f.write(r'''
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -321,8 +320,9 @@ with open('templates/index.html', 'w') as f:
 </html>
 ''')
 
-with open('static/css/style.css', 'w') as f:
-    f.write('''
+    if not os.path.exists('static/css/style.css'):
+        with open('static/css/style.css', 'w') as f:
+            f.write('''
 .console-output {
     max-height: 200px;
     overflow-y: scroll;
@@ -378,23 +378,27 @@ with open('static/css/style.css', 'w') as f:
 }
 ''')
 
-with open('static/js/script.js', 'w') as f:
-    f.write('''
+    # Create JavaScript file if it doesn't exist
+    if not os.path.exists('static/js/script.js'):
+        with open('static/js/script.js', 'w') as f:
+            f.write('''
 document.addEventListener('DOMContentLoaded', function() {
+    'use strict';
     // Tab navigation
     const scanTab = document.getElementById('scan-tab');
     const resultsTab = document.getElementById('results-tab');
-    const hystoryTab = document.getElementById('hystory-tab');
+    const historyTab = document.getElementById('history-tab');
     const settingsTab = document.getElementById('settings-tab');
     const helpTab = document.getElementById('help-tab');
 
     const scanContent = document.getElementById('scan-content');
     const resultsContent = document.getElementById('results-content');
-    const hystoryContent = document.getElementById('hystory-content');
+    const historyContent = document.getElementById('history-content');
     const settingsContent = document.getElementById('settings-content');
-	const helpContent = document.getElementById('help-content');
+    const helpContent = document.getElementById('help-content');
 
     // Buttons
+    // Initialize buttons
     const findFoldersBtn = document.getElementById('find-folders-btn');
     const customFolderBtn = document.getElementById('custom-folder-btn');
     const demoBtn = document.getElementById('demo-btn');
@@ -404,109 +408,132 @@ document.addEventListener('DOMContentLoaded', function() {
     const cleanAllBtn = document.getElementById('clean-all-btn');
     const submitCustomFolderBtn = document.getElementById('submit-custom-folder');
 
-    // Console output
+    // Initialize console elements
     const consoleOutput = document.getElementById('console-output');
     const statusText = document.getElementById('status-text');
 
-    // Bootstrap modals
+    // Initialize modals
     const customFolderModal = new bootstrap.Modal(document.getElementById('customFolderModal'));
     const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
     const confirmMessage = document.getElementById('confirm-message');
     const confirmAction = document.getElementById('confirm-action');
 
-    // Tab switching
-    scanTab.addEventListener('click', function(e) {
-        e.preventDefault();
-        setActiveTab('scan');
-    });
-
-    resultsTab.addEventListener('click', function(e) {
-        e.preventDefault();
-        setActiveTab('results');
-    });
-
-    helpTab.addEventListener('click', function(e) {
-        e.preventDefault();
-        setActiveTab('help');
-    });
-
-    function setActiveTab(tabName) {
-        // Reset all tabs
-        scanTab.classList.remove('active');
-        resultsTab.classList.remove('active');
-        hystoryTab.classList.remove('active');
-        settingsTab.classList.remove('active');		
-        helpTab.classList.remove('active');
-
-        scanContent.classList.remove('active');
-        resultsContent.classList.remove('active');
-		hystoryContent.classList.remove('active');
-		settingsContent.classList.remove('active');
-        helpContent.classList.remove('active');
-
-        // Set active class
-        document.getElementById(tabName + '-tab').classList.add('active');
-        document.getElementById(tabName + '-content').classList.add('active');
+    // Helper functions
+    function setStatus(message) {
+        statusText.textContent = message;
     }
 
-    // Console polling
-    function pollConsole() {
-        fetch('/api/get_logs')
+    function updateFolderList(folders) {
+        const folderList = document.getElementById('folder-list');
+        folderList.innerHTML = '';
+
+        folders.forEach((folder, index) => {
+            const div = document.createElement('div');
+            div.className = 'form-check';
+            div.innerHTML = `
+                <input class="form-check-input folder-checkbox" type="checkbox" value="${index}" id="folder-${index}">
+                <label class="form-check-label" for="folder-${index}">${folder}</label>
+            `;
+            folderList.appendChild(div);
+        });
+    }
+
+    function updateResults() {
+        fetch('/api/get_results')
             .then(response => response.json())
             .then(data => {
-                if (data.logs) {
-                    consoleOutput.textContent = data.logs;
-                    consoleOutput.scrollTop = consoleOutput.scrollHeight;
-                }
-                if (data.status) {
-                    statusText.textContent = data.status;
-                }
+                if (data.success) {
+                    const resultsContainer = document.getElementById('results-container');
+                    resultsContainer.innerHTML = '';
 
-                // Check if scanning is complete to switch to results tab
-                if (data.scan_complete) {
-                    resultsTab.click();
-                    updateResults();
+                    if (data.groups.length === 0) {
+                        resultsContainer.innerHTML = '<p>No duplicate emails found.</p>';
+                        return;
+                    }
+
+                    data.groups.forEach((group, index) => {
+                        const div = document.createElement('div');
+                        div.className = 'duplicate-group mb-4';
+                        div.innerHTML = `
+                            <div class="form-check">
+                                <input class="form-check-input group-checkbox" type="checkbox" value="${index}" id="group-${index}">
+                                <label class="form-check-label" for="group-${index}">
+                                    Group ${index + 1} - ${group.emails.length} duplicates
+                                </label>
+                            </div>
+                            <div class="ms-4">
+                                <strong>Subject:</strong> ${group.subject}<br>
+                                <strong>From:</strong> ${group.sender}<br>
+                                <strong>Date:</strong> ${group.date}<br>
+                                <strong>Folders:</strong> ${group.folders.join(', ')}
+                            </div>
+                        `;
+                        resultsContainer.appendChild(div);
+                    });
+                } else {
+                    console.error('Error getting results:', data.message);
                 }
             })
-            .catch(error => console.error('Error polling console:', error));
+            .catch(error => console.error('Error getting results:', error));
     }
 
-    // Start console polling
-    setInterval(pollConsole, 1000);
+    function cleanGroups(groupIndices) {
+        setStatus('Cleaning selected groups...');
 
-    // Find folders
+        fetch('/api/clean_groups', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ group_indices: groupIndices })
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            if (data.success) {
+                setStatus('Cleaning in progress...');
+            } else {
+                setStatus(data.message || 'Error cleaning groups');
+            }
+        })
+        .catch(function(error) {
+            console.error('Error cleaning groups:', error);
+            setStatus('Error: Could not clean groups');
+        });
+    }
+
+    // Initialize event listeners
     findFoldersBtn.addEventListener('click', function() {
-        const client = document.querySelector('input[name="client"]:checked').value;
+        var client = document.querySelector('input[name="client"]:checked').value;
         setStatus('Searching for mail folders...');
 
         fetch('/api/find_folders', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ client: client }),
+            body: JSON.stringify({ client: client })
         })
-        .then(response => response.json())
-        .then(data => {
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
             if (data.success) {
                 updateFolderList(data.folders);
-                setStatus(`Found ${data.folders.length} mail folders`);
+                setStatus('Found ' + data.folders.length + ' mail folders');
             } else {
                 setStatus(data.message || 'Error finding folders');
             }
         })
-        .catch(error => {
+        .catch(function(error) {
             console.error('Error finding folders:', error);
             setStatus('Error: Could not find mail folders');
         });
     });
 
-    // Custom folder modal
     customFolderBtn.addEventListener('click', function() {
         customFolderModal.show();
     });
 
-    // Submit custom folder
     submitCustomFolderBtn.addEventListener('click', function() {
         const folderPath = document.getElementById('folder-path').value;
         if (!folderPath) {
@@ -537,7 +564,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Run demo
     demoBtn.addEventListener('click', function() {
         confirmMessage.textContent = 'This will create a temporary mailbox with sample emails for demonstration. Continue?';
         confirmAction.onclick = function() {
@@ -562,7 +588,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Select all folders
-    selectAllBtn.addEventListener('click', function() {
+    document.getElementById('select-all-btn').addEventListener('click', function() {
         const checkboxes = document.querySelectorAll('.folder-checkbox');
         checkboxes.forEach(checkbox => {
             checkbox.checked = true;
@@ -570,7 +596,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Scan selected folders
-    scanSelectedBtn.addEventListener('click', function() {
+    document.getElementById('scan-selected-btn').addEventListener('click', function() {
         const checkboxes = document.querySelectorAll('.folder-checkbox:checked');
         if (checkboxes.length === 0) {
             alert('Please select at least one folder to scan');
@@ -608,85 +634,406 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Update results
-    function updateResults() {
-        fetch('/api/get_results')
+    // Clean selected groups
+    document.getElementById('clean-selected-btn').addEventListener('click', function() {
+        const checkboxes = document.querySelectorAll('.group-checkbox:checked');
+        if (checkboxes.length === 0) {
+            alert('Please select at least one group to clean');
+            return;
+        }
+
+        const groupIndices = Array.from(checkboxes).map(checkbox => checkbox.value);
+
+        confirmMessage.textContent = `Are you sure you want to clean ${checkboxes.length} duplicate group(s)?`;
+        confirmAction.onclick = function() {
+            confirmModal.hide();
+
+            fetch('/api/clean_groups', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ group_indices: groupIndices }),
+            })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    const resultsContainer = document.getElementById('results-container');
-                    if (data.groups.length === 0) {
-                        resultsContainer.innerHTML = '<div class="alert alert-info">No duplicate emails found.</div>';
-                        return;
+                    setStatus('Cleaning started');
+                } else {
+                    setStatus(data.message || 'Error starting clean');
+                }
+            })
+            .catch(error => {
+                console.error('Error starting clean:', error);
+                setStatus('Error: Could not start clean');
+            });
+        };
+        confirmModal.show();
+    });
+
+    // Clean all groups
+    document.getElementById('clean-all-btn').addEventListener('click', function() {
+        const checkboxes = document.querySelectorAll('.group-checkbox');
+        if (checkboxes.length === 0) {
+            alert('No duplicate groups found');
+            return;
+        }
+
+        confirmMessage.textContent = `Are you sure you want to clean all ${checkboxes.length} duplicate group(s)?`;
+        confirmAction.onclick = function() {
+            confirmModal.hide();
+
+            fetch('/api/clean_groups', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    group_indices: Array.from(checkboxes).map(checkbox => checkbox.value)
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    setStatus('Cleaning started');
+                } else {
+                    setStatus(data.message || 'Error starting clean');
+                }
+            })
+            .catch(error => {
+                console.error('Error starting clean:', error);
+                setStatus('Error: Could not start clean');
+            });
+        };
+        confirmModal.show();
+    });
+
+        // Start console polling
+        setInterval(pollConsole, 1000);
+    });
+});
+
+''');
+
+    # Create CSS file if it doesn't exist
+    if not os.path.exists('static/css/style.css'):
+        with open('static/css/style.css', 'w') as f:
+            f.write('''
+/* Custom styles */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.folder-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.duplicate-group {
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.duplicate-list {
+    margin-left: 20px;
+}
+
+.console-output {
+    height: 200px;
+    overflow-y: auto;
+    background-color: #f8f9fa;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: monospace;
+    white-space: pre-wrap;
+}
+
+.status-text {
+    margin-top: 10px;
+    font-weight: bold;
+}
+''');
+
+    # Create JavaScript file if it doesn't exist
+    if not os.path.exists('static/js/script.js'):
+        js_content = '''
+// Main JavaScript file for Email Duplicate Cleaner
+
+/* Get DOM elements */
+const consoleOutput = document.getElementById('console-output');
+const statusText = document.getElementById('status-text');
+
+/* Wait for DOM content to be loaded */
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Tab event listeners
+    ['scan', 'results', 'history', 'settings', 'help'].forEach((tab) => {
+        document.getElementById(`${tab}-tab`).addEventListener('click', (e) => {
+            e.preventDefault();
+            setActiveTab(tab);
+        });
+    });
+
+    // Helper functions
+    function setActiveTab(tabName) {
+        // Get all tab elements
+        const tabs = ['scan', 'results', 'history', 'settings', 'help'];
+        
+        // Hide all tabs
+        tabs.forEach((tab) => {
+            document.getElementById(`${tab}-tab-content`).style.display = 'none';
+            document.getElementById(`${tab}-tab`).classList.remove('active');
+        });
+
+        // Show selected tab
+        document.getElementById(`${tabName}-tab-content`).style.display = 'block';
+        document.getElementById(`${tabName}-tab`).classList.add('active');
+    };
+
+    // Console polling
+    function pollConsole() {
+        fetch('/api/get_logs')
+            .then(response => response.json())
+            .then(data => {
+                if (data.logs) {
+                    consoleOutput.textContent = data.logs;
+                    consoleOutput.scrollTop = consoleOutput.scrollHeight;
+                }
+                if (data.status) {
+                    statusText.textContent = data.status;
+                }
+                if (data.scan_complete) {
+                    document.getElementById('results-tab').click();
+                    updateResults();
+                }
+            })
+            .catch(error => {
+                console.error('Error polling console:', error);
+            });
+    }
+
+    // Start console polling
+    setInterval(pollConsole, 1000);
+
+    // Find folders
+    document.getElementById('find-folders-btn').addEventListener('click', function() {
+        const client = document.querySelector('input[name="client"]:checked').value;
+        setStatus('Searching for mail folders...');
+
+        fetch('/api/find_folders', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ client: client })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateFolderList(data.folders);
+                setStatus(`Found ${data.folders.length} mail folders`);
+            } else {
+                setStatus(data.message || 'Error finding folders');
+            }
+        })
+        .catch(error => {
+            console.error('Error finding folders:', error);
+            setStatus('Error: Could not find mail folders');
+        });
+    });
+
+    // Custom folder modal
+    document.getElementById('custom-folder-btn').addEventListener('click', function() {
+        customFolderModal.show();
+    });
+
+    // Submit custom folder
+    submitCustomFolderBtn.addEventListener('click', function() {
+        const folderPath = document.getElementById('folder-path').value;
+        if (!folderPath) {
+            return;
+        }
+
+        customFolderModal.hide();
+
+        fetch('/api/scan_custom_folder', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ folder_path: folderPath })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateFolderList(data.folders);
+                setStatus(`Found ${data.folders.length} mail folders in ${folderPath}`);
+            } else {
+                setStatus(data.message || 'Error scanning custom folder');
+            }
+        })
+        .catch(error => {
+            console.error('Error scanning custom folder:', error);
+            setStatus('Error: Could not scan custom folder');
+        });
+    });
+
+    // Run demo
+    document.getElementById('demo-btn').addEventListener('click', function() {
+        setStatus('Running demo mode...');
+        confirmMessage.textContent = 'This will create a temporary mailbox with sample emails for demonstration. Continue?';
+        confirmAction.onclick = function() {
+            confirmModal.hide();
+
+            fetch('/api/run_demo')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateFolderList(data.folders);
+                        setStatus('Demo mode active');
+                    } else {
+                        setStatus(data.message || 'Error starting demo');
                     }
+                })
+                .catch(error => {
+                    console.error('Error running demo:', error);
+                    setStatus('Error: Could not start demo mode');
+                });
+            };
+            confirmModal.show();
+        });
 
-                    let html = '';
-                    data.groups.forEach((group, groupIndex) => {
-                        html += `
-                            <div class="duplicate-group shadow-sm" data-group-index="${groupIndex}">
-                                <div class="group-header d-flex justify-content-between align-items-center bg-light">
-                                    <div class="d-flex align-items-center">
-                                        <input type="checkbox" class="form-check-input group-checkbox ms-2" value="${groupIndex}">
-                                        <span class="ms-3 fw-bold">Group ${groupIndex + 1}</span>
-                                        <span class="ms-2 badge bg-primary">${group.emails.length} emails</span>
-                                    </div>
-                                    <button class="btn btn-sm btn-warning clean-group-btn me-2" data-group-index="${groupIndex}">
-                                        <i class="fas fa-broom"></i> Clean Group
-                                    </button>
+    // Select all folders
+    document.getElementById('select-all-btn').addEventListener('click', function() {
+        const checkboxes = document.querySelectorAll('.folder-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = true;
+        });
+    });
+
+    // Scan selected folders
+    document.getElementById('scan-selected-btn').addEventListener('click', function() {
+        const checkboxes = document.querySelectorAll('.folder-checkbox:checked');
+        if (checkboxes.length === 0) {
+            alert('Please select at least one folder to scan');
+            return;
+        }
+
+        const folderIndices = Array.from(checkboxes).map(checkbox => parseInt(checkbox.value));
+        const criteria = document.querySelector('input[name="criteria"]:checked').value;
+        const autoClean = document.getElementById('auto-clean').checked;
+
+        setStatus(`Scanning ${folderIndices.length} folders...`);
+
+        fetch('/api/scan_folders', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                folder_indices: folderIndices,
+                criteria: criteria,
+                auto_clean: autoClean
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                setStatus('Scanning in progress...');
+            } else {
+                setStatus(data.message || 'Error starting scan');
+            }
+        })
+        .catch(error => {
+            console.error('Error scanning folders:', error);
+            setStatus('Error: Could not scan folders');
+        });
+    });
+
+    // Helper functions
+    function updateResults() {
+        fetch('/api/get_results')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const resultsContainer = document.getElementById('results-container');
+                if (data.groups.length === 0) {
+                    resultsContainer.innerHTML = '<div class="alert alert-info">No duplicate emails found.</div>';
+                    return;
+                }
+
+                let html = '';
+                data.groups.forEach((group, groupIndex) => {
+                    html += `
+                        <div class="duplicate-group shadow-sm" data-group-index="${groupIndex}">
+                            <div class="group-header d-flex justify-content-between align-items-center bg-light">
+                                <div class="d-flex align-items-center">
+                                    <input type="checkbox" class="form-check-input group-checkbox ms-2" value="${groupIndex}">
+                                    <span class="ms-3 fw-bold">Group ${groupIndex + 1}</span>
+                                    <span class="ms-2 badge bg-primary">${group.emails.length} emails</span>
                                 </div>
-                                <div class="email-list">`;
+                                <button class="btn btn-sm btn-warning clean-group-btn me-2" data-group-index="${groupIndex}">
+                                    <i class="fas fa-broom"></i> Clean Group
+                                </button>
+                            </div>
+                            <div class="email-list">`;
 
-                        group.emails.forEach((email, emailIndex) => {
-                            const isOriginal = emailIndex === 0;
-                            html += `
-                                <div class="email-item p-3 border-bottom ${isOriginal ? 'original bg-light' : ''} hover-highlight">
-                                    <div class="d-flex">
-                                        <div class="email-meta me-3 text-center">
-                                            <span class="badge ${isOriginal ? 'bg-success' : 'bg-secondary'}">${emailIndex + 1}</span>
-                                            ${isOriginal ? '<br><small class="text-success">Original</small>' : ''}
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <div class="email-subject h6 mb-2">${email.subject}</div>
-                                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <div class="email-meta text-muted">
-                                                    <i class="fas fa-user me-1"></i> ${email.from}
-                                                </div>
-                                                <div class="email-meta text-muted">
-                                                    <i class="fas fa-calendar me-1"></i> ${email.date}
-                                                </div>
+                    group.emails.forEach((email, emailIndex) => {
+                        const isOriginal = emailIndex === 0;
+                        html += `
+                            <div class="email-item p-3 border-bottom ${isOriginal ? 'original bg-light' : ''} hover-highlight">
+                                <div class="d-flex">
+                                    <div class="email-meta me-3 text-center">
+                                        <span class="badge ${isOriginal ? 'bg-success' : 'bg-secondary'}">${emailIndex + 1}</span>
+                                        ${isOriginal ? '<br><small class="text-success">Original</small>' : ''}
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="email-subject h6 mb-2">${email.subject}</div>
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <div class="email-meta text-muted">
+                                                <i class="fas fa-user me-1"></i> ${email.from}
                                             </div>
                                             <div class="email-meta text-muted">
-                                                <i class="fas fa-folder me-1"></i> ${email.folder_path}
+                                                <i class="fas fa-calendar me-1"></i> ${email.date}
                                             </div>
                                         </div>
+                                        <div class="email-meta text-muted">
+                                            <i class="fas fa-folder me-1"></i> ${email.folder_path}
+                                        </div>
                                     </div>
-                                </div>`;
-                        });
-
-                        html += `
                                 </div>
                             </div>`;
                     });
 
-                    resultsContainer.innerHTML = html;
+                    html += `
+                            </div>
+                        </div>`;
+                });
 
-                    // Add listeners for individual group clean buttons
-                    document.querySelectorAll('.clean-group-btn').forEach(button => {
-                        button.addEventListener('click', function() {
-                            const groupIndex = parseInt(button.getAttribute('data-group-index'));
-                            cleanGroups([groupIndex]);
-                        });
+                resultsContainer.innerHTML = html;
+
+                // Add listeners for individual group clean buttons
+                document.querySelectorAll('.clean-group-btn').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const groupIndex = parseInt(button.getAttribute('data-group-index'));
+                        cleanGroups([groupIndex]);
                     });
+                });
 
-                    setStatus(`Found ${data.groups.length} duplicate groups`);
-                } else {
-                    setStatus(data.message || 'Error getting results');
-                }
-            })
-            .catch(error => {
-                console.error('Error getting results:', error);
-                setStatus('Error: Could not load results');
-            });
+                setStatus(`Found ${data.groups.length} duplicate groups`);
+            } else {
+                setStatus(data.message || 'Error getting results');
+            }
+        })
+        .catch(error => {
+            console.error('Error getting results:', error);
+            setStatus('Error: Could not load results');
+        });
     }
 
     // Clean selected groups
@@ -700,7 +1047,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const groupIndices = Array.from(checkboxes).map(checkbox => parseInt(checkbox.value));
 
         confirmMessage.textContent = `This will delete duplicates from ${groupIndices.length} selected groups, keeping the oldest email in each group. Continue?`;
-        confirmAction.onclick = function() {
+        confirmAction.onclick = () => {
             confirmModal.hide();
             cleanGroups(groupIndices);
         };
@@ -708,48 +1055,50 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Clean all groups
-    cleanAllBtn.addEventListener('click', function() {
+    cleanAllBtn.addEventListener('click', () => {
         confirmMessage.textContent = 'This will delete duplicates from ALL groups, keeping the oldest email in each group. Continue?';
-        confirmAction.onclick = function() {
+        confirmAction.onclick = () => {
             confirmModal.hide();
 
             fetch('/api/clean_all_groups')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        setStatus('Cleaning in progress...');
-                    } else {
-                        setStatus(data.message || 'Error cleaning groups');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error cleaning all groups:', error);
-                    setStatus('Error: Could not clean groups');
-                });
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    setStatus('Cleaning in progress...');
+                } else {
+                    setStatus(data.message || 'Error cleaning groups');
+                }
+            })
+            .catch(error => {
+                console.error('Error cleaning all groups:', error);
+                setStatus('Error: Could not clean groups');
+            });
         };
         confirmModal.show();
     });
 
     // Clean groups helper function
     function cleanGroups(groupIndices) {
-        setStatus(`Cleaning ${groupIndices.length} groups...`);
+        setStatus('Cleaning ' + groupIndices.length + ' groups...');
 
         fetch('/api/clean_groups', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ group_indices: groupIndices }),
+            body: JSON.stringify({ group_indices: groupIndices })
         })
-        .then(response => response.json())
-        .then(data => {
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
             if (data.success) {
                 setStatus('Cleaning in progress...');
             } else {
                 setStatus(data.message || 'Error cleaning groups');
             }
         })
-        .catch(error => {
+        .catch(function(error) {
             console.error('Error cleaning groups:', error);
             setStatus('Error: Could not clean groups');
         });
@@ -784,10 +1133,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Set status helper function
     function setStatus(message) {
-        statusText.textContent = message;
+        if (statusText && message) {
+            statusText.textContent = message;
+        }
     }
-});
-''')
+});'''
 
 # Custom stream handler to capture console output
 class WebConsoleHandler:
@@ -828,12 +1178,16 @@ def index():
 
     return render_template('index.html', settings=settings)
 
+@app.route('/results')
+def results():
+    """Show results page"""
+    return render_template('results.html')
+
 @app.route('/api/find_folders', methods=['POST'])
 def api_find_folders():
     """Find mail folders for the selected email client"""
-    client = request.json.get('client', 'all')
-
     try:
+        client = request.json.get('client', 'all')
         if client == 'all':
             global_state['mail_folders'] = global_state['client_manager'].get_all_mail_folders()
         else:
@@ -909,19 +1263,37 @@ def api_run_demo():
 @app.route('/api/scan_folders', methods=['POST'])
 def api_scan_folders():
     """Scan selected folders for duplicate emails"""
-    folder_indices = request.json.get('folder_indices', [])
-    criteria = request.json.get('criteria', 'strict')
-    auto_clean = request.json.get('auto_clean', False)
-
-    if not folder_indices:
-        return jsonify({
-            'success': False,
-            'message': 'No folders selected'
-        })
-
     try:
+        folder_indices = request.json.get('folder_indices', [])
+        criteria = request.json.get('criteria', 'strict')
+        auto_clean = request.json.get('auto_clean', False)
+        
+        if not folder_indices:
+            return jsonify({'success': False, 'error': 'No folders selected'})
+        
         # Get selected folders
         global_state['selected_folders'] = [global_state['mail_folders'][i] for i in folder_indices]
+        
+        # Reset scan state
+        global_state['duplicate_groups'] = []
+        global_state['scanning'] = True
+        global_state['scan_progress'] = 0
+        global_state['scan_total'] = 0
+        
+        # Start scanning thread
+        scan_thread = threading.Thread(target=scan_folders_for_duplicates, args=(criteria,))
+        scan_thread.daemon = True
+        scan_thread.start()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Started scanning folders'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        })
 
         # Reset scan state
         global_state['duplicate_groups'] = []
@@ -1007,7 +1379,7 @@ def api_scan_folders():
             'message': f"Error starting scan: {str(e)}"
         })
 
-@app.route('/api/get_results')
+@app.route('/api/get_results', methods=['GET'])
 def api_get_results():
     """Get scanning results"""
     try:
@@ -1016,16 +1388,16 @@ def api_get_results():
         for group in global_state['duplicate_groups']:
             emails_data = []
 
-            for email in group['messages']:  # Changed from 'emails' to 'messages'
+            for email in group['messages']:
                 emails_data.append({
                     'date': email.get('date', ''),
                     'from': email.get('from', ''),
                     'subject': email.get('subject', ''),
-                    'folder_path': email.get('folder', '')  # Changed from folder_path to folder
+                    'folder_path': email.get('folder', '')
                 })
 
             groups_data.append({
-                'count': len(group['messages']),  # Calculate count from messages length
+                'count': len(group['messages']),
                 'emails': emails_data
             })
 
@@ -1084,13 +1456,16 @@ def api_view_email(group_index, email_index):
 @app.route('/api/clean_groups', methods=['POST'])
 def api_clean_groups():
     """Clean duplicates from selected groups"""
-    group_indices = request.json.get('group_indices', [])
+    try:
+        group_indices = request.json.get('group_indices', [])
 
-    if not group_indices:
-        return jsonify({
-            'success': False,
-            'message': 'No groups selected'
-        })
+        if not group_indices:
+            return jsonify({
+                'success': False,
+                'message': 'No groups selected'
+            })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 
     try:
         # Start cleaning thread
@@ -1156,7 +1531,7 @@ def api_clean_groups():
             'message': f"Error starting cleaning: {str(e)}"
         })
 
-@app.route('/api/clean_all_groups')
+@app.route('/api/clean_all_groups', methods=['POST'])
 def api_clean_all_groups():
     """Clean duplicates from all groups"""
     if not global_state['duplicate_groups']:
@@ -1167,7 +1542,7 @@ def api_clean_all_groups():
 
     try:
         all_indices = list(range(len(global_state['duplicate_groups'])))
-        return api_clean_groups()
+        return api_clean_groups(json={'group_indices': all_indices})
     except Exception as e:
         logger.error(f"Error cleaning all groups: {str(e)}")
         return jsonify({
@@ -1205,22 +1580,47 @@ def history():
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
     """Show settings page"""
-    save_success = False
+    try:
+        save_success = False
 
-    if request.method == 'POST':
-        # Save settings to database
-        settings_dict = {
-            'default_client': request.form.get('default_client', 'all'),
-            'default_criteria': request.form.get('default_criteria', 'strict'),
-            'auto_clean': request.form.get('auto_clean') == 'on',
-            'last_custom_folder': request.form.get('last_custom_folder', '')
-        }
+        if request.method == 'POST':
+            # Handle both JSON and form data
+            if request.is_json:
+                data = request.get_json()
+            else:
+                data = request.form
+
+            # Save settings to database
+            settings_dict = {
+                'default_client': data.get('default_client', 'all'),
+                'default_criteria': data.get('default_criteria', 'strict'),
+                'auto_clean': data.get('auto_clean') == 'on' if isinstance(data.get('auto_clean'), str) else data.get('auto_clean', False),
+                'last_custom_folder': data.get('last_custom_folder', '')
+            }
+            
+            with app.app_context():
+                update_user_settings(settings_dict)
+                save_success = True
+
+            # Return JSON response if it was a JSON request
+            if request.is_json:
+                return jsonify({
+                    'success': True,
+                    'message': 'Settings saved successfully'
+                })
+    except Exception as e:
+        if request.is_json:
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            })
+
+    # Get current settings for display
+    try:
         with app.app_context():
-            update_user_settings(settings_dict)
-        save_success = True
-
-    with app.app_context():
-        settings = get_user_settings()
+            settings = get_user_settings()
+    except Exception as e:
+        settings = {}
 
     return render_template('settings.html', settings=settings, save_success=save_success)
 
@@ -1260,6 +1660,9 @@ def cleanup(exception=None):
 
 def main():
     """Main function to run the web application"""
+    # Create template files if they don't exist
+    create_template_files()
+
     port = 5000
     print(f"Starting Email Duplicate Cleaner Web Interface on port {port}")
     print(f"Open http://localhost:{port} in your browser")

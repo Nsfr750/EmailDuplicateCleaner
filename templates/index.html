@@ -15,11 +15,11 @@
                 <span class="fs-4">Email Duplicate Cleaner</span>
             </a>
             <ul class="nav nav-pills">
-                <li class="nav-item"><a href="#" class="nav-link active" id="scan-tab">Scan</a></li>
-                <li class="nav-item"><a href="#" class="nav-link" id="results-tab">Results</a></li>
-                <li class="nav-item"><a href="#" class="nav-link" id="history-tab">History</a></li>
-                <li class="nav-item"><a href="#" class="nav-link" id="settings-tab">Settings</a></li>
-                <li class="nav-item"><a href="#" class="nav-link" id="help-tab">Help</a></li>
+                <li class="nav-item"><a href="/" class="nav-link active">Scan</a></li>
+                <li class="nav-item"><a href="{{ url_for('results') }}" class="nav-link">Results</a></li>
+                <li class="nav-item"><a href="{{ url_for('history') }}" class="nav-link">History</a></li>
+                <li class="nav-item"><a href="{{ url_for('settings') }}" class="nav-link">Settings</a></li>
+                <li class="nav-item"><a href="{{ url_for('help') }}" class="nav-link">Help</a></li>
             </ul>
         </header>
 
@@ -193,9 +193,7 @@
 
         <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
             <div class="col-md-6 d-flex align-items-center">
-                <span class="text-muted">Email Duplicate Cleaner v2.0.1 &copy; 2025 by Nsfr750 </span>
-                <span class="text-muted"> - <a href="https://patreon.com/Nsfr750?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink
-" target="_blank">Patreon</a> - <a href="https://github.com/Nsfr750" target="_blank">GitHub</a></span>
+                <span class="text-muted">Email Duplicate Cleaner v2.1 &copy; 2025 by Nsfr750</span>
             </div>
             <div class="col-md-6 d-flex justify-content-end">
                 <span class="text-muted" id="status-text">Ready</span>
