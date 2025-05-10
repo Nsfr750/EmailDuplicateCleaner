@@ -3,13 +3,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Tab navigation
     const scanTab = document.getElementById('scan-tab');
     const resultsTab = document.getElementById('results-tab');
-    const hystoryTab = document.getElementById('hystory-tab');
+    const historyTab = document.getElementById('history-tab');
     const settingsTab = document.getElementById('settings-tab');
     const helpTab = document.getElementById('help-tab');
 
     const scanContent = document.getElementById('scan-content');
     const resultsContent = document.getElementById('results-content');
-    const hystoryContent = document.getElementById('hystory-content');
+    const historyContent = document.getElementById('history-content');
     const settingsContent = document.getElementById('settings-content');
 	const helpContent = document.getElementById('help-content');
 
@@ -53,13 +53,13 @@ document.addEventListener('DOMContentLoaded', function() {
         // Reset all tabs
         scanTab.classList.remove('active');
         resultsTab.classList.remove('active');
-        hystoryTab.classList.remove('active');
+        historyTab.classList.remove('active');
         settingsTab.classList.remove('active');		
         helpTab.classList.remove('active');
 
         scanContent.classList.remove('active');
         resultsContent.classList.remove('active');
-		hystoryContent.classList.remove('active');
+		historyContent.classList.remove('active');
 		settingsContent.classList.remove('active');
         helpContent.classList.remove('active');
 

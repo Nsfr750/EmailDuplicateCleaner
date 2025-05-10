@@ -15,11 +15,11 @@
                 <span class="fs-4">Email Duplicate Cleaner</span>
             </a>
             <ul class="nav nav-pills">
-                <li class="nav-item"><a href="/" class="nav-link active">Scan</a></li>
-                <li class="nav-item"><a href="{{ url_for('results') }}" class="nav-link">Results</a></li>
-                <li class="nav-item"><a href="{{ url_for('history') }}" class="nav-link">History</a></li>
-                <li class="nav-item"><a href="{{ url_for('settings') }}" class="nav-link">Settings</a></li>
-                <li class="nav-item"><a href="{{ url_for('help') }}" class="nav-link">Help</a></li>
+                <li class="nav-item"><a href="/" class="nav-link active" id="scan-tab">Scan</a></li>
+                <li class="nav-item"><a href="{{ url_for('results') }}" class="nav-link" id="results-tab">Results</a></li>
+                <li class="nav-item"><a href="{{ url_for('history') }}" class="nav-link" id="history-tab">History</a></li>
+                <li class="nav-item"><a href="{{ url_for('settings') }}" class="nav-link" id="settings-tab">Settings</a></li>
+                <li class="nav-item"><a href="{{ url_for('help') }}" class="nav-link" id="help-tab">Help</a></li>
             </ul>
         </header>
 
@@ -127,6 +127,42 @@
 
                 <!-- Results Tab -->
                 <div class="tab-pane" id="results-content">
+                </div>
+
+                <!-- History Tab -->
+                <div class="tab-pane" id="history-content">
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>History</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="alert alert-info">History feature coming soon.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div class="tab-pane" id="settings-content">
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Settings</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="alert alert-info">Settings feature coming soon.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Help Tab -->
+                <div class="tab-pane" id="help-content">
                     <div class="row mb-3">
                         <div class="col-md-12">
                             <div class="card">
