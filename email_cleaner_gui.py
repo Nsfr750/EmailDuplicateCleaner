@@ -29,11 +29,11 @@ class Sponsor:
 
         def open_patreon():
             import webbrowser
-            webbrowser.open("https://www.patreon.com/sponsors/Nsfr750")
+            webbrowser.open("https://www.patreon.com/Nsfr750")
 
         def open_github():
             import webbrowser
-            webbrowser.open("https://github.com/Nsfr750")
+            webbrowser.open("https://github.com/sponsors/Nsfr750")
 
         def open_discord():
             import webbrowser
@@ -41,7 +41,7 @@ class Sponsor:
 
         def open_paypal():
             import webbrowser
-            webbrowser.open("https://paypèal.me/3dmega")
+            webbrowser.open("https://paypal.me/3dmega")
 
         # Create and place buttons
         patreon_button = tk.Button(sponsor_root, text="Join the Patreon!", command=open_patreon)
