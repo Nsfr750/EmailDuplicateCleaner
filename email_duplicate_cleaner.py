@@ -1233,7 +1233,7 @@ def create_test_mailbox():
 def main():
     """Main function to run the Email Duplicate Cleaner."""
     parser = argparse.ArgumentParser(
-        description="Email Duplicate Cleaner - Find and remove duplicate emails from various email clients.",
+        description="Email Duplicate Cleaner 2.2.3- Find and remove duplicate emails from various email clients.",
         epilog="Example: python email_duplicate_cleaner.py --client thunderbird --scan-all --criteria subject-sender"
     )
     
