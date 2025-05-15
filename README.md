@@ -91,10 +91,6 @@ This project is licensed under the MIT License.
 
 Found a bug? [Open an issue](https://github.com/Nsfr750/EmailDuplicateCleaner/issues)
 
-## 💖 Support
-
-Like the project? Consider sponsoring or contributing!
-
 ## 📊 Detection Methods
 
 - `strict`: Message-ID + Date + From + Subject + Content
