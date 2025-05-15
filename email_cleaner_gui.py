@@ -15,49 +15,8 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, scrolledtext, Toplevel
 import queue
 import sqlite3
+from sponsor import Sponsor
 
-
-# Sponsor Class
-class Sponsor:
-    def show_sponsor_window(self):
-        sponsor_root = Toplevel()
-        sponsor_root.geometry("300x200")
-        sponsor_root.title("Sponsor")
-
-        title_label = tk.Label(sponsor_root, text="Support Us", font=("Arial", 16))
-        title_label.pack(pady=10)
-
-        def open_patreon():
-            import webbrowser
-            webbrowser.open("https://www.patreon.com/Nsfr750")
-
-        def open_github():
-            import webbrowser
-            webbrowser.open("https://github.com/sponsors/Nsfr750")
-
-        def open_discord():
-            import webbrowser
-            webbrowser.open("https://discord.gg/BvvkUEP9")
-
-        def open_paypal():
-            import webbrowser
-            webbrowser.open("https://paypal.me/3dmega")
-
-        # Create and place buttons
-        patreon_button = tk.Button(sponsor_root, text="Join the Patreon!", command=open_patreon)
-        patreon_button.pack(pady=5)
-
-        github_button = tk.Button(sponsor_root, text="GitHub", command=open_github)
-        github_button.pack(pady=5)
-
-        discord_button = tk.Button(sponsor_root, text="Discord", command=open_discord)
-        discord_button.pack(pady=5)
-
-        paypal_button = tk.Button(sponsor_root, text="Paypal", command=open_paypal)
-        paypal_button.pack(pady=5)
-
-        sponsor_root.mainloop()
-        
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -200,8 +159,7 @@ class EmailCleanerGUI:
 
         # Sponsor menu
         sponsor_menu = tk.Menu(menu_bar, tearoff=0)
-        sponsor = Sponsor()
-        sponsor_menu.add_command(label="Sponsor Us", command=sponsor.show_sponsor_window)
+        sponsor_menu.add_command(label="Sponsor Us", command=lambda: Sponsor().show_sponsor_window())
         menu_bar.add_cascade(label="Sponsor", menu=sponsor_menu)
 
         self.root.config(menu=menu_bar)
@@ -699,22 +657,9 @@ class EmailCleanerGUI:
     
     def show_about(self):
         """Show the about dialog"""
-        about_text = """Email Duplicate Cleaner
-
-Version 2.2.3
-
-A tool to scan, identify, and remove duplicate emails
-from various email clients.
-
-Supported Email Clients:
-- Mozilla Thunderbird
-- Apple Mail
-- Microsoft Outlook
-- Generic mbox/maildir formats
-
-© 2025 by Nsfr750"""
-        
-        messagebox.showinfo("About Email Duplicate Cleaner", about_text)
+        from about import About
+        about = About()
+        about.show_about()
     
     def show_help(self):
         """Show the help dialog"""
@@ -916,8 +861,7 @@ You can also right-click on any email to view its full content."""
     
     def show_sponsor_menu(self):
         """Display the Sponsor window"""
-        sponsor = Sponsor()
-        sponsor.show_sponsor_window()
+        Sponsor().show_sponsor_window()
         
     def on_closing(self):
         """Clean up when closing the application"""

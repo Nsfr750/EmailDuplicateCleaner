@@ -1,54 +1,101 @@
-# Email Duplicate Cleaner
+# 📧 Email Duplicate Cleaner
 
-A Python tool to scan, identify, and remove duplicate emails from various email clients. Offers web-based, desktop graphical, and command-line interfaces.
+A comprehensive Python tool designed to scan, identify, and remove duplicate emails across multiple email clients. Featuring web, desktop, and command-line interfaces.
 
-## Features
+## 🚀 Version
 
-- Automatically detects email client profiles (Thunderbird, Apple Mail, Outlook, Generic mbox/maildir formats)
-- Multiple interfaces (Web, GUI, CLI)
-- Dark mode and debug mode support
-- Multiple duplicate detection criteria
-- Interactive cleaning with preview
+**Current Version:** 2.2.4 (Beta)
+[![GitHub release](https://img.shields.io/badge/release-v2.2.4-blue)](https://github.com/Nsfr750/EmailDuplicateCleaner)
+[![Python Versions](https://img.shields.io/badge/python-3.8%20|%203.9%20|%203.10%20|%203.11%20|%203.12-blue)](https://www.python.org/)
+
+## ✨ Features
+
+### 🔍 Duplicate Detection
+- Multiple detection criteria:
+  - Strict: Comprehensive comparison
+  - Content Only: Message body analysis
+  - Headers: Metadata-based matching
+  - Subject+Sender: Focused identification
+
+### 🖥️ Multi-Interface Support
+- Web Interface
+- Desktop GUI
+- Command-Line Interface
+
+### 🌓 Enhanced User Experience
+- Dark mode support
+- Interactive preview
+- Debug mode
 - Demo mode for testing
 
+### 🔒 Email Client Compatibility
+Supports:
+- Mozilla Thunderbird
+- Apple Mail
+- Microsoft Outlook
+- Generic mbox/maildir formats
 
-## Getting Started
+### 🏗️ Technical Highlights
+- Modular architecture
+- Separate modules for About, Sponsor, and Version management
+- Cross-platform compatibility
+
+## 🛠️ Prerequisites
+
+- Python 3.8+
+- pip
+- Supported OS: Windows, macOS, Linux
+
+## 🚀 Quick Start
 
 ### Installation
 
-1. Clone this repository
-2. Install the required dependencies:
+1. Clone the repository:
+```bash
+git clone https://github.com/Nsfr750/EmailDuplicateCleaner.git
+cd EmailDuplicateCleaner
 ```
+
+2. Install dependencies:
+```bash
 pip install -r requirements.txt
 ```
 
 ### Running the Application
 
-1. Click the Run button to start in demo mode
-2. Choose an interface:
-   - Web: Access via port 5000
-   - GUI: Native window interface
-   - CLI: Command-line interface
-
-## Usage Examples
-
-### Web Interface
-```
+#### Web Interface
+```bash
 python email_cleaner_web.py
 ```
-Access at `http://0.0.0.0:5000`
+Access at `http://localhost:5000`
 
-### Desktop GUI
-```
+#### Desktop GUI
+```bash
 python email_cleaner_gui.py
 ```
 
-### Command Line Demo
-```
+#### Command Line Demo
+```bash
 python email_duplicate_cleaner.py --demo
 ```
 
-## Detection Methods
+## 🤝 Contributing
+
+Interested in contributing? Check out our [Contributing Guidelines](CONTRIBUTING.md)!
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 🐛 Issues
+
+Found a bug? [Open an issue](https://github.com/Nsfr750/EmailDuplicateCleaner/issues)
+
+## 💖 Support
+
+Like the project? Consider sponsoring or contributing!
+
+## 📊 Detection Methods
 
 - `strict`: Message-ID + Date + From + Subject + Content
 - `content`: Content only
