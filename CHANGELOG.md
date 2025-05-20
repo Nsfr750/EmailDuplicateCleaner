@@ -5,6 +5,48 @@ All notable changes to Email Duplicate Cleaner will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 🚀 [2.3.0] - 2025-05-20 (Stable)
+
+### 🆕 Added
+- 🌐 Modern Web Interface:
+  - Fully responsive web interface built with Flask
+  - Dark/light mode toggle
+  - Real-time updates and interactive previews
+- 📚 Comprehensive Help System:
+  - Dynamic help content with multiple sections
+  - Integrated into GUI menu
+  - Detailed documentation for all features
+- 🛠️ Development Tools:
+  - Enhanced testing framework
+  - Improved code formatting tools
+  - Better type checking
+
+### 🔧 Changed
+- 🏗️ Architecture:
+  - Complete rewrite of web interface
+  - Improved database management with SQLAlchemy
+  - Enhanced error handling throughout the application
+- 📦 Dependencies:
+  - Updated Flask and related packages
+  - Added new development tools
+  - Improved package management
+
+### 🐛 Fixed
+- 🔍 Web Interface:
+  - Resolved routing issues
+  - Fixed template rendering problems
+  - Improved state management
+- 🖥️ UI/UX:
+  - Enhanced dark mode implementation
+  - Fixed layout inconsistencies
+  - Improved form handling
+
+### 🔬 Technical Enhancements
+- Performance improvements
+- Better memory management
+- Enhanced logging system
+- Improved test coverage
+
 ## 🚀 [2.2.4] - 2025-05-15 (Beta)
 
 ### 🆕 Added
