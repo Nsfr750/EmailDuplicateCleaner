@@ -23,6 +23,7 @@ from email_duplicate_cleaner import (
     BaseEmailClientHandler, ThunderbirdMailHandler, AppleMailHandler,
     OutlookHandler, GenericMailHandler
 )
+from help import get_help_content
 
 # Import database functions
 from db_init import (
@@ -77,9 +78,19 @@ def create_template_files():
     <title>Email Duplicate Cleaner</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
+        <!-- Theme Toggle Button -->
+        <button class="theme-toggle">
+            <i class="fas fa-moon"></i>
+        </button>
+        <div class="theme-toggle-container">
+            <div class="theme-toggle-button">
+                <i class="fas fa-moon"></i>
+            </div>
+        </div>
         <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
             <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
                 <span class="fs-4">Email Duplicate Cleaner</span>
@@ -376,6 +387,86 @@ def create_template_files():
 .check-column {
     width: 40px;
 }
+
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --background-color: #f9f9f9;
+    --text-color: #333;
+}
+
+[data-theme="dark"] {
+    --primary-color: #66d9ef;
+    --secondary-color: #adb5bd;
+    --background-color: #2f2f2f;
+    --text-color: #fff;
+}
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.card {
+    background-color: var(--background-color);
+    border-color: var(--secondary-color);
+}
+
+.card-header {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+}
+
+.card-body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.console-output {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.folder-list {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.duplicate-group {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.group-header {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+}
+
+.email-item {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+.email-item:hover {
+    background-color: var(--secondary-color);
+}
+
+.email-item.original {
+    background-color: var(--primary-color);
+}
+
+.email-meta {
+    color: var(--secondary-color);
+}
+
+.email-subject {
+    color: var(--primary-color);
+}
+
+.check-column {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
 ''')
 
     # Create JavaScript file if it doesn't exist
@@ -384,6 +475,30 @@ def create_template_files():
             f.write('''
 document.addEventListener('DOMContentLoaded', function() {
     'use strict';
+    // Theme Toggle
+    const themeToggle = document.createElement('button');
+    themeToggle.className = 'theme-toggle';
+    themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+    document.body.appendChild(themeToggle);
+
+    // Check for saved theme preference
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        if (savedTheme === 'dark') {
+            themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        }
+    }
+
+    // Theme toggle click handler
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        themeToggle.innerHTML = newTheme === 'dark' ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+    });
+
     // Tab navigation
     const scanTab = document.getElementById('scan-tab');
     const resultsTab = document.getElementById('results-tab');
@@ -1572,10 +1687,16 @@ def api_get_logs():
 # Database-related routes
 @app.route('/history')
 def history():
-    """Show scan history page"""
-    with app.app_context():
-        scan_history = get_scan_history(limit=50)  # Get more history entries
-    return render_template('history.html', scan_history=scan_history)
+    return render_template('history.html')
+
+@app.route('/settings')
+def settings():
+    return render_template('settings.html')
+
+@app.route('/help')
+def help():
+    help_content = get_help_content()
+    return render_template('help.html', help_content=help_content)
 
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
