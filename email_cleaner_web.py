@@ -1684,14 +1684,9 @@ def api_get_logs():
         'scan_complete': global_state['scan_complete'] and not global_state['cleaning']
     })
 
-# Database-related routes
 @app.route('/history')
 def history():
     return render_template('history.html')
-
-@app.route('/settings')
-def settings():
-    return render_template('settings.html')
 
 @app.route('/help')
 def help():
@@ -1745,10 +1740,7 @@ def settings():
 
     return render_template('settings.html', settings=settings, save_success=save_success)
 
-@app.route('/help')
-def help():
-    """Show help page"""
-    return render_template('help.html')
+
 
 @app.route('/api/save_settings', methods=['POST'])
 def api_save_settings():
