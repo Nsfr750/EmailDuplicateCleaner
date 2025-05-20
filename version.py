@@ -7,8 +7,8 @@ for the Email Duplicate Cleaner project.
 
 # Version information follows Semantic Versioning 2.0.0 (https://semver.org/)
 VERSION_MAJOR = 2
-VERSION_MINOR = 2
-VERSION_PATCH = 4
+VERSION_MINOR = 3
+VERSION_PATCH = 0
 
 # Additional version qualifiers
 VERSION_QUALIFIER = 'beta'  # Could be 'alpha', 'beta', 'rc', or ''
@@ -62,4 +62,28 @@ def check_version_compatibility(min_version):
     return True
 
 # Expose version as a module-level attribute for easy access
-__version__ = get_version()
+__version__ = "2.3.0"
+__release_date__ = "2025-05-20"
+
+# Version history
+VERSION_HISTORY = {
+    "2.3.0": {
+        "date": "2025-05-20",
+        "changes": [
+            "Added web interface with modern design",
+            "Implemented dark mode toggle",
+            "Added comprehensive help system",
+            "Improved error handling",
+            "Enhanced user experience with better UI components"
+        ]
+    },
+    "2.2.3": {
+        "date": "2025-05-19",
+        "changes": [
+            "Initial web interface version",
+            "Basic scanning and cleaning functionality",
+            "History tracking",
+            "Settings management"
+        ]
+    }
+}
