@@ -1,18 +1,47 @@
-# TO_DO List
+# 📝 TO_DO List
 
+## 🔥 High Priority
 
-## Features
+### 🚀 Features
+- [ ] Add advanced email analysis options
+- [ ] Implement email recovery feature
+- [ ] Add email export functionality
+- [ ] Improve performance for large email datasets
 
-- Add database functionality for tracking scans and user settings. 
-- Includes a new database schema and associated API endpoints.
-- Add email viewing functionality to web interface. 
-- Add button to enable/disable debug mode in web version
-- Improve the visual design and add dark mode toggle in web version
+### 🐛 Fixes
+- [ ] Resolve remaining GUI button functionality issues
+- [ ] Fix any remaining dark mode inconsistencies
+- [ ] Improve error handling in web interface
+- [ ] Fix any remaining routing issues
 
-## Fix
+## 🏗️ Medium Priority
 
-- Fix GUI button functionality by adding error handling and debug print statements.
+### 🛠️ Development
+- [ ] Add more comprehensive unit tests
+- [ ] Improve code documentation
+- [ ] Add more detailed logging
+- [ ] Implement automated testing
 
-## Other
+### 🎨 UI/UX
+- [ ] Add loading indicators for long operations
+- [ ] Improve form validation feedback
+- [ ] Add more user-friendly error messages
+- [ ] Enhance mobile responsiveness
 
-- Add Various BUG
+## 📋 Low Priority
+
+### 📚 Documentation
+- [ ] Add more detailed API documentation
+- [ ] Create user guides for different use cases
+- [ ] Add more examples to help documentation
+
+### 🎨 Design
+- [ ] Add animations for better user feedback
+- [ ] Improve iconography
+- [ ] Add more visual feedback for actions
+
+### 🛠️ Technical
+- [ ] Investigate memory usage optimization
+- [ ] Add more performance monitoring
+- [ ] Implement caching strategies
+- [ ] Add more detailed logging levels
