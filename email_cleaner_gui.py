@@ -351,24 +351,34 @@ class EmailCleanerGUI:
     
     def find_mail_folders(self):
         """Find mail folders for the selected email client"""
+        logging.info("Finding mail folders for client: %s", self.client_var.get())
         self.folder_listbox.delete(0, tk.END)
         self.set_status("Searching for mail folders...")
         
         def search_folders():
-            client = self.client_var.get()
-            
             try:
+                client = self.client_var.get()
+                logging.debug("Selected client: %s", client)
+                
                 if client == "all":
+                    logging.info("Searching for all mail folders")
                     self.mail_folders = self.client_manager.get_all_mail_folders()
                 else:
+                    logging.info("Searching for folders for client: %s", client)
                     self.mail_folders = self.client_manager.get_client_folders(client)
+                
+                logging.info("Found %d folders", len(self.mail_folders))
                 
                 # Update UI in the main thread
                 self.root.after(0, self.update_folder_list)
+                
             except Exception as e:
-                self.root.after(0, lambda: self.show_error(f"Error finding mail folders: {str(e)}"))
+                error_msg = f"Error finding mail folders: {str(e)}"
+                logging.error(error_msg, exc_info=True)
+                self.root.after(0, lambda: self.show_error(error_msg))
         
         # Run in a separate thread to keep UI responsive
+        logging.debug("Starting folder search thread")
         threading.Thread(target=search_folders, daemon=True).start()
     
     def update_folder_list(self):
@@ -388,18 +398,21 @@ class EmailCleanerGUI:
     
     def scan_selected_folders(self):
         """Scan selected folders for duplicate emails"""
+        logging.info("Starting folder scan")
         selections = self.folder_listbox.curselection()
         
         if not selections:
+            logging.warning("No folders selected for scanning")
             messagebox.showwarning("No Selection", "Please select at least one folder to scan")
             return
         
         # Get selected folders
         self.selected_folders = [self.mail_folders[i] for i in selections]
+        logging.info("Scanning %d folders", len(self.selected_folders))
         
         # Clear previous results
         self.results_tree.delete(*self.results_tree.get_children())
-        
+
         # Switch to results tab
         self.notebook.select(1)
         
@@ -407,23 +420,31 @@ class EmailCleanerGUI:
         self.set_status(f"Scanning {len(self.selected_folders)} folders...")
         
         def scan_folders():
-            self.duplicate_groups = []
-            criteria = self.criteria_var.get()
-            
             try:
+                self.duplicate_groups = []
+                criteria = self.criteria_var.get()
+                logging.info("Using scan criteria: %s", criteria)
+                
                 for folder in self.selected_folders:
-                    print(f"Scanning folder: {folder['display_name']}")
+                    logging.info("Scanning folder: %s", folder['display_name'])
                     groups = self.duplicate_finder.scan_folder(folder, criteria)
                     
                     if groups:
+                        logging.info("Found %d duplicate groups in folder", len(groups))
                         for group in groups:
                             self.duplicate_groups.append(group)
+                    else:
+                        logging.info("No duplicates found in folder: %s", folder['display_name'])
                 
                 # Update UI in the main thread
                 self.root.after(0, self.update_results_tree)
+                
             except Exception as e:
-                self.root.after(0, lambda: self.show_error(f"Error scanning folders: {str(e)}"))
+                error_msg = f"Error scanning folders: {str(e)}"
+                logging.error(error_msg, exc_info=True)
+                self.root.after(0, lambda: self.show_error(error_msg))
         
+        logging.debug("Starting scan thread")
         self.scanning_thread = threading.Thread(target=scan_folders, daemon=True)
         self.scanning_thread.start()
     
@@ -463,33 +484,42 @@ class EmailCleanerGUI:
     
     def clean_selected_groups(self):
         """Clean duplicates from selected groups"""
+        logging.info("Starting group cleaning")
         selected_items = self.results_tree.selection()
         
         if not selected_items:
+            logging.warning("No groups selected for cleaning")
             messagebox.showwarning("No Selection", "Please select groups to clean")
             return
         
         # Find selected group indices
         group_indices = set()
         for item_id in selected_items:
-            # Only process top-level items (groups)
-            if self.results_tree.parent(item_id) == "":
-                group_index = int(self.results_tree.item(item_id)['text'].split()[1]) - 1
-                group_indices.add(group_index)
-            else:
-                # If an email is selected, get its group
-                parent_id = self.results_tree.parent(item_id)
-                if parent_id and self.results_tree.parent(parent_id) == "":
-                    group_index = int(self.results_tree.item(parent_id)['text'].split()[1]) - 1
+            try:
+                # Only process top-level items (groups)
+                if self.results_tree.parent(item_id) == "":
+                    group_index = int(self.results_tree.item(item_id)['text'].split()[1]) - 1
                     group_indices.add(group_index)
+                else:
+                    # If an email is selected, get its group
+                    parent_id = self.results_tree.parent(item_id)
+                    if parent_id and self.results_tree.parent(parent_id) == "":
+                        group_index = int(self.results_tree.item(parent_id)['text'].split()[1]) - 1
+                        group_indices.add(group_index)
+            except (ValueError, IndexError) as e:
+                logging.error("Error processing selected item: %s", str(e))
+                continue
         
         if not group_indices:
+            logging.warning("No valid groups found for cleaning")
+            messagebox.showwarning("No Valid Groups", "No valid groups were selected for cleaning")
             return
         
         # Confirm deletion
         if not messagebox.askyesno("Confirm Deletion", 
-                                 "Are you sure you want to delete duplicates from the selected groups?\n"
-                                 "This will keep the oldest email in each group."):
+                                  "Are you sure you want to delete duplicates from the selected groups?\n"
+                                  "This will keep the oldest email in each group."):
+            logging.info("Cleaning cancelled by user")
             return
         
         # Start cleaning thread
@@ -500,12 +530,17 @@ class EmailCleanerGUI:
                 deleted, errors = self.duplicate_finder.delete_duplicates(
                     list(group_indices), selection_method='keep-first'
                 )
+                logging.info("Deleted %d emails with %d errors", deleted, len(errors))
                 
                 # Update UI in the main thread
                 self.root.after(0, lambda: self.update_after_cleaning(deleted, errors))
+                
             except Exception as e:
-                self.root.after(0, lambda: self.show_error(f"Error cleaning duplicates: {str(e)}"))
+                error_msg = f"Error cleaning duplicates: {str(e)}"
+                logging.error(error_msg, exc_info=True)
+                self.root.after(0, lambda: self.show_error(error_msg))
         
+        logging.debug("Starting cleaning thread")
         self.cleaning_thread = threading.Thread(target=clean_groups, daemon=True)
         self.cleaning_thread.start()
     
