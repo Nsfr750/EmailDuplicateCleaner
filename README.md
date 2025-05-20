@@ -4,8 +4,9 @@ A comprehensive Python tool designed to scan, identify, and remove duplicate ema
 
 ## 🚀 Version
 
-**Current Version:** 2.2.4 (Beta)
-[![GitHub release](https://img.shields.io/badge/release-v2.2.4-blue)](https://github.com/Nsfr750/EmailDuplicateCleaner)
+**Current Version:** 2.3.0 (Stable)
+[![GitHub release](https://img.shields.io/badge/release-v2.3.0-blue)](https://github.com/Nsfr750/EmailDuplicateCleaner)
+[![Documentation](https://img.shields.io/badge/docs-available-brightgreen)](https://github.com/Nsfr750/EmailDuplicateCleaner/blob/master/README.md)
 [![Python Versions](https://img.shields.io/badge/python-3.8%20|%203.9%20|%203.10%20|%203.11%20|%203.12-blue)](https://www.python.org/)
 
 ## ✨ Features
@@ -23,10 +24,11 @@ A comprehensive Python tool designed to scan, identify, and remove duplicate ema
 - Command-Line Interface
 
 ### 🌓 Enhanced User Experience
-- Dark mode support
-- Interactive preview
-- Debug mode
-- Demo mode for testing
+- Modern web interface with dark/light mode
+- Interactive preview with real-time updates
+- Comprehensive help system
+- Debug mode with detailed logging
+- Demo mode for testing and learning
 
 ### 🔒 Email Client Compatibility
 Supports:
@@ -36,9 +38,12 @@ Supports:
 - Generic mbox/maildir formats
 
 ### 🏗️ Technical Highlights
-- Modular architecture
-- Separate modules for About, Sponsor, and Version management
+- Modern web interface built with Flask
+- SQLAlchemy for database management
+- Comprehensive help system with dynamic content
+- Modular architecture with clear separation of concerns
 - Cross-platform compatibility
+- Extensive error handling and logging
 
 ## 🛠️ Prerequisites
 
