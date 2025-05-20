@@ -60,3 +60,5 @@ htmlcov/
 dist/
 build/
 *.egg-info/
+cli.bat
+gui.bat
