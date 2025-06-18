@@ -24,21 +24,14 @@ class Help:
     @staticmethod
     def show_help(parent):
         """
-        Display the Help dialog.
-        
-        This method creates and shows a modal dialog with help information
-        organized in tabs. The dialog includes sections for usage instructions,
-        features, and tips.
-        
-        Args:
-            parent (tk.Tk): The parent window for the dialog
+        Displays the help window with two tabs: Usage and Features.
+        The window is modal.
         """
-        # Create and configure the help window
         help_window = tk.Toplevel(parent)
-        help_window.title(tr('help'))
+        help_window.title(tr('help_title'))
         help_window.geometry("700x500")
         help_window.minsize(600, 400)
-        
+
         # Center the window on screen
         window_width = 700
         window_height = 500
@@ -50,24 +43,24 @@ class Help:
         
         # Create a notebook (tabbed interface)
         notebook = ttk.Notebook(help_window)
-        notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
-        
+        notebook.pack(pady=10, padx=10, fill="both", expand=True)
+
         # ===== USAGE TAB =====
         usage_frame = ttk.Frame(notebook, padding=10)
         notebook.add(usage_frame, text=tr('usage_tab'))
         usage_text = tr('help_usage')
-        usage_label = tk.Label(usage_frame, text=usage_text, justify=tk.LEFT, anchor='nw', wraplength=650)
-        usage_label.pack(fill=tk.BOTH, expand=True)
+        usage_label = ttk.Label(usage_frame, text=usage_text, justify=tk.LEFT, wraplength=650)
+        usage_label.pack(fill=tk.BOTH, expand=True, anchor='nw')
 
         # ===== FEATURES TAB =====
         features_frame = ttk.Frame(notebook, padding=10)
         notebook.add(features_frame, text=tr('features_tab'))
         features_text = tr('help_features')
-        features_label = tk.Label(features_frame, text=features_text, justify=tk.LEFT, anchor='nw', wraplength=650)
-        features_label.pack(fill=tk.BOTH, expand=True)
+        features_label = ttk.Label(features_frame, text=features_text, justify=tk.LEFT, wraplength=650)
+        features_label.pack(fill=tk.BOTH, expand=True, anchor='nw')
 
         # Close button
-        close_btn = tk.Button(help_window, text=tr('close'), command=help_window.destroy)
+        close_btn = ttk.Button(help_window, text=tr('close'), command=help_window.destroy)
         close_btn.pack(pady=10)
         
         # Make the window modal

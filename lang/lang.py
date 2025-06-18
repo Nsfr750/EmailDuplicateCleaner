@@ -35,11 +35,10 @@ TRANSLATIONS = {
 
         'menu_help': 'Help',
         'menu_help_about': 'About',
-        'menu_help_report_bug': 'Report Bug',
-        'menu_help_content': 'Help Content',
-
+                
         'menu_sponsor': 'Sponsor',
         'menu_sponsor_us': 'Sponsor Us',
+        'menu_sponsor_github': 'Sponsor on GitHub',
 
         # ======================================================================
         # Tabs
@@ -206,6 +205,11 @@ TRANSLATIONS = {
         # Help Window
         # ======================================================================
         'help_window_title': 'Help',
+        'help_title': 'Help',
+        'usage_tab': 'Usage',
+        'features_tab': 'Features',
+        'help_usage': 'This application helps you find and remove duplicate emails from your mail clients. Select your client, choose the folders to scan, and start the scan.',
+        'help_features': '- Supports Thunderbird, Apple Mail, Outlook, and generic clients.\n- Various detection criteria: Strict, Content, Headers, etc.\n- Preview duplicate emails before deleting.\n- Automatic or manual cleaning.',
 
         # ======================================================================
         # Log Viewer Window
@@ -259,12 +263,8 @@ TRANSLATIONS = {
 
         'menu_help': 'Aiuto',
         'menu_help_about': 'Informazioni',
-        'menu_help_report_bug': 'Report Bug',
-        'menu_help_content': 'Contenuto Aiuto',
-
-        'menu_sponsor': 'Sponsor',
         'menu_sponsor_us': 'Sponsorizzaci',
-
+        
         # ======================================================================
         # Tabs
         # ======================================================================
@@ -430,6 +430,11 @@ TRANSLATIONS = {
         # Help Window
         # ======================================================================
         'help_window_title': 'Aiuto',
+        'help_title': 'Aiuto',
+        'usage_tab': 'Utilizzo',
+        'features_tab': 'Funzionalità',
+        'help_usage': 'Questa applicazione ti aiuta a trovare e rimuovere email duplicate dai tuoi client di posta. Seleziona il tuo client, scegli le cartelle da analizzare e avvia la scansione.',
+        'help_features': '- Supporta Thunderbird, Apple Mail, Outlook e client generici.\n- Diversi criteri di rilevamento: Stretto, Contenuto, Intestazioni, etc.\n- Anteprima delle email duplicate prima di eliminarle.\n- Pulizia automatica o manuale.',
 
         # ======================================================================
         # Log Viewer Window

@@ -21,7 +21,7 @@ class About:
         about_dialog.grab_set()
 
         # Add app icon or logo here if you have one
-        title = ttk.Label(about_dialog, text='Project', font=('Helvetica', 16, 'bold'))
+        title = ttk.Label(about_dialog, text=tr('app_title'), font=('Helvetica', 16, 'bold'))
         title.pack(pady=20)
 
         # Get version dynamically from version.py
@@ -31,7 +31,7 @@ class About:
         description = ttk.Label(about_dialog, text='', justify=tk.CENTER)
         description.pack(pady=20)
 
-        copyright = ttk.Label(about_dialog, text=' 2025 Nsfr750')
+        copyright = ttk.Label(about_dialog, text='© 2025 Nsfr750')
         copyright.pack(pady=10)
 
         ttk.Button(about_dialog, text=tr('close'), command=about_dialog.destroy).pack(pady=20)

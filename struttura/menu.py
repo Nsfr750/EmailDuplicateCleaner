@@ -67,7 +67,7 @@ class AppMenu:
         help_menu.add_command(label=tr('menu_help'), command=lambda: Help.show_help(self.root))
         help_menu.add_separator()
         help_menu.add_command(label=tr('menu_help_about'), command=lambda: About.show_about(self.root))
-        help_menu.add_command(label=tr('menu_sponsors_us'), command=lambda: Sponsor(self.root).show_sponsor())
+        help_menu.add_command(label=tr('menu_sponsor_us'), command=lambda: Sponsor(self.root).show_sponsor())
         self.menu_bar.add_cascade(label=tr('menu_help'), menu=help_menu)  
   
     def destroy(self):
