@@ -61,21 +61,15 @@ class AppMenu:
         settings_menu.add_separator()
         dark_mode_var = tk.BooleanVar(value=False) # This should be tied to the app's state
         settings_menu.add_checkbutton(label=tr('menu_settings_dark_mode'), variable=dark_mode_var, command=self.app.toggle_dark_mode)
-
+  
         # Help menu
         help_menu = tk.Menu(self.menu_bar, tearoff=0)
-        self.menu_bar.add_cascade(label=tr('menu_help'), menu=help_menu)
-        help_menu.add_command(label=tr('menu_help_documentation'), command=lambda: Help.show_help(self.root))
-        help_menu.add_command(label=tr('menu_help_report_bug'), command=self.app.report_bug)
+        help_menu.add_command(label=tr('menu_help'), command=lambda: Help.show_help(self.root))
+        help_menu.add_separator()
         help_menu.add_command(label=tr('menu_help_about'), command=lambda: About.show_about(self.root))
-
-        # Sponsor menu
-        sponsor_menu = tk.Menu(self.menu_bar, tearoff=0)
-        self.menu_bar.add_cascade(label=tr('menu_sponsor'), menu=sponsor_menu)
-        sponsor_menu.add_command(label=tr('menu_sponsor_github'), command=lambda: webbrowser.open("https://github.com/sponsors/Nsfr750"))
-        sponsor_menu.add_command(label=tr('menu_sponsor_patreon'), command=lambda: webbrowser.open("https://www.patreon.com/Nsfr750"))
-        sponsor_menu.add_command(label=tr('menu_sponsor_window'), command=lambda: Sponsor.show_sponsor(self.root))
-
+        help_menu.add_command(label=tr('menu_sponsors_us'), command=lambda: Sponsor(self.root).show_sponsor())
+        self.menu_bar.add_cascade(label=tr('menu_help'), menu=help_menu)  
+  
     def destroy(self):
         """Destroy the menu bar."""
         self.menu_bar.destroy()

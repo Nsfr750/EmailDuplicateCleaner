@@ -35,6 +35,7 @@ TRANSLATIONS = {
 
         'menu_help': 'Help',
         'menu_help_about': 'About',
+        'menu_help_report_bug': 'Report Bug',
         'menu_help_content': 'Help Content',
 
         'menu_sponsor': 'Sponsor',
@@ -258,6 +259,7 @@ TRANSLATIONS = {
 
         'menu_help': 'Aiuto',
         'menu_help_about': 'Informazioni',
+        'menu_help_report_bug': 'Report Bug',
         'menu_help_content': 'Contenuto Aiuto',
 
         'menu_sponsor': 'Sponsor',

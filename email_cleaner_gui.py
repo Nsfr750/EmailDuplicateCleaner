@@ -23,6 +23,7 @@ from struttura.traceback import setup_traceback_handler
 from struttura.log_viewer import LogViewer
 from struttura.about import About
 from struttura.help import Help
+from struttura.sponsor import Sponsor
 from struttura.menu import AppMenu
 from email_duplicate_cleaner import (
     EmailClientManager, DuplicateEmailFinder, create_test_mailbox,
@@ -171,63 +172,55 @@ class EmailCleanerGUI:
         self.scan_tab.columnconfigure(1, weight=1)  # Content column
         
         # Client selection
-        self.client_label = ttk.Label(self.scan_tab, text=get_string('scan_client_label'))
-        self.client_label.grid(row=0, column=0, sticky=tk.W, padx=5, pady=2)
+        self.client_frame = ttk.LabelFrame(self.scan_tab, text=get_string('scan_client_frame'))
+        self.client_frame.grid(row=0, column=0, columnspan=2, sticky=(tk.W, tk.E), padx=5, pady=5)
         
         self.client_var = tk.StringVar(value="all")
-        client_frame = ttk.Frame(self.scan_tab)
-        client_frame.grid(row=0, column=1, sticky=(tk.W, tk.E), padx=5, pady=2)
-        
-        self.radio_client_all = ttk.Radiobutton(client_frame, text=get_string('scan_client_all_radio'), value="all", 
+        self.radio_client_all = ttk.Radiobutton(self.client_frame, text=get_string('scan_client_all_radio'), value="all", 
                       variable=self.client_var)
         self.radio_client_all.pack(side=tk.LEFT, padx=5)
-        self.radio_client_tb = ttk.Radiobutton(client_frame, text=get_string('scan_client_thunderbird_radio'), value="thunderbird", 
+        self.radio_client_tb = ttk.Radiobutton(self.client_frame, text=get_string('scan_client_thunderbird_radio'), value="thunderbird", 
                       variable=self.client_var)
         self.radio_client_tb.pack(side=tk.LEFT, padx=5)
-        self.radio_client_am = ttk.Radiobutton(client_frame, text=get_string('scan_client_apple_mail_radio'), value="apple_mail", 
+        self.radio_client_am = ttk.Radiobutton(self.client_frame, text=get_string('scan_client_apple_mail_radio'), value="apple_mail", 
                       variable=self.client_var)
         self.radio_client_am.pack(side=tk.LEFT, padx=5)
-        self.radio_client_ol = ttk.Radiobutton(client_frame, text=get_string('scan_client_outlook_radio'), value="outlook", 
+        self.radio_client_ol = ttk.Radiobutton(self.client_frame, text=get_string('scan_client_outlook_radio'), value="outlook", 
                       variable=self.client_var)
         self.radio_client_ol.pack(side=tk.LEFT, padx=5)
-        self.radio_client_gen = ttk.Radiobutton(client_frame, text=get_string('scan_client_generic_radio'), value="generic", 
+        self.radio_client_gen = ttk.Radiobutton(self.client_frame, text=get_string('scan_client_generic_radio'), value="generic", 
                       variable=self.client_var)
         self.radio_client_gen.pack(side=tk.LEFT, padx=5)
         
         # Duplicate detection criteria
-        self.criteria_label = ttk.Label(self.scan_tab, text=get_string('scan_criteria_label'))
-        self.criteria_label.grid(row=1, column=0, sticky=tk.W, padx=5, pady=2)
+        self.criteria_frame = ttk.LabelFrame(self.scan_tab, text=get_string('scan_criteria_frame'))
+        self.criteria_frame.grid(row=1, column=0, columnspan=2, sticky=(tk.W, tk.E), padx=5, pady=5)
         
         self.criteria_var = tk.StringVar(value="strict")
-        criteria_frame = ttk.Frame(self.scan_tab)
-        criteria_frame.grid(row=1, column=1, sticky=(tk.W, tk.E), padx=5, pady=2)
-        
-        self.radio_crit_strict = ttk.Radiobutton(criteria_frame, text=get_string('scan_criteria_strict_radio'), value="strict", 
+        self.radio_crit_strict = ttk.Radiobutton(self.criteria_frame, text=get_string('scan_criteria_strict_radio'), value="strict", 
                       variable=self.criteria_var)
         self.radio_crit_strict.pack(side=tk.LEFT, padx=5)
-        self.radio_crit_content = ttk.Radiobutton(criteria_frame, text=get_string('scan_criteria_content_radio'), value="content", 
+        self.radio_crit_content = ttk.Radiobutton(self.criteria_frame, text=get_string('scan_criteria_content_radio'), value="content", 
                       variable=self.criteria_var)
         self.radio_crit_content.pack(side=tk.LEFT, padx=5)
-        self.radio_crit_headers = ttk.Radiobutton(criteria_frame, text=get_string('scan_criteria_headers_radio'), value="headers", 
+        self.radio_crit_headers = ttk.Radiobutton(self.criteria_frame, text=get_string('scan_criteria_headers_radio'), value="headers", 
                       variable=self.criteria_var)
         self.radio_crit_headers.pack(side=tk.LEFT, padx=5)
-        self.radio_crit_subj_send = ttk.Radiobutton(criteria_frame, text=get_string('scan_criteria_subject_sender_radio'), value="subject-sender", 
+        self.radio_crit_subj_send = ttk.Radiobutton(self.criteria_frame, text=get_string('scan_criteria_subject_sender_radio'), value="subject-sender", 
                       variable=self.criteria_var)
         self.radio_crit_subj_send.pack(side=tk.LEFT, padx=5)
         
         # Mail folder list
-        self.mail_folders_label = ttk.Label(self.scan_tab, text=get_string('scan_folders_label'))
-        self.mail_folders_label.grid(row=2, column=0, sticky=tk.NW, padx=5, pady=5)
-        folder_frame = ttk.Frame(self.scan_tab)
-        folder_frame.grid(row=2, column=1, sticky=(tk.N, tk.S, tk.E, tk.W), padx=5, pady=5)
+        self.folder_frame = ttk.LabelFrame(self.scan_tab, text=get_string('scan_folder_frame'))
+        self.folder_frame.grid(row=2, column=0, columnspan=2, sticky=(tk.N, tk.S, tk.E, tk.W), padx=5, pady=5)
         self.scan_tab.rowconfigure(2, weight=1)
-        folder_frame.columnconfigure(0, weight=1)
-        folder_frame.rowconfigure(0, weight=1)
+        self.folder_frame.columnconfigure(0, weight=1)
+        self.folder_frame.rowconfigure(0, weight=1)
 
-        self.folder_listbox = tk.Listbox(folder_frame, selectmode=tk.EXTENDED)
+        self.folder_listbox = tk.Listbox(self.folder_frame, selectmode=tk.EXTENDED)
         self.folder_listbox.grid(row=0, column=0, sticky=(tk.N, tk.S, tk.E, tk.W))
         
-        y_scrollbar = ttk.Scrollbar(folder_frame, orient=tk.VERTICAL, command=self.folder_listbox.yview)
+        y_scrollbar = ttk.Scrollbar(self.folder_frame, orient=tk.VERTICAL, command=self.folder_listbox.yview)
         self.folder_listbox.configure(yscrollcommand=y_scrollbar.set)
         y_scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
         
@@ -974,18 +967,12 @@ class EmailCleanerGUI:
 
         # Update Scan tab widgets
         self.client_frame.config(text=get_string('scan_client_frame'))
-        self.client_label.config(text=get_string('scan_client_label'))
+        self.criteria_frame.config(text=get_string('scan_criteria_frame'))
         self.folder_frame.config(text=get_string('scan_folder_frame'))
         self.select_all_button.config(text=get_string('scan_select_all_button'))
-        self.deselect_all_button.config(text=get_string('scan_deselect_all_button'))
         self.find_folders_button.config(text=get_string('scan_find_folders_button'))
-        self.criteria_frame.config(text=get_string('scan_criteria_frame'))
-        self.strict_radio.config(text=get_string('scan_criteria_strict_radio'))
-        self.normal_radio.config(text=get_string('scan_criteria_normal_radio'))
-        self.custom_radio.config(text=get_string('scan_criteria_custom_radio'))
-        self.options_frame.config(text=get_string('scan_options_frame'))
-        self.auto_clean_check.config(text=get_string('scan_options_auto_clean_checkbox'))
-        self.scan_button.config(text=get_string('scan_scan_button'))
+        self.auto_clean_check.config(text=get_string('scan_autoclean_checkbox'))
+        self.scan_button.config(text=get_string('scan_button'))
 
         # Update Results tab widgets
         self.results_tree.heading("#0", text=get_string('results_header_group'))
