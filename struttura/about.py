@@ -1,7 +1,13 @@
 import tkinter as tk
 from tkinter import ttk
-from lang.lang import get_string
+import sys
+import os
+
+# Add project root to the Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from version import __version__
+from lang.lang import get_string
 
 class About:
     """A class to display the about window."""

@@ -1,6 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
 import webbrowser
+import sys
+import os
+
+# Add project root to the Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from lang.lang import get_string
 
 # Sponsor Class

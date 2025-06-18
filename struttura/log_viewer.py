@@ -1,8 +1,14 @@
 import tkinter as tk
-from tkinter import ttk, scrolledtext, filedialog
+from tkinter import scrolledtext, ttk
+import sys
+import os
 import logging
+from queue import Queue
+
+# Add project root to the Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from lang.lang import get_string
-import queue
 
 class LogViewer(tk.Toplevel):
     """A Toplevel window to display logs."""
@@ -61,7 +67,7 @@ class LogViewer(tk.Toplevel):
             while True:
                 record = self.log_queue.get_nowait()
                 self.display_log(record)
-        except queue.Empty:
+        except Queue.Empty:
             pass
         finally:
             self.after(100, self.process_queue)

@@ -15,11 +15,14 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, scrolledtext, Toplevel
 import queue
 import sqlite3
+import webbrowser
 from struttura.sponsor import Sponsor
 from lang.lang import lang_manager, get_string
 from struttura.logger import setup_logging
 from struttura.traceback import setup_traceback_handler
 from struttura.log_viewer import LogViewer
+from struttura.about import AboutWindow
+from struttura.help import HelpWindow
 from email_duplicate_cleaner import (
     EmailClientManager, DuplicateEmailFinder, create_test_mailbox,
     BaseEmailClientHandler, ThunderbirdMailHandler, AppleMailHandler,
@@ -992,29 +995,9 @@ class EmailCleanerGUI:
         self.root.title(get_string('app_title'))
         self.set_status(get_string('ready_status'))
 
-        # Update menu bar
-        self.menu_bar.entryconfig(0, label=get_string('menu_file'))
-        self.file_menu.entryconfig(0, label=get_string('menu_file_open_folder'))
-        self.file_menu.entryconfig(1, label=get_string('menu_file_run_demo'))
-        self.file_menu.entryconfig(3, label=get_string('menu_file_exit'))
-
-        self.menu_bar.entryconfig(1, label=get_string('menu_tools'))
-        self.tools_menu.entryconfig(0, label=get_string('menu_tools_log_viewer'))
-
-        self.menu_bar.entryconfig(2, label=get_string('menu_settings'))
-        self.settings_menu.entryconfig(0, label=get_string('menu_settings_language'))
-        self.lang_menu.entryconfig(0, label=get_string('menu_settings_language_en'))
-        self.lang_menu.entryconfig(1, label=get_string('menu_settings_language_it'))
-        self.settings_menu.entryconfig(2, label=get_string('menu_settings_dark_mode'))
-
-        self.menu_bar.entryconfig(3, label=get_string('menu_help'))
-        self.help_menu.entryconfig(0, label=get_string('menu_help_documentation'))
-        self.help_menu.entryconfig(1, label=get_string('menu_help_report_bug'))
-        self.help_menu.entryconfig(2, label=get_string('menu_help_about'))
-
-        self.menu_bar.entryconfig(4, label=get_string('menu_sponsor'))
-        self.sponsor_menu.entryconfig(0, label=get_string('menu_sponsor_github'))
-        self.sponsor_menu.entryconfig(1, label=get_string('menu_sponsor_patreon'))
+        # Recreate the menu to update labels, avoiding a TclError on some systems
+        self.menu_bar.destroy()
+        self.create_menu()
 
         # Update notebook tabs
         self.notebook.tab(self.scan_tab, text=get_string('tab_scan'))
