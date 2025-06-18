@@ -72,6 +72,21 @@ We appreciate your interest in contributing to Email Duplicate Cleaner. This doc
 - Maintain modular architecture
 - Keep dependencies up to date
 
+## Codebase Structure
+
+The project is organized into a clean and modular structure to promote maintainability and ease of development. Key components include:
+
+- **`email_duplicate_cleaner.py`**: The core logic for duplicate detection.
+- **`email_cleaner_gui.py`**: The main file for the Tkinter-based GUI. It is responsible for the main window layout and coordinating UI events.
+- **`struttura/`**: This directory contains all auxiliary GUI modules:
+  - `menu.py`: Manages the main menu bar. To add or modify menu items, edit this file.
+  - `about.py`, `help.py`, `sponsor.py`: These files define the dialog windows. Each window is a self-contained class.
+  - `log_viewer.py`: A simple log viewer utility.
+- **`lang/`**: Contains language files for internationalization.
+- **`tests/`**: Unit and integration tests.
+
+When contributing to the GUI, please follow the existing modular structure. New dialogs or complex UI components should be created in their own files within the `struttura/` directory.
+
 ## Areas of Contribution
 
 - Bug fixes

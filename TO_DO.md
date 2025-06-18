@@ -20,10 +20,12 @@
 
 ### 🛠️ Development
 
+- [x] Refactor menu creation into a separate `struttura/menu.py` module.
 - [ ] Add more comprehensive unit tests
 - [ ] Improve code documentation
 - [ ] Add more detailed logging
 - [ ] Implement automated testing
+- [ ] Connect the dark mode toggle in the menu to the application's state.
 
 ### 🎨 UI/UX
 
@@ -51,3 +53,9 @@
 - [ ] Add more performance monitoring
 - [ ] Implement caching strategies
 - [ ] Add more detailed logging levels
+
+## Done
+- ✅ Initial release of all three interfaces (GUI, CLI, Web).
+- ✅ Implemented core duplicate detection logic.
+- ✅ Added basic logging and error handling.
+- ✅ Created initial documentation.

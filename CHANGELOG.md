@@ -141,10 +141,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 🚀 New Feature
 - 🌐 Improvement
 
+## [Unreleased]
+
 ### Added
-- Dark mode support
-- Improved UI responsiveness
-- Enhanced error logging
+- New `AppMenu` class in `struttura/menu.py` to handle menu creation and management.
+- Dynamic language switching for all menu and UI elements.
+
+### Changed
+- **Refactored** GUI menu creation by detaching it from `email_cleaner_gui.py` and moving it to `struttura/menu.py`.
+- Updated all auxiliary windows (`About`, `Help`, `Sponsor`) to be Toplevel subclasses with static `show` methods.
+- Replaced local frames with `LabelFrame` widgets in the Scan tab for better UI organization.
+
+### Fixed
+- `NameError` in `struttura/menu.py` caused by incorrect variable scope.
+- `AttributeError` in `email_cleaner_gui.py` during language switching due to typos and incorrect widget references.
+- `TabError` in `struttura/menu.py` due to inconsistent indentation.
+- `SyntaxError` in `struttura/about.py`.
+- Missing and incorrect translation keys in `lang/lang.py`.
 
 ## [2.2.1] - 2025-04-25
 

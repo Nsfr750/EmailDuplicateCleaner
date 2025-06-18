@@ -79,7 +79,7 @@ Supports:
 #### Web Interface
 
 ```bash
-python email_cleaner_web.py
+python app.py
 ```
 
 Access at `http://localhost:5000`
@@ -136,6 +136,28 @@ Found a bug? [Open an issue](https://github.com/Nsfr750/EmailDuplicateCleaner/is
 - Help: Shows usage information
 - GUI Mode: Launches desktop interface
 - Web Mode: Starts web server
+
+## GUI Structure
+
+- **GUI (`email_cleaner_gui.py`)**: A user-friendly graphical interface built with Tkinter. It provides an intuitive way to select email clients, scan folders, and manage duplicates.
+- **CLI (`email_cleaner_cli.py`)**: A command-line interface for users who prefer working in the terminal.
+- **Web (`app.py`)**: A web-based interface built with Flask, accessible from any browser.
+
+### Auxiliary Modules (`struttura/`)
+
+The `struttura/` directory contains all the auxiliary modules that support the GUI, such as dialog windows and the menu.
+
+- **`menu.py`**: Manages the creation and functionality of the main menu bar, keeping the main GUI file clean and focused on its core layout.
+- **`about.py`**, **`help.py`**, **`sponsor.py`**: Define the `About`, `Help`, and `Sponsor` dialog windows, each encapsulated in its own class.
+- **`log_viewer.py`**: A simple log viewer to display application logs.
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Python 3.8+
+- pip
+- Supported OS: Windows, macOS, Linux
 
 ## Social Links
 
