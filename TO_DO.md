@@ -11,8 +11,8 @@
 ### 🐛 Fixes
 - [ ] Resolve remaining GUI button functionality issues
 - [ ] Fix any remaining dark mode inconsistencies
-- [ ] Improve error handling in web interface
-- [ ] Fix any remaining routing issues
+- [x] Improve error handling in web interface
+- [x] Fix any remaining routing issues
 
 ## 🏗️ Medium Priority
 

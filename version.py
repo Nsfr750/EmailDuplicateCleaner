@@ -8,10 +8,10 @@ for the Email Duplicate Cleaner project.
 # Version information follows Semantic Versioning 2.0.0 (https://semver.org/)
 VERSION_MAJOR = 2
 VERSION_MINOR = 3
-VERSION_PATCH = 2
+VERSION_PATCH = 3
 
 # Additional version qualifiers
-VERSION_QUALIFIER = 'beta'  # Could be 'alpha', 'beta', 'rc', or ''
+VERSION_QUALIFIER = ''  # Could be 'alpha', 'beta', 'rc', or ''
 
 def get_version():
     """
@@ -62,11 +62,21 @@ def check_version_compatibility(min_version):
     return True
 
 # Expose version as a module-level attribute for easy access
-__version__ = "2.3.0"
-__release_date__ = "2025-05-20"
+__version__ = "2.3.3"
+__release_date__ = "2025-06-18"
 
 # Version history
 VERSION_HISTORY = {
+    "2.3.3": {
+        "date": "2025-06-18",
+        "changes": [
+            "Fixed critical bugs in the web interface",
+            "Added missing Flask route decorators for API endpoints",
+            "Corrected JavaScript typo for history tab",
+            "Improved template creation logic",
+            "Enhanced error handling and database context management in APIs"
+        ]
+    },
     "2.3.0": {
         "date": "2025-05-20",
         "changes": [

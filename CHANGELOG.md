@@ -5,6 +5,16 @@ All notable changes to Email Duplicate Cleaner will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 🚀 [2.3.3] - 2025-06-18
+
+### 🐛 Fixed
+- 🌐 Web Interface:
+  - Resolved critical routing errors by adding missing `@app.route` decorators to all API endpoints.
+  - Corrected a JavaScript typo (`hystoryTab` -> `historyTab`) that prevented the history tab from functioning.
+  - Improved template handling to prevent unnecessary file operations.
+  - Strengthened error handling within API endpoints to provide clearer feedback.
+  - Ensured proper database session management to prevent resource leaks.
+
 ## 🚀 [2.3.0] - 2025-05-20 (Stable)
 
 ### 🆕 Added
