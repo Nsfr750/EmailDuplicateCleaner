@@ -60,7 +60,7 @@ class AppMenu:
 
         settings_menu.add_separator()
         dark_mode_var = tk.BooleanVar(value=False) # This should be tied to the app's state
-        settings_menu.add_checkbutton(label=tr('menu_settings_dark_mode'), variable=dark_mode_var, command=self.app.toggle_dark_mode)
+        settings_menu.add_checkbutton(label=tr('menu_view_dark_mode'), variable=dark_mode_var, command=self.app.toggle_dark_mode)
   
         # Help menu
         help_menu = tk.Menu(self.menu_bar, tearoff=0)

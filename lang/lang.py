@@ -50,9 +50,9 @@ TRANSLATIONS = {
         # Scan Tab
         # ======================================================================
         # --- Labels and Frames ---
-        'scan_client_label': 'Email Client:',
-        'scan_criteria_label': 'Duplicate Detection Criteria:',
-        'scan_folders_label': 'Mail Folders:',
+        'scan_client_frame': 'Email Client:',
+        'scan_criteria_frame': 'Duplicate Detection Criteria:',
+        'scan_folder_frame': 'Mail Folders:',
 
         # --- Radio Buttons ---
         'scan_client_all_radio': 'All Supported',
@@ -78,30 +78,30 @@ TRANSLATIONS = {
         # Results Tab
         # ======================================================================
         # --- Labels and Frames ---
-        'results_group_management_frame': 'Group Management',
-        'results_email_actions_frame': 'Email Actions',
-        'results_preview_header_default': 'Select an email to preview its content.',
-        'results_preview_header_group_selected': 'Select an individual email to see a preview.',
-        'results_preview_header_error': 'Error Previewing Email',
+        'group_management_frame': 'Group Management',
+        'email_actions_frame': 'Email Actions',
+        'preview_header_default': 'Select an email to preview its content.',
+        'preview_header_group_selected': 'Select an individual email to see a preview.',
+        'preview_header_error': 'Error Previewing Email',
 
         # --- Treeview Headers ---
-        'results_header_group': 'Group',
-        'results_header_date': 'Date',
-        'results_header_from': 'From',
-        'results_header_subject': 'Subject',
-        'results_header_folder': 'Folder',
-        'results_group_text': '{count} emails',
-        'results_original_prefix': 'Original',
+        'header_group': 'Group',
+        'header_date': 'Date',
+        'header_from': 'From',
+        'header_subject': 'Subject',
+        'header_folder': 'Folder',
+        'group_text': '{count} emails',
+        'original_prefix': 'Original',
 
         # --- Buttons ---
-        'results_expand_all_button': 'Expand All',
-        'results_collapse_all_button': 'Collapse All',
-        'results_view_email_button': 'View Email',
-        'results_clean_selected_button': 'Clean Selected',
-        'results_clean_all_button': 'Clean All',
+        'expand_all_button': 'Expand All',
+        'collapse_all_button': 'Collapse All',
+        'view_email_button': 'View Email',
+        'clean_selected_button': 'Clean Selected',
+        'clean_all_button': 'Clean All',
 
         # --- Context Menu ---
-        'results_context_menu_view_email': 'View Email Content',
+        'context_menu_view_email': 'View Email Content',
 
         # ======================================================================
         # Console
@@ -198,9 +198,11 @@ TRANSLATIONS = {
         # Sponsor Window
         # ======================================================================
         'sponsor_window_title': 'Sponsor this Project',
-        'sponsor_paypal_button': 'PayPal',
-        'sponsor_patreon_button': 'Patreon',
-
+        'sponsor_on_github': 'GitHub',
+        'join_discord': 'Join Discord',
+        'buy_me_a_coffee': 'Buy me a Coffee',
+        'join_the_patreon': 'Join Patreon',
+        
         # ======================================================================
         # Help Window
         # ======================================================================
@@ -275,9 +277,9 @@ TRANSLATIONS = {
         # Scan Tab
         # ======================================================================
         # --- Labels and Frames ---
-        'scan_client_label': 'Client Email:',
-        'scan_criteria_label': 'Criteri Rilevamento Duplicati:',
-        'scan_folders_label': 'Cartelle Email:',
+        'scan_client_frame': 'Client Email:',
+        'scan_criteria_frame': 'Criteri Rilevamento Duplicati:',
+        'scan_folder_frame': 'Cartelle Email:',
 
         # --- Radio Buttons ---
         'scan_client_all_radio': 'Tutti i Supportati',
@@ -303,30 +305,30 @@ TRANSLATIONS = {
         # Results Tab
         # ======================================================================
         # --- Labels and Frames ---
-        'results_group_management_frame': 'Gestione Gruppi',
-        'results_email_actions_frame': 'Azioni Email',
-        'results_preview_header_default': 'Seleziona un\'email per vederne l\'anteprima.',
-        'results_preview_header_group_selected': 'Seleziona una singola email per vederne l\'anteprima.',
-        'results_preview_header_error': 'Errore Anteprima Email',
+        'group_management_frame': 'Gestione Gruppi',
+        'email_actions_frame': 'Azioni Email',
+        'preview_header_default': 'Seleziona un\'email per vederne l\'anteprima.',
+        'preview_header_group_selected': 'Seleziona una singola email per vederne l\'anteprima.',
+        'preview_header_error': 'Errore Anteprima Email',
 
         # --- Treeview Headers ---
-        'results_header_group': 'Gruppo',
-        'results_header_date': 'Data',
-        'results_header_from': 'Da',
-        'results_header_subject': 'Oggetto',
-        'results_header_folder': 'Cartella',
-        'results_group_text': '{count} email',
-        'results_original_prefix': 'Originale',
+        'header_group': 'Gruppo',
+        'header_date': 'Data',
+        'header_from': 'Da',
+        'header_subject': 'Oggetto',
+        'header_folder': 'Cartella',
+        'group_text': '{count} email',
+        'original_prefix': 'Originale',
 
         # --- Buttons ---
-        'results_expand_all_button': 'Espandi Tutto',
-        'results_collapse_all_button': 'Comprimi Tutto',
-        'results_view_email_button': 'Visualizza Email',
-        'results_clean_selected_button': 'Pulisci Selezionati',
-        'results_clean_all_button': 'Pulisci Tutto',
+        'expand_all_button': 'Espandi Tutto',
+        'collapse_all_button': 'Comprimi Tutto',
+        'view_email_button': 'Visualizza Email',
+        'clean_selected_button': 'Pulisci Selezionati',
+        'clean_all_button': 'Pulisci Tutto',
 
         # --- Context Menu ---
-        'results_context_menu_view_email': 'Visualizza Contenuto Email',
+        'context_menu_view_email': 'Visualizza Contenuto Email',
 
         # ======================================================================
         # Console
@@ -423,8 +425,11 @@ TRANSLATIONS = {
         # Sponsor Window
         # ======================================================================
         'sponsor_window_title': 'Sponsorizza questo Progetto',
-        'sponsor_paypal_button': 'PayPal',
-        'sponsor_patreon_button': 'Patreon',
+        'sponsor_on_github': 'GitHub',
+        'join_discord': 'Entra in Discord',
+        'buy_me_a_coffee': 'Offrimi un Caffè',
+        'join_the_patreon': 'Vieni su Patreon',
+        'close': 'Chiudi',
 
         # ======================================================================
         # Help Window
