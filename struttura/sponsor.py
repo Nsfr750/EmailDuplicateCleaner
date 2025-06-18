@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 import webbrowser
 from lang.lang import get_string
 
@@ -6,11 +7,15 @@ from lang.lang import get_string
 class Sponsor:
     def show_sponsor_window(self):
         sponsor_root = tk.Toplevel()
-        sponsor_root.geometry("300x200")
-        sponsor_root.title(get_string('sponsor_title'))
+        sponsor_root.title(get_string('sponsor_window_title'))
 
-        title_label = tk.Label(sponsor_root, text=get_string('sponsor_support_us'), font=("Arial", 16))
-        title_label.pack(pady=10)
+        main_frame = ttk.Frame(sponsor_root, padding="20")
+        main_frame.pack(expand=True, fill=tk.BOTH)
+
+        ttk.Label(main_frame, text=get_string('sponsor_window_main_text'), font=("Arial", 12), wraplength=380, justify=tk.CENTER).pack(pady=(0, 15))
+
+        button_frame = ttk.Frame(main_frame)
+        button_frame.pack(pady=5)
 
         def open_patreon():
             webbrowser.open("https://www.patreon.com/Nsfr750")
@@ -18,21 +23,21 @@ class Sponsor:
         def open_github():
             webbrowser.open("https://github.com/sponsors/Nsfr750")
 
-        def open_discord():
-            webbrowser.open("https://discord.gg/BvvkUEP9")
-
         def open_paypal():
             webbrowser.open("https://paypal.me/3dmega")
 
-        # Create and place buttons
-        patreon_button = tk.Button(sponsor_root, text=get_string('sponsor_patreon_button'), command=open_patreon)
-        patreon_button.pack(pady=5)
+        ttk.Button(button_frame, text=get_string('sponsor_window_patreon_button'), command=open_patreon).pack(side=tk.LEFT, padx=10)
+        ttk.Button(button_frame, text=get_string('sponsor_window_github_button'), command=open_github).pack(side=tk.LEFT, padx=10)
+        ttk.Button(button_frame, text=get_string('sponsor_window_paypal_button'), command=open_paypal).pack(side=tk.LEFT, padx=10)
 
-        github_button = tk.Button(sponsor_root, text=get_string('sponsor_github_button'), command=open_github)
-        github_button.pack(pady=5)
+        ttk.Separator(main_frame, orient='horizontal').pack(fill='x', pady=(20, 10))
 
-        discord_button = tk.Button(sponsor_root, text=get_string('sponsor_discord_button'), command=open_discord)
-        discord_button.pack(pady=5)
+        def close_window():
+            sponsor_root.destroy()
 
-        paypal_button = tk.Button(sponsor_root, text=get_string('sponsor_paypal_button'), command=open_paypal)
-        paypal_button.pack(pady=5)
+        ttk.Button(main_frame, text=get_string('dialog_close_button'), command=close_window).pack(side=tk.RIGHT, pady=(0, 10))
+
+        sponsor_root.update_idletasks()
+        x = sponsor_root.winfo_x() + (sponsor_root.winfo_width() - sponsor_root.winfo_width()) // 2
+        y = sponsor_root.winfo_y() + (sponsor_root.winfo_height() - sponsor_root.winfo_height()) // 2
+        sponsor_root.geometry(f"+{x}+{y}")

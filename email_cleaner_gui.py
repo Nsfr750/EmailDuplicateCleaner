@@ -121,7 +121,7 @@ class EmailCleanerGUI:
         sys.stdout = self.stdout_redirect
         
         # Set initial status
-        self.set_status(get_string('ready'))
+        self.set_status(get_string('ready_status'))
 
     def create_main_frame(self):
         """Create the main frame structure"""
@@ -141,54 +141,47 @@ class EmailCleanerGUI:
     
     def create_menu(self):
         """Create the application menu bar"""
-        self.menu_bar = tk.Menu(self.root, tearoff=0)
-        
+        self.menu_bar = tk.Menu(self.root)
+        self.root.config(menu=self.menu_bar)
+
         # File menu
         self.file_menu = tk.Menu(self.menu_bar, tearoff=0)
-        self.file_menu.add_command(label=get_string('open_folder'), command=self.open_folder)
+        self.menu_bar.add_cascade(label=get_string('menu_file'), menu=self.file_menu)
+        self.file_menu.add_command(label=get_string('menu_file_open_folder'), command=self.open_folder)
+        self.file_menu.add_command(label=get_string('menu_file_run_demo'), command=self.run_demo_mode)
         self.file_menu.add_separator()
-        self.file_menu.add_command(label=get_string('run_demo'), command=self.run_demo_mode)
-        self.file_menu.add_separator()
-        self.file_menu.add_command(label=get_string('exit'), command=self.root.quit)
-        self.menu_bar.add_cascade(label=get_string('file'), menu=self.file_menu)
+        self.file_menu.add_command(label=get_string('menu_file_exit'), command=self.on_closing)
 
         # Tools menu
         self.tools_menu = tk.Menu(self.menu_bar, tearoff=0)
-        self.menu_bar.add_cascade(label=get_string('tools'), menu=self.tools_menu)
-        self.tools_menu.add_command(label=get_string('log_viewer_title'), command=self.open_log_viewer)
+        self.menu_bar.add_cascade(label=get_string('menu_tools'), menu=self.tools_menu)
+        self.tools_menu.add_command(label=get_string('menu_tools_log_viewer'), command=self.open_log_viewer)
 
-        # View menu
-        self.view_menu = tk.Menu(self.menu_bar, tearoff=0)
-        self.dark_mode_var = tk.BooleanVar(value=False)
-        self.debug_mode_var = tk.BooleanVar(value=False)
-        self.view_menu.add_checkbutton(label=get_string('dark_mode'), variable=self.dark_mode_var, command=self.toggle_dark_mode)
-        self.view_menu.add_checkbutton(label=get_string('debug_mode'), variable=self.debug_mode_var, command=self.toggle_debug_mode)
-        self.menu_bar.add_cascade(label=get_string('view'), menu=self.view_menu)
-        
         # Settings menu
         self.settings_menu = tk.Menu(self.menu_bar, tearoff=0)
-        self.menu_bar.add_cascade(label=get_string('settings'), menu=self.settings_menu)
+        self.menu_bar.add_cascade(label=get_string('menu_settings'), menu=self.settings_menu)
         
-        self.settings_menu.add_separator()
-        
-        # Language submenu
         self.lang_menu = tk.Menu(self.settings_menu, tearoff=0)
-        self.settings_menu.add_cascade(label=get_string('language'), menu=self.lang_menu)
-        self.lang_menu.add_radiobutton(label=get_string('lang_english'), variable=self.lang_var, value='en', command=self.switch_language)
-        self.lang_menu.add_radiobutton(label=get_string('lang_italian'), variable=self.lang_var, value='it', command=self.switch_language)
+        self.settings_menu.add_cascade(label=get_string('menu_settings_language'), menu=self.lang_menu)
+        self.lang_menu.add_radiobutton(label=get_string('menu_settings_language_en'), variable=self.lang_var, value='en', command=self.switch_language)
+        self.lang_menu.add_radiobutton(label=get_string('menu_settings_language_it'), variable=self.lang_var, value='it', command=self.switch_language)
+
+        self.settings_menu.add_separator()
+        self.dark_mode_var = tk.BooleanVar(value=False)
+        self.settings_menu.add_checkbutton(label=get_string('menu_settings_dark_mode'), variable=self.dark_mode_var, command=self.toggle_dark_mode)
 
         # Help menu
         self.help_menu = tk.Menu(self.menu_bar, tearoff=0)
-        self.help_menu.add_command(label=get_string('about'), command=self.show_about)
-        self.help_menu.add_command(label=get_string('help_content'), command=self.show_help)
-        self.menu_bar.add_cascade(label=get_string('help'), menu=self.help_menu)
+        self.menu_bar.add_cascade(label=get_string('menu_help'), menu=self.help_menu)
+        self.help_menu.add_command(label=get_string('menu_help_documentation'), command=self.show_help)
+        self.help_menu.add_command(label=get_string('menu_help_report_bug'), command=self.report_bug)
+        self.help_menu.add_command(label=get_string('menu_help_about'), command=self.show_about)
 
         # Sponsor menu
         self.sponsor_menu = tk.Menu(self.menu_bar, tearoff=0)
-        self.sponsor_menu.add_command(label=get_string('sponsor_us'), command=lambda: Sponsor().show_sponsor_window())
-        self.menu_bar.add_cascade(label=get_string('sponsor'), menu=self.sponsor_menu)
-
-        self.root.config(menu=self.menu_bar)
+        self.menu_bar.add_cascade(label=get_string('menu_sponsor'), menu=self.sponsor_menu)
+        self.sponsor_menu.add_command(label=get_string('menu_sponsor_github'), command=lambda: webbrowser.open("https://github.com/sponsors/Nsfr750"))
+        self.sponsor_menu.add_command(label=get_string('menu_sponsor_patreon'), command=lambda: webbrowser.open("https://www.patreon.com/Nsfr750"))
 
     def create_tabs(self):
         """Create the main tab structure"""
@@ -218,82 +211,80 @@ class EmailCleanerGUI:
         self.scan_tab.columnconfigure(1, weight=1)  # Content column
         
         # Client selection
-        self.client_label = ttk.Label(self.scan_tab, text=get_string('client_label'))
+        self.client_label = ttk.Label(self.scan_tab, text=get_string('scan_client_label'))
         self.client_label.grid(row=0, column=0, sticky=tk.W, padx=5, pady=2)
         
         self.client_var = tk.StringVar(value="all")
         client_frame = ttk.Frame(self.scan_tab)
         client_frame.grid(row=0, column=1, sticky=(tk.W, tk.E), padx=5, pady=2)
         
-        self.radio_client_all = ttk.Radiobutton(client_frame, text=get_string('client_all'), value="all", 
+        self.radio_client_all = ttk.Radiobutton(client_frame, text=get_string('scan_client_all_radio'), value="all", 
                       variable=self.client_var)
         self.radio_client_all.pack(side=tk.LEFT, padx=5)
-        self.radio_client_tb = ttk.Radiobutton(client_frame, text=get_string('client_thunderbird'), value="thunderbird", 
+        self.radio_client_tb = ttk.Radiobutton(client_frame, text=get_string('scan_client_thunderbird_radio'), value="thunderbird", 
                       variable=self.client_var)
         self.radio_client_tb.pack(side=tk.LEFT, padx=5)
-        self.radio_client_am = ttk.Radiobutton(client_frame, text=get_string('client_apple_mail'), value="apple_mail", 
+        self.radio_client_am = ttk.Radiobutton(client_frame, text=get_string('scan_client_apple_mail_radio'), value="apple_mail", 
                       variable=self.client_var)
         self.radio_client_am.pack(side=tk.LEFT, padx=5)
-        self.radio_client_ol = ttk.Radiobutton(client_frame, text=get_string('client_outlook'), value="outlook", 
+        self.radio_client_ol = ttk.Radiobutton(client_frame, text=get_string('scan_client_outlook_radio'), value="outlook", 
                       variable=self.client_var)
         self.radio_client_ol.pack(side=tk.LEFT, padx=5)
-        self.radio_client_gen = ttk.Radiobutton(client_frame, text=get_string('client_generic'), value="generic", 
+        self.radio_client_gen = ttk.Radiobutton(client_frame, text=get_string('scan_client_generic_radio'), value="generic", 
                       variable=self.client_var)
         self.radio_client_gen.pack(side=tk.LEFT, padx=5)
         
         # Duplicate detection criteria
-        self.criteria_label = ttk.Label(self.scan_tab, text=get_string('criteria_label'))
+        self.criteria_label = ttk.Label(self.scan_tab, text=get_string('scan_criteria_label'))
         self.criteria_label.grid(row=1, column=0, sticky=tk.W, padx=5, pady=2)
         
         self.criteria_var = tk.StringVar(value="strict")
         criteria_frame = ttk.Frame(self.scan_tab)
         criteria_frame.grid(row=1, column=1, sticky=(tk.W, tk.E), padx=5, pady=2)
         
-        self.radio_crit_strict = ttk.Radiobutton(criteria_frame, text=get_string('criteria_strict'), value="strict", 
+        self.radio_crit_strict = ttk.Radiobutton(criteria_frame, text=get_string('scan_criteria_strict_radio'), value="strict", 
                       variable=self.criteria_var)
         self.radio_crit_strict.pack(side=tk.LEFT, padx=5)
-        self.radio_crit_content = ttk.Radiobutton(criteria_frame, text=get_string('criteria_content'), value="content", 
+        self.radio_crit_content = ttk.Radiobutton(criteria_frame, text=get_string('scan_criteria_content_radio'), value="content", 
                       variable=self.criteria_var)
         self.radio_crit_content.pack(side=tk.LEFT, padx=5)
-        self.radio_crit_headers = ttk.Radiobutton(criteria_frame, text=get_string('criteria_headers'), value="headers", 
+        self.radio_crit_headers = ttk.Radiobutton(criteria_frame, text=get_string('scan_criteria_headers_radio'), value="headers", 
                       variable=self.criteria_var)
         self.radio_crit_headers.pack(side=tk.LEFT, padx=5)
-        self.radio_crit_subj_send = ttk.Radiobutton(criteria_frame, text=get_string('criteria_subject_sender'), value="subject-sender", 
+        self.radio_crit_subj_send = ttk.Radiobutton(criteria_frame, text=get_string('scan_criteria_subject_sender_radio'), value="subject-sender", 
                       variable=self.criteria_var)
         self.radio_crit_subj_send.pack(side=tk.LEFT, padx=5)
         
         # Mail folder list
-        self.mail_folders_label = ttk.Label(self.scan_tab, text=get_string('mail_folders_label'))
+        self.mail_folders_label = ttk.Label(self.scan_tab, text=get_string('scan_folders_label'))
         self.mail_folders_label.grid(row=2, column=0, sticky=tk.NW, padx=5, pady=5)
         folder_frame = ttk.Frame(self.scan_tab)
         folder_frame.grid(row=2, column=1, sticky=(tk.N, tk.S, tk.E, tk.W), padx=5, pady=5)
         self.scan_tab.rowconfigure(2, weight=1)
-        
         folder_frame.columnconfigure(0, weight=1)
         folder_frame.rowconfigure(0, weight=1)
-        
-        # Create folder listbox with scrollbar
-        self.folder_listbox = tk.Listbox(folder_frame, selectmode=tk.MULTIPLE, height=10)
-        scrollbar = ttk.Scrollbar(folder_frame, orient=tk.VERTICAL, command=self.folder_listbox.yview)
-        self.folder_listbox.configure(yscrollcommand=scrollbar.set)
-        
+
+        self.folder_listbox = tk.Listbox(folder_frame, selectmode=tk.EXTENDED)
         self.folder_listbox.grid(row=0, column=0, sticky=(tk.N, tk.S, tk.E, tk.W))
-        scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
         
-        # Button frame
+        y_scrollbar = ttk.Scrollbar(folder_frame, orient=tk.VERTICAL, command=self.folder_listbox.yview)
+        self.folder_listbox.configure(yscrollcommand=y_scrollbar.set)
+        y_scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
+        
+        # Action buttons for scan tab
         button_frame = ttk.Frame(self.scan_tab)
         button_frame.grid(row=3, column=0, columnspan=2, sticky=(tk.W, tk.E), padx=5, pady=5)
         
         self.auto_clean_var = tk.BooleanVar(value=False)
-        self.check_auto_clean = ttk.Checkbutton(button_frame, text=get_string('auto_clean'), 
+        self.check_auto_clean = ttk.Checkbutton(button_frame, text=get_string('scan_autoclean_checkbox'), 
                        variable=self.auto_clean_var)
         self.check_auto_clean.pack(side=tk.LEFT, padx=5)
         
-        self.find_folders_button = ttk.Button(button_frame, text=get_string('find_folders_button'), 
+        self.find_folders_button = ttk.Button(button_frame, text=get_string('scan_find_folders_button'), 
                                                 command=self.find_mail_folders)
         self.find_folders_button.pack(side=tk.LEFT, padx=5)
         
-        self.select_all_button = ttk.Button(button_frame, text=get_string('select_all_button'), 
+        self.select_all_button = ttk.Button(button_frame, text=get_string('scan_select_all_button'), 
                                               command=self.select_all_folders)
         self.select_all_button.pack(side=tk.LEFT, padx=5)
         
@@ -709,7 +700,7 @@ class EmailCleanerGUI:
     
     def open_folder(self):
         """Open a custom folder for scanning"""
-        folder_path = filedialog.askdirectory(title=get_string('select_mail_folder_title'))
+        folder_path = filedialog.askdirectory(title=get_string('dialog_select_folder_title'))
 
         if folder_path:
             self.mail_folders = []
@@ -997,82 +988,91 @@ class EmailCleanerGUI:
 
     def update_ui_text(self):
         """Update all UI text elements to the current language."""
+        logging.debug("Updating UI text for language: %s", lang_manager.language)
         self.root.title(get_string('app_title'))
-        self.set_status(get_string('ready'))
+        self.set_status(get_string('ready_status'))
 
-        # Update menu bar by index for robustness
-        self.menu_bar.entryconfig(0, label=get_string('file'))
-        self.menu_bar.entryconfig(1, label=get_string('tools'))
-        self.menu_bar.entryconfig(2, label=get_string('view'))
-        self.menu_bar.entryconfig(3, label=get_string('settings'))
-        self.menu_bar.entryconfig(4, label=get_string('help'))
-        self.menu_bar.entryconfig(5, label=get_string('sponsor'))
+        # Update menu bar
+        self.menu_bar.entryconfig(0, label=get_string('menu_file'))
+        self.file_menu.entryconfig(0, label=get_string('menu_file_open_folder'))
+        self.file_menu.entryconfig(1, label=get_string('menu_file_run_demo'))
+        self.file_menu.entryconfig(3, label=get_string('menu_file_exit'))
 
-        # Update File menu (indices 0, 2, 4 are commands)
-        self.file_menu.entryconfig(0, label=get_string('open_folder'))
-        self.file_menu.entryconfig(2, label=get_string('run_demo'))
-        self.file_menu.entryconfig(4, label=get_string('exit'))
+        self.menu_bar.entryconfig(1, label=get_string('menu_tools'))
+        self.tools_menu.entryconfig(0, label=get_string('menu_tools_log_viewer'))
 
-        # Update Tools menu
-        self.tools_menu.entryconfig(0, label=get_string('log_viewer_title'))
+        self.menu_bar.entryconfig(2, label=get_string('menu_settings'))
+        self.settings_menu.entryconfig(0, label=get_string('menu_settings_language'))
+        self.lang_menu.entryconfig(0, label=get_string('menu_settings_language_en'))
+        self.lang_menu.entryconfig(1, label=get_string('menu_settings_language_it'))
+        self.settings_menu.entryconfig(2, label=get_string('menu_settings_dark_mode'))
 
-        # Update View menu
-        self.view_menu.entryconfig(0, label=get_string('dark_mode'))
-        self.view_menu.entryconfig(1, label=get_string('debug_mode'))
+        self.menu_bar.entryconfig(3, label=get_string('menu_help'))
+        self.help_menu.entryconfig(0, label=get_string('menu_help_documentation'))
+        self.help_menu.entryconfig(1, label=get_string('menu_help_report_bug'))
+        self.help_menu.entryconfig(2, label=get_string('menu_help_about'))
 
-        # Update Settings menu (index 1 is the language cascade)
-        self.settings_menu.entryconfig(1, label=get_string('language'))
-        self.lang_menu.entryconfig(0, label=get_string('lang_english'))
-        self.lang_menu.entryconfig(1, label=get_string('lang_italian'))
+        self.menu_bar.entryconfig(4, label=get_string('menu_sponsor'))
+        self.sponsor_menu.entryconfig(0, label=get_string('menu_sponsor_github'))
+        self.sponsor_menu.entryconfig(1, label=get_string('menu_sponsor_patreon'))
 
-        # Update Help menu
-        self.help_menu.entryconfig(0, label=get_string('about'))
-        self.help_menu.entryconfig(1, label=get_string('help_content'))
-
-        # Update Sponsor menu
-        self.sponsor_menu.entryconfig(0, label=get_string('sponsor_us'))
-
-        # Update tabs
-        self.notebook.tab(self.scan_tab, text=get_string("tab_scan"))
-        self.notebook.tab(self.results_tab, text=get_string("tab_results"))
+        # Update notebook tabs
+        self.notebook.tab(self.scan_tab, text=get_string('tab_scan'))
+        self.notebook.tab(self.results_tab, text=get_string('tab_results'))
 
         # Update Scan tab widgets
-        self.client_label.config(text=get_string('client_label'))
-        self.radio_client_all.config(text=get_string('client_all'))
-        self.radio_client_tb.config(text=get_string('client_thunderbird'))
-        self.radio_client_am.config(text=get_string('client_apple_mail'))
-        self.radio_client_ol.config(text=get_string('client_outlook'))
-        self.radio_client_gen.config(text=get_string('client_generic'))
-
-        self.criteria_label.config(text=get_string('criteria_label'))
-        self.radio_crit_strict.config(text=get_string('criteria_strict'))
-        self.radio_crit_content.config(text=get_string('criteria_content'))
-        self.radio_crit_headers.config(text=get_string('criteria_headers'))
-        self.radio_crit_subj_send.config(text=get_string('criteria_subject_sender'))
-
-        self.mail_folders_label.config(text=get_string('mail_folders_label'))
-        self.check_auto_clean.config(text=get_string('auto_clean'))
-        self.find_folders_button.config(text=get_string('find_folders_button'))
-        self.select_all_button.config(text=get_string('select_all_button'))
-        self.scan_button.config(text=get_string('scan_button'))
+        self.client_frame.config(text=get_string('scan_client_frame'))
+        self.client_label.config(text=get_string('scan_client_label'))
+        self.folder_frame.config(text=get_string('scan_folder_frame'))
+        self.select_all_button.config(text=get_string('scan_select_all_button'))
+        self.deselect_all_button.config(text=get_string('scan_deselect_all_button'))
+        self.find_folders_button.config(text=get_string('scan_find_folders_button'))
+        self.criteria_frame.config(text=get_string('scan_criteria_frame'))
+        self.strict_radio.config(text=get_string('scan_criteria_strict_radio'))
+        self.normal_radio.config(text=get_string('scan_criteria_normal_radio'))
+        self.custom_radio.config(text=get_string('scan_criteria_custom_radio'))
+        self.options_frame.config(text=get_string('scan_options_frame'))
+        self.auto_clean_check.config(text=get_string('scan_options_auto_clean_checkbox'))
+        self.scan_button.config(text=get_string('scan_scan_button'))
 
         # Update Results tab widgets
-        self.results_tree.heading("#0", text=get_string('header_group'))
-        self.results_tree.heading("date", text=get_string('header_date'))
-        self.results_tree.heading("from", text=get_string('header_from'))
-        self.results_tree.heading("subject", text=get_string('header_subject'))
-        self.results_tree.heading("folder", text=get_string('header_folder'))
-        self.preview_header.config(text=get_string('preview_header'))
-        self.group_buttons_frame.config(text=get_string('group_management_frame'))
-        self.expand_all_button.config(text=get_string('expand_all_button'))
-        self.collapse_all_button.config(text=get_string('collapse_all_button'))
-        self.action_buttons_frame.config(text=get_string('email_actions_frame'))
-        self.view_email_button.config(text=get_string('view_email_button'))
-        self.clean_selected_button.config(text=get_string('clean_selected_button'))
-        self.clean_all_button.config(text=get_string('clean_all_button'))
+        self.results_tree.heading("#0", text=get_string('results_header_group'))
+        self.results_tree.heading("date", text=get_string('results_header_date'))
+        self.results_tree.heading("from", text=get_string('results_header_from'))
+        self.results_tree.heading("subject", text=get_string('results_header_subject'))
+        self.results_tree.heading("folder", text=get_string('results_header_folder'))
+        self.preview_header.config(text=get_string('results_preview_header_default'))
+        self.group_buttons_frame.config(text=get_string('results_group_management_frame'))
+        self.expand_all_button.config(text=get_string('results_expand_all_button'))
+        self.collapse_all_button.config(text=get_string('results_collapse_all_button'))
+        self.action_buttons_frame.config(text=get_string('results_email_actions_frame'))
+        self.view_email_button.config(text=get_string('results_view_email_button'))
+        self.clean_selected_button.config(text=get_string('results_clean_selected_button'))
+        self.clean_all_button.config(text=get_string('results_clean_all_button'))
+
+        # Update context menus
+        self.email_menu.entryconfig(0, label=get_string('results_context_menu_view_email'))
 
         # Update console label
         self.console_frame.config(text=get_string('console_frame_title'))
+
+        # Repopulate results tree to update group headers if language changed
+        if self.duplicate_groups:
+            self.populate_results_tree()
+
+        logging.debug("UI text update complete.")
+
+    def show_about(self):
+        """Show the about window"""
+        AboutWindow(self.root)
+
+    def show_help(self):
+        """Show the help window"""
+        HelpWindow(self.root)
+
+    def report_bug(self):
+        """Open the GitHub issues page in a browser"""
+        webbrowser.open("https://github.com/Nsfr750/EmailDuplicateCleaner/issues")
 
     def on_closing(self):
         """Clean up when closing the application."""

@@ -8,8 +8,8 @@ class LogViewer(tk.Toplevel):
     """A Toplevel window to display logs."""
     def __init__(self, parent, log_queue):
         super().__init__(parent)
-        self.title(get_string('log_viewer_title'))
-        self.geometry("800x400")
+        self.title(get_string("log_viewer_window_title"))
+        self.geometry("700x400")
 
         self.log_queue = log_queue
         self.parent = parent

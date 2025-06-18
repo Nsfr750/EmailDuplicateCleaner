@@ -12,6 +12,7 @@ A comprehensive Python tool designed to scan, identify, and remove duplicate ema
 ## ✨ Features
 
 ### 🔍 Duplicate Detection
+
 - Multiple detection criteria:
   - Strict: Comprehensive comparison
   - Content Only: Message body analysis
@@ -19,11 +20,13 @@ A comprehensive Python tool designed to scan, identify, and remove duplicate ema
   - Subject+Sender: Focused identification
 
 ### 🖥️ Multi-Interface Support
+
 - Web Interface
 - Desktop GUI
 - Command-Line Interface
 
 ### 🌓 Enhanced User Experience
+
 - Modern web interface with dark/light mode
 - Interactive preview with real-time updates
 - Comprehensive help system
@@ -31,13 +34,16 @@ A comprehensive Python tool designed to scan, identify, and remove duplicate ema
 - Demo mode for testing and learning
 
 ### 🔒 Email Client Compatibility
+
 Supports:
+
 - Mozilla Thunderbird
 - Apple Mail
 - Microsoft Outlook
 - Generic mbox/maildir formats
 
 ### 🏗️ Technical Highlights
+
 - Modern web interface built with Flask
 - SQLAlchemy for database management
 - Comprehensive help system with dynamic content
@@ -55,31 +61,37 @@ Supports:
 
 ### Installation
 
-1. Clone the repository:
-```bash
-git clone https://github.com/Nsfr750/EmailDuplicateCleaner.git
-cd EmailDuplicateCleaner
-```
+1.  Clone the repository:
 
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
+    ```bash
+    git clone https://github.com/Nsfr750/EmailDuplicateCleaner.git
+    cd EmailDuplicateCleaner
+    ```
+
+2.  Install dependencies:
+
+    ```bash
+    pip install -r requirements.txt
+    ```
 
 ### Running the Application
 
 #### Web Interface
+
 ```bash
 python email_cleaner_web.py
 ```
+
 Access at `http://localhost:5000`
 
 #### Desktop GUI
+
 ```bash
 python email_cleaner_gui.py
 ```
 
 #### Command Line Demo
+
 ```bash
 python email_duplicate_cleaner.py --demo
 ```
@@ -100,7 +112,7 @@ Found a bug? [Open an issue](https://github.com/Nsfr750/EmailDuplicateCleaner/is
 
 - `strict`: Message-ID + Date + From + Subject + Content
 - `content`: Content only
-- `headers`: Message-ID + Date + From + Subject  
+- `headers`: Message-ID + Date + From + Subject
 - `subject-sender`: Subject + From fields only
 
 ## Safety Features
@@ -113,7 +125,7 @@ Found a bug? [Open an issue](https://github.com/Nsfr750/EmailDuplicateCleaner/is
 ## Project Structure
 
 - `email_cleaner_web.py`: Web interface
-- `email_cleaner_gui.py`: Desktop GUI 
+- `email_cleaner_gui.py`: Desktop GUI
 - `email_duplicate_cleaner.py`: Core functionality and CLI
 - `static/`: Web assets (CSS, JS)
 - `templates/`: HTML templates
@@ -121,7 +133,7 @@ Found a bug? [Open an issue](https://github.com/Nsfr750/EmailDuplicateCleaner/is
 ## Workflows
 
 - Demo Mode: Runs with test emails
-- Help: Shows usage information 
+- Help: Shows usage information
 - GUI Mode: Launches desktop interface
 - Web Mode: Starts web server
 

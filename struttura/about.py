@@ -1,46 +1,32 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
-from struttura.version import get_version
+from tkinter import ttk
 from lang.lang import get_string
+from version import __version__
 
 class About:
     """A class to display the about window."""
     def show_about(self):
         about_root = tk.Toplevel()
-        about_root.title(get_string('about_title'))
-        about_root.geometry("400x300")
+        about_root.title(get_string("about_window_title"))
+        about_root.transient(about_root.master)
+        about_root.grab_set()
+        about_root.resizable(False, False)
 
-        # Title
-        title_label = tk.Label(about_root, text=get_string('app_title'), font=("Arial", 16, "bold"))
-        title_label.pack(pady=20)
+        main_frame = ttk.Frame(about_root, padding="20")
+        main_frame.pack(expand=True, fill=tk.BOTH)
 
-        # Version
-        version_label = tk.Label(about_root, text=f"{get_string('version_label')} {get_version()}")
-        version_label.pack()
+        ttk.Label(main_frame, text=get_string('app_title'), font=("Arial", 16, "bold")).pack()
+        ttk.Label(main_frame, text=f"{get_string('about_window_version')} {__version__}").pack(pady=(0, 10))
 
-        # Description
-        description_label = tk.Label(about_root, text=get_string('about_description'), justify=tk.CENTER)
-        description_label.pack(pady=20)
+        ttk.Label(main_frame, text=get_string('about_window_description'), wraplength=380, justify=tk.CENTER).pack(pady=10)
 
-        # Links
-        def open_github():
-            import webbrowser
-            webbrowser.open("https://github.com/Nsfr750/EmailDuplicateCleaner")
+        ttk.Separator(main_frame, orient='horizontal').pack(fill='x', pady=10)
 
-        def open_issues():
-            import webbrowser
-            webbrowser.open("https://github.com/Nsfr750/EmailDuplicateCleaner/issues")
+        ttk.Label(main_frame, text=f"{get_string('about_window_developer')} Nsfr750").pack()
 
-        github_button = tk.Button(about_root, text=get_string('github_button'), command=open_github)
-        github_button.pack(pady=5)
+        ttk.Button(main_frame, text=get_string("dialog_close_button"), command=about_root.destroy).pack(pady=(20, 0))
 
-        issues_button = tk.Button(about_root, text=get_string('issues_button'), command=open_issues)
-        issues_button.pack(pady=5)
-
-        # Copyright
-        copyright_label = tk.Label(about_root, text=get_string('copyright_label'), font=("Arial", 10))
-        copyright_label.pack(pady=10)
-
-        # Close button
-        close_button = tk.Button(about_root, text=get_string('close_button'), command=about_root.destroy)
-        close_button.pack(pady=10)
+        about_root.update_idletasks()
+        x = about_root.master.winfo_x() + (about_root.master.winfo_width() - about_root.winfo_width()) // 2
+        y = about_root.master.winfo_y() + (about_root.master.winfo_height() - about_root.winfo_height()) // 2
+        about_root.geometry(f"+{x}+{y}")
