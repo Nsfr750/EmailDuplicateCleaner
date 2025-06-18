@@ -23,9 +23,7 @@ from email_duplicate_cleaner import (
     BaseEmailClientHandler, ThunderbirdMailHandler, AppleMailHandler,
     OutlookHandler, GenericMailHandler
 )
-from help import get_help_content
-
-# Import database functions
+from struttura.help import get_help_content
 from db_init import (
     create_app, init_db, add_scan_history, add_clean_record, 
     get_user_settings, update_user_settings, get_scan_history
@@ -828,7 +826,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-''');
+''')
 
     # Create CSS file if it doesn't exist
     if not os.path.exists('static/css/style.css'):
@@ -872,7 +870,7 @@ document.addEventListener('DOMContentLoaded', function() {
     margin-top: 10px;
     font-weight: bold;
 }
-''');
+''')
 
     # Create JavaScript file if it doesn't exist
     if not os.path.exists('static/js/script.js'):
