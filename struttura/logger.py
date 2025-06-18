@@ -1,6 +1,8 @@
 import datetime
 import sys
 import threading
+import logging
+import queue
 
 LOG_FILE = 'traceback.log'
 LOG_LEVELS = ("INFO", "WARNING", "ERROR")
@@ -33,3 +35,31 @@ def log_exception(exc_type, exc_value, exc_tb):
 
 def setup_global_exception_logging():
     sys.excepthook = log_exception
+
+class QueueHandler(logging.Handler):
+    """A logging handler that puts records into a queue."""
+    def __init__(self, log_queue):
+        super().__init__()
+        self.log_queue = log_queue
+
+    def emit(self, record):
+        self.log_queue.put(record)
+
+def setup_logging(log_level=logging.INFO):
+    """Configure logging for the application."""
+    log_queue = queue.Queue()
+    queue_handler = QueueHandler(log_queue)
+
+    # Basic configuration for file logging
+    logging.basicConfig(
+        level=log_level,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        filename='app.log',  # Log to a file
+        filemode='w' # Overwrite log on each run
+    )
+
+    # Get the root logger and add the queue handler
+    logger = logging.getLogger()
+    logger.addHandler(queue_handler)
+
+    return log_queue

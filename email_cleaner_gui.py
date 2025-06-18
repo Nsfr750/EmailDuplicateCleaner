@@ -17,18 +17,19 @@ import queue
 import sqlite3
 from struttura.sponsor import Sponsor
 from lang.lang import lang_manager, get_string
+from struttura.logger import setup_logging
+from struttura.traceback import setup_traceback_handler
+from struttura.log_viewer import LogViewer
+from email_duplicate_cleaner import (
+    EmailClientManager, DuplicateEmailFinder, create_test_mailbox,
+    BaseEmailClientHandler, ThunderbirdMailHandler, AppleMailHandler,
+    OutlookHandler, GenericMailHandler
+)
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
-)
-
-# Import the core functionality from the CLI version
-from email_duplicate_cleaner import (
-    EmailClientManager, DuplicateEmailFinder, create_test_mailbox,
-    BaseEmailClientHandler, ThunderbirdMailHandler, AppleMailHandler,
-    OutlookHandler, GenericMailHandler
 )
 
 class RedirectText:
@@ -90,6 +91,11 @@ class EmailCleanerGUI:
         self.temp_dir = None
         self.lang_var = tk.StringVar(value=lang_manager.get_language())
         
+        # Setup logging and exception handling
+        self.log_queue = setup_logging()
+        setup_traceback_handler()
+        logging.info("Application started.")
+
         # Create the main frame structure
         self.create_main_frame()
         
@@ -148,6 +154,11 @@ class EmailCleanerGUI:
         self.file_menu.add_command(label=get_string('menu_exit'), command=self.root.quit)
         menu_bar.add_cascade(label=get_string('menu_file'), menu=self.file_menu)
 
+        # Tools menu
+        self.tools_menu = tk.Menu(menu_bar, tearoff=0)
+        menu_bar.add_cascade(label=get_string('tools'), menu=self.tools_menu)
+        self.tools_menu.add_command(label=get_string('log_viewer_title'), command=self.open_log_viewer)
+
         # View menu
         self.view_menu = tk.Menu(menu_bar, tearoff=0)
         self.dark_mode_var = tk.BooleanVar(value=False)
@@ -181,6 +192,12 @@ class EmailCleanerGUI:
 
         self.root.config(menu=menu_bar)
     
+    def open_log_viewer(self):
+        if not hasattr(self, 'log_viewer') or not self.log_viewer.winfo_exists():
+            self.log_viewer = LogViewer(self.root, self.log_queue)
+        else:
+            self.log_viewer.lift()
+
     def create_tabs(self):
         """Create the main tab structure"""
         self.notebook = ttk.Notebook(self.main_frame)
@@ -1021,6 +1038,12 @@ class EmailCleanerGUI:
         except Exception as e:
             self.show_error(get_string('error_viewing_email').format(error=str(e)))
 
+    def open_log_viewer(self):
+        if not hasattr(self, 'log_viewer') or not self.log_viewer.winfo_exists():
+            self.log_viewer = LogViewer(self.root, self.log_queue)
+        else:
+            self.log_viewer.lift()
+
     def switch_language(self):
         """Switch the application language and update UI text."""
         new_lang = self.lang_var.get()
@@ -1035,10 +1058,10 @@ class EmailCleanerGUI:
         # Menu Bar
         menu_bar = self.root.nametowidget(self.root.cget('menu'))
         menu_bar.entryconfig(get_string('menu_file'), label=get_string('menu_file'))
+        menu_bar.entryconfig(get_string('menu_tools'), label=get_string('tools'))
         menu_bar.entryconfig(get_string('menu_view'), label=get_string('menu_view'))
         menu_bar.entryconfig(get_string('menu_settings'), label=get_string('menu_settings'))
         menu_bar.entryconfig(get_string('menu_help'), label=get_string('menu_help'))
-        menu_bar.entryconfig(get_string('menu_sponsor'), label=get_string('menu_sponsor'))
 
         # File Menu
         self.file_menu.entryconfig(get_string('menu_open_folder'), label=get_string('menu_open_folder'))
@@ -1048,6 +1071,9 @@ class EmailCleanerGUI:
         # View Menu
         self.view_menu.entryconfig(get_string('menu_dark_mode'), label=get_string('menu_dark_mode'))
         self.view_menu.entryconfig(get_string('menu_debug_mode'), label=get_string('menu_debug_mode'))
+
+        # Tools Menu
+        self.tools_menu.entryconfig(get_string('log_viewer_title'), label=get_string('log_viewer_title'))
 
         # Settings Menu
         self.settings_menu.entryconfig(get_string('menu_language'), label=get_string('menu_language'))

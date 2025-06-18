@@ -92,6 +92,19 @@ TRANSLATIONS = {
         # Sponsor Window
         'sponsor_title': 'Sponsor this Project',
 
+        # Logger
+        'log_viewer_title': 'Log Viewer',
+        'log_level': 'Log Level:',
+        'log_timestamp': 'Timestamp',
+        'log_level_name': 'Level',
+        'log_message': 'Message',
+        'clear_log': 'Clear Log',
+        'export_log': 'Export Log',
+
+        # Traceback
+        'traceback_title': 'Unhandled Exception',
+        'traceback_message': 'An unexpected error occurred. Please see the details below.',
+        'copy_to_clipboard': 'Copy to Clipboard',
     },
     'it': {
         # General
@@ -183,6 +196,20 @@ TRANSLATIONS = {
 
         # Sponsor Window
         'sponsor_title': 'Sponsorizza questo Progetto',
+
+        # Logger
+        'log_viewer_title': 'Visualizzatore Log',
+        'log_level': 'Livello Log:',
+        'log_timestamp': 'Timestamp',
+        'log_level_name': 'Livello',
+        'log_message': 'Messaggio',
+        'clear_log': 'Pulisci Log',
+        'export_log': 'Esporta Log',
+
+        # Traceback
+        'traceback_title': 'Eccezione non gestita',
+        'traceback_message': 'Si è verificato un errore imprevisto. Vedi i dettagli di seguito.',
+        'copy_to_clipboard': 'Copia negli Appunti',
     }
 }
 
