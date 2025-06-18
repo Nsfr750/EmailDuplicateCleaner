@@ -19,6 +19,7 @@ TRANSLATIONS = {
         'file': 'File',
         'exit': 'Exit',
         'tools': 'Tools',
+        'view': 'View',
         'demo_mode': 'Demo Mode',
         'settings': 'Settings',
         'dark_mode': 'Dark Mode',
@@ -26,6 +27,7 @@ TRANSLATIONS = {
         'help': 'Help',
         'about': 'About',
         'sponsor': 'Sponsor',
+        'sponsor_us': 'Sponsor Us',
         'language': 'Language',
 
         # Tabs
@@ -61,6 +63,20 @@ TRANSLATIONS = {
 
         # Console
         'console': 'Console',
+        'console_frame_title': "Console",
+        'status_debug_enabled': "Debug mode enabled.",
+        'status_debug_disabled': "Debug mode disabled.",
+        'error_prefix': "Error",
+        'lang_english': "English",
+        'lang_italian': "Italiano",
+        'demo_mode_running': "Running in demo mode with test emails...",
+        'expanding_all_groups': "Expanding all groups...",
+        'collapsing_all_groups': "Collapsing all groups...",
+        'found_top_level_items': "Found {count} top-level items",
+        'preview_header_group_selected': "Select an individual email to see a preview.",
+        'preview_header_error': "Error Previewing Email",
+        'error_previewing_email': "Could not display the email preview.",
+        'error_cleanup_temp_dir': "Failed to clean up temp directory: {error}",
 
         # Status Messages
         'finding_folders': 'Finding mail folders...',
@@ -82,12 +98,13 @@ TRANSLATIONS = {
         'error_viewing_email': 'Error viewing email content: {error}',
 
         # About Window
-        'about_title': 'About Email Duplicate Cleaner',
+        'about_title': "About Email Duplicate Cleaner",
         'version': 'Version',
         'author': 'Author',
         'email': 'Email',
         'github': 'GitHub',
         'license': 'License',
+        'version_label': "Version:",
 
         # Sponsor Window
         'sponsor_title': 'Sponsor this Project',
@@ -124,6 +141,7 @@ TRANSLATIONS = {
         'file': 'File',
         'exit': 'Esci',
         'tools': 'Strumenti',
+        'view': 'Visualizza',
         'demo_mode': 'Modalità Demo',
         'settings': 'Impostazioni',
         'dark_mode': 'Modalità Scura',
@@ -131,6 +149,7 @@ TRANSLATIONS = {
         'help': 'Aiuto',
         'about': 'Informazioni',
         'sponsor': 'Sponsor',
+        'sponsor_us': 'Sponsorizzaci',
         'language': 'Lingua',
 
         # Tabs
@@ -166,6 +185,20 @@ TRANSLATIONS = {
 
         # Console
         'console': 'Console',
+        'console_frame_title': "Console",
+        'status_debug_enabled': "Modalità debug attivata.",
+        'status_debug_disabled': "Modalità debug disattivata.",
+        'error_prefix': "Errore",
+        'lang_english': "English",
+        'lang_italian': "Italiano",
+        'demo_mode_running': "Esecuzione in modalità demo con email di prova...",
+        'expanding_all_groups': "Espansione di tutti i gruppi...",
+        'collapsing_all_groups': "Compressione di tutti i gruppi...",
+        'found_top_level_items': "Trovati {count} elementi di primo livello",
+        'preview_header_group_selected': "Seleziona una singola email per vederne l'anteprima.",
+        'preview_header_error': "Errore Anteprima Email",
+        'error_previewing_email': "Impossibile visualizzare l'anteprima dell'email.",
+        'error_cleanup_temp_dir': "Pulizia della directory temporanea fallita: {error}",
 
         # Status Messages
         'finding_folders': 'Ricerca cartelle email in corso...',
@@ -180,19 +213,20 @@ TRANSLATIONS = {
         'select_folders_to_scan': 'Seleziona almeno una cartella da scansionare.',
         'select_groups_to_clean': 'Seleziona almeno un gruppo da pulire.',
         'no_groups_to_clean': 'Nessun gruppo di duplicati da pulire.',
-        'demo_mode_running': 'In esecuzione in Modalità Demo. È stata creata una casella di posta temporanea.',
+        'demo_mode_running': "Esecuzione in modalità demo con email di prova...",
         'error_finding_folders': 'Errore durante la ricerca delle cartelle email: {error}',
         'error_scanning': 'Errore durante la scansione: {error}',
-        'error_cleaning': 'Errore durante la pulizia: {error}',
-        'error_viewing_email': 'Errore durante la visualizzazione del contenuto dell\`email: {error}',
+        'error_cleaning': 'Errore during la pulizia: {error}',
+        'error_viewing_email': "Errore durante la visualizzazione del contenuto dell'email: {error}",
 
         # About Window
-        'about_title': 'Informazioni su Email Duplicate Cleaner',
+        'about_title': "Informazioni su Email Duplicate Cleaner",
         'version': 'Versione',
         'author': 'Autore',
         'email': 'Email',
         'github': 'GitHub',
         'license': 'Licenza',
+        'version_label': "Versione:",
 
         # Sponsor Window
         'sponsor_title': 'Sponsorizza questo Progetto',
