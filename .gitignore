@@ -62,3 +62,4 @@ build/
 *.egg-info/
 cli.bat
 gui.bat
+EmailDupFinder.exe
