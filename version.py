@@ -8,7 +8,7 @@ for the Email Duplicate Cleaner project.
 # Version information follows Semantic Versioning 2.0.0 (https://semver.org/)
 VERSION_MAJOR = 2
 VERSION_MINOR = 3
-VERSION_PATCH = 0
+VERSION_PATCH = 2
 
 # Additional version qualifiers
 VERSION_QUALIFIER = 'beta'  # Could be 'alpha', 'beta', 'rc', or ''

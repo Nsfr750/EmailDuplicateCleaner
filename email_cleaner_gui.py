@@ -254,23 +254,24 @@ class EmailCleanerGUI:
     
     def setup_results_tab(self):
         """Set up the content for the Results tab"""
-        # Configure grid
-        self.results_tab.columnconfigure(0, weight=1)
+        # Configura la griglia: 1 riga, 2 colonne
+        self.results_tab.columnconfigure(0, weight=3)
+        self.results_tab.columnconfigure(1, weight=2)
         self.results_tab.rowconfigure(0, weight=1)
         self.results_tab.rowconfigure(1, weight=0)
-        
-        # Results treeview
+
+        # Frame risultati (sinistra)
         self.results_frame = ttk.Frame(self.results_tab)
         self.results_frame.grid(row=0, column=0, sticky=(tk.N, tk.S, tk.E, tk.W), pady=5)
-        
         self.results_frame.columnconfigure(0, weight=1)
         self.results_frame.rowconfigure(0, weight=1)
-        
-        # Create treeview with scrollbar
-        self.results_tree = ttk.Treeview(self.results_frame, columns=("date", "from", "subject", "folder"),
-                                    show="tree headings", selectmode="extended")
-        
-        # Set column headings
+
+        # Treeview con scrollbar
+        self.results_tree = ttk.Treeview(
+            self.results_frame,
+            columns=("date", "from", "subject", "folder"),
+            show="tree headings", selectmode="extended"
+        )
         self.results_tree.heading("#0", text="Group")
         self.results_tree.column("#0", width=60, stretch=False)
         self.results_tree.heading("date", text="Date")
@@ -281,54 +282,107 @@ class EmailCleanerGUI:
         self.results_tree.column("subject", width=200)
         self.results_tree.heading("folder", text="Folder")
         self.results_tree.column("folder", width=180)
-        
-        # Add scrollbars
+
         y_scrollbar = ttk.Scrollbar(self.results_frame, orient=tk.VERTICAL, command=self.results_tree.yview)
         self.results_tree.configure(yscrollcommand=y_scrollbar.set)
-        
         x_scrollbar = ttk.Scrollbar(self.results_frame, orient=tk.HORIZONTAL, command=self.results_tree.xview)
         self.results_tree.configure(xscrollcommand=x_scrollbar.set)
-        
-        # Place treeview and scrollbars
+
         self.results_tree.grid(row=0, column=0, sticky=(tk.N, tk.S, tk.E, tk.W))
         y_scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
         x_scrollbar.grid(row=1, column=0, sticky=(tk.E, tk.W))
-        
-        # Add right-click menu for viewing email content
+
+        # Menu contestuale e binding eventi
         self.email_menu = tk.Menu(self.results_tree, tearoff=0)
         self.email_menu.add_command(label="View Email Content", command=self.view_email_content)
-        
-        # Bind right-click and double-click events
         self.results_tree.bind("<Button-3>", self.show_email_menu)
         self.results_tree.bind("<Double-1>", self.on_item_double_click)
-        
-        # Print debug information
-        print(f"Treeview initialized: {self.results_tree}")
-        
-        # Button frame
+        self.results_tree.bind("<<TreeviewSelect>>", self.update_preview_panel)
+
+        # Frame anteprima (destra)
+        self.preview_frame = ttk.Frame(self.results_tab, padding=5)
+        self.preview_frame.grid(row=0, column=1, sticky=(tk.N, tk.S, tk.E, tk.W))
+        self.preview_frame.columnconfigure(0, weight=1)
+        self.preview_frame.rowconfigure(1, weight=1)
+
+        # Header
+        self.preview_header = tk.Label(self.preview_frame, text="Seleziona una email per vedere l'anteprima", anchor="w", justify="left", font=("Arial", 10, "bold"))
+        self.preview_header.grid(row=0, column=0, sticky="ew", pady=(0, 5))
+
+        # Contenuto (ScrolledText)
+        self.preview_text = scrolledtext.ScrolledText(self.preview_frame, wrap=tk.WORD, font=('Arial', 10), width=50, height=20, state="disabled")
+        self.preview_text.grid(row=1, column=0, sticky="nsew")
+
+        # Button frame (sotto)
         button_frame = ttk.Frame(self.results_tab)
-        button_frame.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=10)
-        
+        button_frame.grid(row=1, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=10)
+
         # Group management buttons
         group_buttons_frame = ttk.LabelFrame(button_frame, text="Group Management")
         group_buttons_frame.pack(side=tk.LEFT, padx=10, fill=tk.X)
-        
-        ttk.Button(group_buttons_frame, text="Expand All Groups", 
-                  command=self.expand_all_groups).pack(side=tk.LEFT, padx=5, pady=5)
-        ttk.Button(group_buttons_frame, text="Collapse All Groups", 
-                  command=self.collapse_all_groups).pack(side=tk.LEFT, padx=5, pady=5)
-        
+        ttk.Button(group_buttons_frame, text="Expand All Groups", command=self.expand_all_groups).pack(side=tk.LEFT, padx=5, pady=5)
+        ttk.Button(group_buttons_frame, text="Collapse All Groups", command=self.collapse_all_groups).pack(side=tk.LEFT, padx=5, pady=5)
+
         # Email action buttons
         action_buttons_frame = ttk.LabelFrame(button_frame, text="Email Actions")
         action_buttons_frame.pack(side=tk.LEFT, padx=10, fill=tk.X)
+        ttk.Button(action_buttons_frame, text="View Selected Email", command=self.view_email_content).pack(side=tk.LEFT, padx=5, pady=5)
+        ttk.Button(action_buttons_frame, text="Clean Selected Groups", command=self.clean_selected_groups).pack(side=tk.LEFT, padx=5, pady=5)
+        ttk.Button(action_buttons_frame, text="Clean All Groups", command=self.clean_all_groups).pack(side=tk.LEFT, padx=5, pady=5)
+
+    def update_preview_panel(self, event=None):
+        """Aggiorna il pannello di anteprima con la mail selezionata"""
+        self.preview_header.config(text="")
+        self.preview_text.config(state="normal")
+        self.preview_text.delete("1.0", tk.END)
+
+        selected = self.results_tree.selection()
+        if not selected:
+            self.preview_header.config(text="Seleziona una email per vedere l'anteprima")
+            self.preview_text.config(state="disabled")
+            return
+
+        item_id = selected[0]
+        tags = self.results_tree.item(item_id, "tags")
+
+        if not tags or len(tags) < 2:
+            self.preview_header.config(text="Seleziona una email per vedere l'anteprima")
+            self.preview_text.insert("1.0", "Seleziona una email da un gruppo per vederne il contenuto.")
+            self.preview_text.config(state="disabled")
+            return
         
-        ttk.Button(action_buttons_frame, text="View Selected Email", 
-                  command=self.view_email_content).pack(side=tk.LEFT, padx=5, pady=5)
-        ttk.Button(action_buttons_frame, text="Clean Selected Groups", 
-                  command=self.clean_selected_groups).pack(side=tk.LEFT, padx=5, pady=5)
-        ttk.Button(action_buttons_frame, text="Clean All Groups", 
-                  command=self.clean_all_groups).pack(side=tk.LEFT, padx=5, pady=5)
-    
+        try:
+            group_idx_str, email_idx_str = tags
+            group_idx = int(group_idx_str)
+            email_idx = int(email_idx_str)
+            email_info = self.duplicate_groups[group_idx]['messages'][email_idx]
+            header = (
+                f"From: {email_info['from']}\n"
+                f"To: {email_info.get('to', 'N/A')}\n"
+                f"Date: {email_info['date']}\n"
+                f"Subject: {email_info['subject']}\n"
+                f"Folder: {email_info['folder']}"
+            )
+            self.preview_header.config(text=header)
+            content = email_info.get('content', '')
+            if isinstance(content, bytes):
+                try:
+                    content = content.decode('utf-8')
+                except UnicodeDecodeError:
+                    try:
+                        content = content.decode('latin-1')
+                    except UnicodeDecodeError:
+                        content = str(content)
+            self.preview_text.insert("1.0", content)
+        except (ValueError, IndexError, KeyError) as e:
+            self.preview_header.config(text="Errore nel caricamento dell'anteprima")
+            self.preview_text.insert("1.0", f"Impossibile caricare l'email. Dettagli: {e}")
+        except Exception as e:
+            self.preview_header.config(text="Errore imprevisto")
+            self.preview_text.insert("1.0", str(e))
+
+        self.preview_text.config(state="disabled")
+
     def create_console(self):
         """Create the output console area"""
         console_frame = ttk.LabelFrame(self.main_frame, text="Console Output")
