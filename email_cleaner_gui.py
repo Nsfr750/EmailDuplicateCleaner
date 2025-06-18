@@ -141,7 +141,7 @@ class EmailCleanerGUI:
     
     def create_menu(self):
         """Create the application menu bar"""
-        self.menu_bar = tk.Menu(self.root)
+        self.menu_bar = tk.Menu(self.root, tearoff=0)
         
         # File menu
         self.file_menu = tk.Menu(self.menu_bar, tearoff=0)
@@ -421,6 +421,7 @@ class EmailCleanerGUI:
             header_text = (
                 f"{get_string('header_from')}: {email_info['from']}\n"
                 f"{get_string('header_to')}: {email_info.get('to', get_string('header_to_na'))}\n"
+                f"{get_string('header_date')}: {email_info['date']}\n"
                 f"{get_string('header_subject')}: {email_info['subject']}"
             )
             self.preview_header.config(text=header_text)
@@ -917,7 +918,7 @@ class EmailCleanerGUI:
             
             # Header frame
             header_frame = ttk.LabelFrame(viewer, text=get_string('email_headers_frame'), padding="5")
-            header_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), padx=5, pady=5)
+            header_frame.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
             
             # Add header information
             email_info = self.duplicate_groups[group_idx]['messages'][email_idx]
@@ -1021,6 +1022,8 @@ class EmailCleanerGUI:
 
         # Update Settings menu (index 1 is the language cascade)
         self.settings_menu.entryconfig(1, label=get_string('language'))
+        self.lang_menu.entryconfig(0, label=get_string('lang_english'))
+        self.lang_menu.entryconfig(1, label=get_string('lang_italian'))
 
         # Update Help menu
         self.help_menu.entryconfig(0, label=get_string('about'))
