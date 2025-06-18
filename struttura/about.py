@@ -4,35 +4,34 @@ import sys
 import os
 
 # Add project root to the Python path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 
-from version import __version__
-from lang.lang import get_string
+from struttura.version import __version__
+from lang.lang import get_string as tr
 
 class About:
-    """A class to display the about window."""
-    def show_about(self):
-        about_root = tk.Toplevel()
-        about_root.title(get_string("about_window_title"))
-        about_root.transient(about_root.master)
-        about_root.grab_set()
-        about_root.resizable(False, False)
+    @staticmethod
+    def show_about(root):
+        about_dialog = tk.Toplevel(root)
+        about_dialog.title(tr('about'))
+        about_dialog.geometry('400x300')
+        about_dialog.transient(root)
+        about_dialog.grab_set()
 
-        main_frame = ttk.Frame(about_root, padding="20")
-        main_frame.pack(expand=True, fill=tk.BOTH)
+        # Add app icon or logo here if you have one
+        title = ttk.Label(about_dialog, text='Project', font=('Helvetica', 16, 'bold'))
+        title.pack(pady=20)
 
-        ttk.Label(main_frame, text=get_string('app_title'), font=("Arial", 16, "bold")).pack()
-        ttk.Label(main_frame, text=f"{get_string('about_window_version')} {__version__}").pack(pady=(0, 10))
+        # Get version dynamically from version.py
+        version = ttk.Label(about_dialog, text=f"{tr('version')} {__version__}")
+        version.pack()
 
-        ttk.Label(main_frame, text=get_string('about_window_description'), wraplength=380, justify=tk.CENTER).pack(pady=10)
+        description = ttk.Label(about_dialog, text='', justify=tk.CENTER)
+        description.pack(pady=20)
 
-        ttk.Separator(main_frame, orient='horizontal').pack(fill='x', pady=10)
+        copyright = ttk.Label(about_dialog, text=' 2025 Nsfr750')
+        copyright.pack(pady=10)
 
-        ttk.Label(main_frame, text=f"{get_string('about_window_developer')} Nsfr750").pack()
-
-        ttk.Button(main_frame, text=get_string("dialog_close_button"), command=about_root.destroy).pack(pady=(20, 0))
-
-        about_root.update_idletasks()
-        x = about_root.master.winfo_x() + (about_root.master.winfo_width() - about_root.winfo_width()) // 2
-        y = about_root.master.winfo_y() + (about_root.master.winfo_height() - about_root.winfo_height()) // 2
-        about_root.geometry(f"+{x}+{y}")
+        ttk.Button(about_dialog, text=tr('close'), command=about_dialog.destroy).pack(pady=20)

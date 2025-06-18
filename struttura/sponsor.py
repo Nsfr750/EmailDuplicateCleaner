@@ -5,45 +5,37 @@ import sys
 import os
 
 # Add project root to the Python path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 
-from lang.lang import get_string
+from lang.lang import get_string as tr
 
 # Sponsor Class
-class Sponsor:
-    def show_sponsor_window(self):
-        sponsor_root = tk.Toplevel()
-        sponsor_root.title(get_string('sponsor_window_title'))
 
-        main_frame = ttk.Frame(sponsor_root, padding="20")
-        main_frame.pack(expand=True, fill=tk.BOTH)
+class Sponsor(tk.Toplevel):
+    def __init__(self, root):
+        super().__init__(root)
 
-        ttk.Label(main_frame, text=get_string('sponsor_window_main_text'), font=("Arial", 12), wraplength=380, justify=tk.CENTER).pack(pady=(0, 15))
-
-        button_frame = ttk.Frame(main_frame)
-        button_frame.pack(pady=5)
-
-        def open_patreon():
-            webbrowser.open("https://www.patreon.com/Nsfr750")
-
-        def open_github():
-            webbrowser.open("https://github.com/sponsors/Nsfr750")
-
-        def open_paypal():
-            webbrowser.open("https://paypal.me/3dmega")
-
-        ttk.Button(button_frame, text=get_string('sponsor_window_patreon_button'), command=open_patreon).pack(side=tk.LEFT, padx=10)
-        ttk.Button(button_frame, text=get_string('sponsor_window_github_button'), command=open_github).pack(side=tk.LEFT, padx=10)
-        ttk.Button(button_frame, text=get_string('sponsor_window_paypal_button'), command=open_paypal).pack(side=tk.LEFT, padx=10)
-
-        ttk.Separator(main_frame, orient='horizontal').pack(fill='x', pady=(20, 10))
-
-        def close_window():
-            sponsor_root.destroy()
-
-        ttk.Button(main_frame, text=get_string('dialog_close_button'), command=close_window).pack(side=tk.RIGHT, pady=(0, 10))
-
-        sponsor_root.update_idletasks()
-        x = sponsor_root.winfo_x() + (sponsor_root.winfo_width() - sponsor_root.winfo_width()) // 2
-        y = sponsor_root.winfo_y() + (sponsor_root.winfo_height() - sponsor_root.winfo_height()) // 2
-        sponsor_root.geometry(f"+{x}+{y}")
+    def show_sponsor(self):
+        self.title(tr('sponsor'))
+        self.geometry('500x150')
+        
+        # Sponsor buttons
+        btn_frame = tk.Frame(self)
+        btn_frame.pack(pady=20)
+        
+        buttons = [
+            (tr('sponsor_on_github'), "https://github.com/sponsors/Nsfr750"),
+            (tr('join_discord'), "https://discord.gg/BvvkUEP9"),
+            (tr('buy_me_a_coffee'), "https://paypal.me/3dmega"),
+            (tr('join_the_patreon'), "https://www.patreon.com/Nsfr750")
+        ]
+        
+        for text, url in buttons:
+            btn = tk.Button(btn_frame, text=text, pady=5,
+                          command=lambda u=url: webbrowser.open(u))
+            btn.pack(side=tk.LEFT, padx=5)
+        
+        # Close button
+        tk.Button(self, text=tr('close'), command=self.destroy).pack(pady=10)

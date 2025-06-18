@@ -21,8 +21,9 @@ from lang.lang import lang_manager, get_string
 from struttura.logger import setup_logging
 from struttura.traceback import setup_traceback_handler
 from struttura.log_viewer import LogViewer
-from struttura.about import AboutWindow
-from struttura.help import HelpWindow
+from struttura.about import About
+from struttura.help import Help
+from struttura.menu import AppMenu
 from email_duplicate_cleaner import (
     EmailClientManager, DuplicateEmailFinder, create_test_mailbox,
     BaseEmailClientHandler, ThunderbirdMailHandler, AppleMailHandler,
@@ -93,7 +94,7 @@ class EmailCleanerGUI:
         self.stdout_redirect = None
         self.temp_dir = None
         self.lang_var = tk.StringVar(value=lang_manager.language)
-        self.menu_bar = None
+        self.menu = None
         
         # Setup logging and exception handling
         self.log_queue = setup_logging()
@@ -104,7 +105,7 @@ class EmailCleanerGUI:
         self.create_main_frame()
         
         # Create the menu bar
-        self.create_menu()
+        self.menu = AppMenu(self)
         
         # Create tabs
         self.create_tabs()
@@ -142,50 +143,6 @@ class EmailCleanerGUI:
                                     relief=tk.SUNKEN, anchor=tk.W)
         self.status_bar.grid(row=1, column=0, sticky=(tk.W, tk.E))
     
-    def create_menu(self):
-        """Create the application menu bar"""
-        self.menu_bar = tk.Menu(self.root)
-        self.root.config(menu=self.menu_bar)
-
-        # File menu
-        self.file_menu = tk.Menu(self.menu_bar, tearoff=0)
-        self.menu_bar.add_cascade(label=get_string('menu_file'), menu=self.file_menu)
-        self.file_menu.add_command(label=get_string('menu_file_open_folder'), command=self.open_folder)
-        self.file_menu.add_command(label=get_string('menu_file_run_demo'), command=self.run_demo_mode)
-        self.file_menu.add_separator()
-        self.file_menu.add_command(label=get_string('menu_file_exit'), command=self.on_closing)
-
-        # Tools menu
-        self.tools_menu = tk.Menu(self.menu_bar, tearoff=0)
-        self.menu_bar.add_cascade(label=get_string('menu_tools'), menu=self.tools_menu)
-        self.tools_menu.add_command(label=get_string('menu_tools_log_viewer'), command=self.open_log_viewer)
-
-        # Settings menu
-        self.settings_menu = tk.Menu(self.menu_bar, tearoff=0)
-        self.menu_bar.add_cascade(label=get_string('menu_settings'), menu=self.settings_menu)
-        
-        self.lang_menu = tk.Menu(self.settings_menu, tearoff=0)
-        self.settings_menu.add_cascade(label=get_string('menu_settings_language'), menu=self.lang_menu)
-        self.lang_menu.add_radiobutton(label=get_string('menu_settings_language_en'), variable=self.lang_var, value='en', command=self.switch_language)
-        self.lang_menu.add_radiobutton(label=get_string('menu_settings_language_it'), variable=self.lang_var, value='it', command=self.switch_language)
-
-        self.settings_menu.add_separator()
-        self.dark_mode_var = tk.BooleanVar(value=False)
-        self.settings_menu.add_checkbutton(label=get_string('menu_settings_dark_mode'), variable=self.dark_mode_var, command=self.toggle_dark_mode)
-
-        # Help menu
-        self.help_menu = tk.Menu(self.menu_bar, tearoff=0)
-        self.menu_bar.add_cascade(label=get_string('menu_help'), menu=self.help_menu)
-        self.help_menu.add_command(label=get_string('menu_help_documentation'), command=self.show_help)
-        self.help_menu.add_command(label=get_string('menu_help_report_bug'), command=self.report_bug)
-        self.help_menu.add_command(label=get_string('menu_help_about'), command=self.show_about)
-
-        # Sponsor menu
-        self.sponsor_menu = tk.Menu(self.menu_bar, tearoff=0)
-        self.menu_bar.add_cascade(label=get_string('menu_sponsor'), menu=self.sponsor_menu)
-        self.sponsor_menu.add_command(label=get_string('menu_sponsor_github'), command=lambda: webbrowser.open("https://github.com/sponsors/Nsfr750"))
-        self.sponsor_menu.add_command(label=get_string('menu_sponsor_patreon'), command=lambda: webbrowser.open("https://www.patreon.com/Nsfr750"))
-
     def create_tabs(self):
         """Create the main tab structure"""
         self.notebook = ttk.Notebook(self.main_frame)
@@ -796,16 +753,27 @@ class EmailCleanerGUI:
         messagebox.showerror(get_string('error_title'), message)
         self.set_status(f"{get_string('error_prefix')}: {message}")
 
-    def show_about(self):
-        """Show the about dialog"""
-        from struttura.about import About
-        about = About()
-        about.show_about()
+    def report_bug(self):
+        """Open the GitHub issues page in a browser"""
+        webbrowser.open("https://github.com/Nsfr750/EmailDuplicateCleaner/issues")
 
-    def show_help(self):
-        """Show the help dialog"""
-        help_text = get_string('help_text')
-        messagebox.showinfo(get_string('menu_help_content'), help_text)
+    def on_closing(self):
+        """Clean up when closing the application."""
+        # Restore stdout
+        if self.stdout_redirect:
+            sys.stdout = sys.__stdout__
+            self.stdout_redirect.stop()
+
+        # Remove temp directory if in demo mode
+        if self.temp_dir and os.path.exists(self.temp_dir):
+            try:
+                import shutil
+                shutil.rmtree(self.temp_dir)
+                logging.info("Cleaned up demo environment.")
+            except Exception as e:
+                logging.error(get_string('error_cleanup_temp_dir').format(error=e))
+        
+        self.root.destroy()
 
     def expand_all_groups(self):
         """Expand all groups in the results tree"""
@@ -996,8 +964,9 @@ class EmailCleanerGUI:
         self.set_status(get_string('ready_status'))
 
         # Recreate the menu to update labels, avoiding a TclError on some systems
-        self.menu_bar.destroy()
-        self.create_menu()
+        if hasattr(self, 'menu') and self.menu:
+            self.menu.destroy()
+        self.menu = AppMenu(self)
 
         # Update notebook tabs
         self.notebook.tab(self.scan_tab, text=get_string('tab_scan'))
@@ -1044,37 +1013,6 @@ class EmailCleanerGUI:
             self.populate_results_tree()
 
         logging.debug("UI text update complete.")
-
-    def show_about(self):
-        """Show the about window"""
-        AboutWindow(self.root)
-
-    def show_help(self):
-        """Show the help window"""
-        HelpWindow(self.root)
-
-    def report_bug(self):
-        """Open the GitHub issues page in a browser"""
-        webbrowser.open("https://github.com/Nsfr750/EmailDuplicateCleaner/issues")
-
-    def on_closing(self):
-        """Clean up when closing the application."""
-        # Restore stdout
-        if self.stdout_redirect:
-            sys.stdout = sys.__stdout__
-            self.stdout_redirect.stop()
-
-        # Remove temp directory if in demo mode
-        if self.temp_dir and os.path.exists(self.temp_dir):
-            try:
-                import shutil
-                shutil.rmtree(self.temp_dir)
-                logging.info("Cleaned up demo environment.")
-            except Exception as e:
-                logging.error(get_string('error_cleanup_temp_dir').format(error=e))
-        
-        self.root.destroy()
-
 
 def main():
     """Main function to run the GUI application"""
