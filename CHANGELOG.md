@@ -141,6 +141,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 🚀 New Feature
 - 🌐 Improvement
 
+## [1.2.0-rc] - 2025-06-19
+
+### Added
+- **GUI**: Added multi-selection of mailboxes and folders using `Shift+Arrow Keys` and `Ctrl+Arrow Keys` for a more efficient workflow.
+
+### Fixed
+- **GUI**: Fixed a `_tkinter.TclError` crash caused by mixing `pack` and `grid` geometry managers within the same frame.
+- **GUI**: Fixed an `AttributeError` on startup by ensuring event bindings are set only after the corresponding widgets have been created.
+- **GUI**: Restored automatic scrolling to ensure the active item is always visible when navigating lists with the keyboard.
+- **GUI**: Corrected an `IndentationError` that prevented the application from starting.
+
 ## [Unreleased]
 
 ### Added

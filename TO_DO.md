@@ -8,6 +8,7 @@
 - [ ] Implement email recovery feature
 - [ ] Add email export functionality
 - [ ] Improve performance for large email datasets
+- [ ] Implement advanced search filters (e.g., by date range, sender, attachment presence).
 
 ### 🐛 Fixes
 
@@ -23,14 +24,11 @@
 - [x] Refactor menu creation into a separate `struttura/menu.py` module.
 - [ ] Add more comprehensive unit tests
 - [ ] Improve code documentation
-- [ ] Add more detailed logging
-- [ ] Implement automated testing
 - [ ] Connect the dark mode toggle in the menu to the application's state.
 
 ### 🎨 UI/UX
 
 - [ ] Add loading indicators for long operations
-- [ ] Improve form validation feedback
 - [ ] Add more user-friendly error messages
 
 ## 📋 Low Priority
@@ -41,16 +39,9 @@
 - [ ] Create user guides for different use cases
 - [ ] Add more examples to help documentation
 
-### 🎨 Design
-
-- [ ] Add animations for better user feedback
-- [ ] Improve iconography
-- [ ] Add more visual feedback for actions
-
 ### 🛠️ Technical
 
 - [ ] Investigate memory usage optimization
-- [ ] Add more performance monitoring
 - [ ] Implement caching strategies
 - [ ] Add more detailed logging levels
 
@@ -59,3 +50,7 @@
 - ✅ Implemented core duplicate detection logic.
 - ✅ Added basic logging and error handling.
 - ✅ Created initial documentation.
+- ✅ Implement multi-selection in GUI lists using `Shift+Arrow Keys` and `Ctrl+Arrow Keys`.
+- ✅ Fixed several critical GUI bugs causing crashes and usability issues.
+- ✅ Add multi-language support (English and Italian).
+- ✅ Create a web interface for remote management.

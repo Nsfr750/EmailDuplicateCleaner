@@ -151,6 +151,19 @@ The `struttura/` directory contains all the auxiliary modules that support the G
 - **`about.py`**, **`help.py`**, **`sponsor.py`**: Define the `About`, `Help`, and `Sponsor` dialog windows, each encapsulated in its own class.
 - **`log_viewer.py`**: A simple log viewer to display application logs.
 
+## GUI Features
+
+- **Intuitive Interface**: A clean and easy-to-use graphical interface for managing email accounts and scanning for duplicates.
+- **Multi-selection**: Use `Shift+Arrow Keys` and `Ctrl+Arrow Keys` to select multiple mailboxes and folders.
+- **Multi-language Support**: Available in English and Italian.
+
+### Command-Line Interface (CLI)
+
+- **Help**: Shows usage information
+- **Demo Mode**: Runs with test emails
+- **GUI Mode**: Launches desktop interface
+- **Web Mode**: Starts web server
+
 ## 🚀 Getting Started
 
 ### Prerequisites
