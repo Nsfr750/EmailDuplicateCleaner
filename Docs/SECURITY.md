@@ -52,5 +52,5 @@ We are committed to:
 
 ## Contact
 
-Security Team: security@emailduplicatecleaner.com
+Security Team: nsfr750@yandex.com
 Project Maintainer: Nsfr750
