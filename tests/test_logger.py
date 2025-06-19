@@ -37,10 +37,12 @@ def test_log_exception():
 def test_setup_global_exception_logging(monkeypatch):
     clean_log()
     logger.setup_global_exception_logging()
+    
     # Simulate uncaught exception
     code = 'import struttura.logger\nstruttura.logger.setup_global_exception_logging()\nraise RuntimeError(\'uncaught!\')'
     import subprocess
     result = subprocess.run(['python', '-c', code], capture_output=True, text=True)
+    
     # Should log the uncaught exception
     assert os.path.exists(LOG_FILE)
     contents = read_log()
