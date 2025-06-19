@@ -25,7 +25,6 @@ class Help:
     def show_help(parent):
         """
         Displays the help window with two tabs: Usage and Features.
-        The window is modal.
         """
         help_window = tk.Toplevel(parent)
         help_window.title(tr('help_title'))
