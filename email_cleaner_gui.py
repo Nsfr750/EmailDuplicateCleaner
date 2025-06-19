@@ -3,8 +3,6 @@
 Email Duplicate Cleaner - GUI Interface
 
 A graphical user interface for the Email Duplicate Cleaner tool.
-This GUI provides easy access to the functionality for scanning and removing
-duplicate emails from various email clients.
 """
 
 import os
