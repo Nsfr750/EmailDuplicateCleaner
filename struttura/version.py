@@ -5,7 +5,7 @@ VERSION_MINOR = 4
 VERSION_PATCH = 0
 
 # Additional version qualifiers
-VERSION_QUALIFIER = 'beta'  # Could be 'alpha', 'beta', 'rc', or ''
+VERSION_QUALIFIER = 'rc'  # Could be 'alpha', 'beta', 'rc', or ''
 
 def get_version():
     """

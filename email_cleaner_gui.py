@@ -217,13 +217,13 @@ class EmailCleanerGUI:
         self.folder_frame.columnconfigure(0, weight=1)
         self.folder_frame.rowconfigure(0, weight=1)
 
-        self.folder_listbox = tk.Listbox(self.folder_frame, selectmode=tk.EXTENDED)
-        self.folder_listbox.grid(row=0, column=0, sticky=(tk.N, tk.S, tk.E, tk.W))
-        
+        self.folder_listbox = tk.Listbox(self.folder_frame, selectmode=tk.EXTENDED, exportselection=False)
+        self.folder_listbox.grid(row=0, column=0, sticky='nsew')
+
         y_scrollbar = ttk.Scrollbar(self.folder_frame, orient=tk.VERTICAL, command=self.folder_listbox.yview)
         self.folder_listbox.configure(yscrollcommand=y_scrollbar.set)
         y_scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
-        
+
         # Action buttons for scan tab
         button_frame = ttk.Frame(self.scan_tab)
         button_frame.grid(row=3, column=0, columnspan=2, sticky=(tk.W, tk.E), padx=5, pady=5)
@@ -1001,16 +1001,129 @@ class EmailCleanerGUI:
 
         logging.debug("UI text update complete.")
 
+    def on_folder_shift_up(self, event):
+        listbox = self.folder_listbox
+        
+        if not listbox.curselection():
+            listbox.selection_set(tk.ACTIVE)
+            listbox.selection_anchor(tk.ACTIVE)
+
+        active_idx = listbox.index(tk.ACTIVE)
+        anchor_idx = listbox.index(tk.ANCHOR)
+
+        if active_idx > 0:
+            listbox.activate(active_idx - 1)
+            new_active_idx = listbox.index(tk.ACTIVE)
+            
+            listbox.selection_clear(0, tk.END)
+            listbox.selection_set(anchor_idx, new_active_idx)
+            listbox.see(new_active_idx)
+            
+        return "break"
+
+    def on_folder_shift_down(self, event):
+        listbox = self.folder_listbox
+
+        if not listbox.curselection():
+            listbox.selection_set(tk.ACTIVE)
+            listbox.selection_anchor(tk.ACTIVE)
+
+        active_idx = listbox.index(tk.ACTIVE)
+        anchor_idx = listbox.index(tk.ANCHOR)
+
+        if active_idx < listbox.size() - 1:
+            listbox.activate(active_idx + 1)
+            new_active_idx = listbox.index(tk.ACTIVE)
+            
+            listbox.selection_clear(0, tk.END)
+            listbox.selection_set(anchor_idx, new_active_idx)
+            listbox.see(new_active_idx)
+            
+        return "break"
+
+    def on_folder_ctrl_arrow(self, direction):
+        listbox = self.folder_listbox
+        active_idx = listbox.index(tk.ACTIVE)
+        
+        if direction == "up" and active_idx > 0:
+            listbox.activate(active_idx - 1)
+            listbox.see(active_idx - 1)
+        elif direction == "down" and active_idx < listbox.size() - 1:
+            listbox.activate(active_idx + 1)
+            listbox.see(active_idx + 1)
+            
+        return "break"
+
+    def on_mailbox_listbox_select(self, event):
+        selections = self.mailbox_list.curselection()
+        if selections:
+            self.last_anchor = selections[0]
+
+    def on_mailbox_shift_up(self, event, control_pressed=False):
+        selections = list(self.mailbox_list.curselection())
+        current_focus = self.mailbox_list.index(tk.ACTIVE)
+
+        if not selections:
+            self.mailbox_list.selection_set(current_focus)
+            return "break"
+
+        if not hasattr(self, 'last_anchor') or self.last_anchor is None:
+            self.last_anchor = selections[0]
+
+        if not control_pressed:
+            self.mailbox_list.selection_clear(0, tk.END)
+
+        if current_focus > 0:
+            self.mailbox_list.activate(current_focus - 1)
+            new_focus = self.mailbox_list.index(tk.ACTIVE)
+            self.mailbox_list.selection_set(self.last_anchor, new_focus)
+            self.mailbox_list.see(new_focus)
+
+        return "break"
+
+    def on_mailbox_shift_down(self, event, control_pressed=False):
+        selections = list(self.mailbox_list.curselection())
+        current_focus = self.mailbox_list.index(tk.ACTIVE)
+
+        if not selections:
+            self.mailbox_list.selection_set(current_focus)
+            return "break"
+
+        if not hasattr(self, 'last_anchor') or self.last_anchor is None:
+            self.last_anchor = selections[0]
+
+        if not control_pressed:
+            self.mailbox_list.selection_clear(0, tk.END)
+
+        if current_focus < self.mailbox_list.size() - 1:
+            self.mailbox_list.activate(current_focus + 1)
+            new_focus = self.mailbox_list.index(tk.ACTIVE)
+            self.mailbox_list.selection_set(self.last_anchor, new_focus)
+            self.mailbox_list.see(new_focus)
+
+        return "break"
+
+    def on_mailbox_ctrl_arrow(self, direction):
+        current_focus = self.mailbox_list.index(tk.ACTIVE)
+        if direction == "up" and current_focus > 0:
+            self.mailbox_list.activate(current_focus - 1)
+            self.mailbox_list.see(current_focus - 1)
+        elif direction == "down" and current_focus < self.mailbox_list.size() - 1:
+            self.mailbox_list.activate(current_focus + 1)
+            self.mailbox_list.see(current_focus + 1)
+        return "break"
+
+
 def main():
     """Main function to run the GUI application"""
     root = tk.Tk()
     app = EmailCleanerGUI(root)
-    
+
     # Set up clean exit
     root.protocol("WM_DELETE_WINDOW", app.on_closing)
-    
-    # Start the GUI event loop
+
     root.mainloop()
+
 
 if __name__ == "__main__":
     main()
