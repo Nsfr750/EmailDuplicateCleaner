@@ -425,7 +425,7 @@ TRANSLATIONS = {
         # Sponsor Window
         # ======================================================================
         'sponsor_window_title': 'Sponsorizza questo Progetto',
-        'sponsor_on_github': 'GitHub',
+        'sponsor_on_github': 'Sponsorizza su GitHub',
         'join_discord': 'Entra in Discord',
         'buy_me_a_coffee': 'Offrimi un Caffè',
         'join_the_patreon': 'Vieni su Patreon',
