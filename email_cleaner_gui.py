@@ -92,7 +92,7 @@ class EmailCleanerGUI:
         self.cleaning_thread = None
         self.stdout_redirect = None
         self.temp_dir = None
-        self.lang_var = tk.StringVar(value=lang_manager.language)
+        self.language_var = tk.StringVar(value=lang_manager.language)
         self.debug_var = tk.BooleanVar(value=False)
         self.menu = None
         
@@ -739,6 +739,16 @@ class EmailCleanerGUI:
         self.console.configure(bg='#1a1a1a' if is_dark else '#ffffff',
                              fg='#00ff00' if is_dark else '#000000')
 
+    def switch_language(self):
+        """Switch the application language."""
+        new_lang = self.language_var.get()
+        lang_manager.set_language(new_lang)
+        logging.info(f"Language switched to {new_lang}")
+        messagebox.showinfo(
+            "Language Switched",
+            "Please restart the application for the changes to take full effect."
+        )
+
     def show_error(self, message):
         """Show an error message"""
         logging.error(message)
@@ -942,63 +952,6 @@ class EmailCleanerGUI:
             self.log_viewer = LogViewer(self.root, self.log_queue)
         else:
             self.log_viewer.lift()
-
-    def switch_language(self):
-        """Switch the application language and update UI text."""
-        new_lang = self.lang_var.get()
-        lang_manager.set_language(new_lang)
-        self.update_ui_text()
-
-    def update_ui_text(self):
-        """Update all UI text elements to the current language."""
-        logging.debug("Updating UI text for language: %s", lang_manager.language)
-        self.root.title(get_string('app_title'))
-        self.set_status(get_string('ready_status'))
-
-        # Recreate the menu to update labels, avoiding a TclError on some systems
-        if hasattr(self, 'menu') and self.menu:
-            self.menu.destroy()
-        self.menu = AppMenu(self)
-
-        # Update notebook tabs
-        self.notebook.tab(self.scan_tab, text=get_string('tab_scan'))
-        self.notebook.tab(self.results_tab, text=get_string('tab_results'))
-
-        # Update Scan tab widgets
-        self.client_frame.config(text=get_string('scan_client_frame'))
-        self.criteria_frame.config(text=get_string('scan_criteria_frame'))
-        self.folder_frame.config(text=get_string('scan_folder_frame'))
-        self.select_all_button.config(text=get_string('scan_select_all_button'))
-        self.find_folders_button.config(text=get_string('scan_find_folders_button'))
-        self.auto_clean_check.config(text=get_string('scan_autoclean_checkbox'))
-        self.scan_button.config(text=get_string('scan_button'))
-
-        # Update Results tab widgets
-        self.results_tree.heading("#0", text=get_string('results_header_group'))
-        self.results_tree.heading("date", text=get_string('results_header_date'))
-        self.results_tree.heading("from", text=get_string('results_header_from'))
-        self.results_tree.heading("subject", text=get_string('results_header_subject'))
-        self.results_tree.heading("folder", text=get_string('results_header_folder'))
-        self.preview_header.config(text=get_string('results_preview_header_default'))
-        self.group_buttons_frame.config(text=get_string('results_group_management_frame'))
-        self.expand_all_button.config(text=get_string('results_expand_all_button'))
-        self.collapse_all_button.config(text=get_string('results_collapse_all_button'))
-        self.action_buttons_frame.config(text=get_string('results_email_actions_frame'))
-        self.view_email_button.config(text=get_string('results_view_email_button'))
-        self.clean_selected_button.config(text=get_string('results_clean_selected_button'))
-        self.clean_all_button.config(text=get_string('results_clean_all_button'))
-
-        # Update context menus
-        self.email_menu.entryconfig(0, label=get_string('results_context_menu_view_email'))
-
-        # Update console label
-        self.console_frame.config(text=get_string('console_frame_title'))
-
-        # Repopulate results tree to update group headers if language changed
-        if self.duplicate_groups:
-            self.populate_results_tree()
-
-        logging.debug("UI text update complete.")
 
     def on_folder_shift_up(self, event):
         listbox = self.folder_listbox

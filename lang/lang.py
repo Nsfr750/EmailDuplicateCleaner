@@ -31,7 +31,7 @@ TRANSLATIONS = {
         'menu_settings': 'Settings',
         'menu_settings_language': 'Language',
         'menu_settings_language_en': 'English',
-        'menu_settings_language_it': 'Italiano',
+        'menu_settings_language_it': 'Italian',
 
         'menu_help': 'Help',
         'menu_help_about': 'About',
@@ -257,7 +257,7 @@ TRANSLATIONS = {
 
         'menu_settings': 'Impostazioni',
         'menu_settings_language': 'Lingua',
-        'menu_settings_language_en': 'English',
+        'menu_settings_language_en': 'Inglese',
         'menu_settings_language_it': 'Italiano',
 
         'menu_help': 'Aiuto',
