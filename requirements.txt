@@ -2,10 +2,8 @@
 pandas>=2.2.0
 python-dateutil>=2.9.0
 tqdm>=4.66.0
-pathlib>=1.0.1
 
 # GUI Requirements
-tkinter>=8.6
 pillow>=10.0.0
 
 # Web Interface
@@ -17,7 +15,6 @@ werkzeug>=3.0.1
 
 # Utilities
 requests>=2.31.0
-webbrowser>=0.10
 beautifulsoup4>=4.12.2
 
 # Development and Testing
@@ -32,5 +29,9 @@ coverage>=7.3.2
 semver>=3.0.0
 
 # Optional: Logging and Debugging
-logging>=0.5.1.2
 python-dotenv>=1.0.0
+
+# Documentation
+sphinx>=7.0.0
+sphinx_rtd_theme>=1.3.0
+myst-parser>=2.0.0

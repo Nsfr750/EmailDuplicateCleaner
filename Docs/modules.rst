@@ -1,0 +1,47 @@
+Modules
+=======
+
+.. automodule:: db_init
+   :members:
+
+.. automodule:: email_cleaner_gui
+   :members:
+
+.. automodule:: email_cleaner_web
+   :members:
+
+.. automodule:: email_duplicate_cleaner
+   :members:
+
+.. automodule:: lang.lang
+   :members:
+
+.. automodule:: struttura.about
+   :members:
+
+.. automodule:: struttura.help
+   :members:
+
+.. automodule:: struttura.log_viewer
+   :members:
+
+.. automodule:: struttura.logger
+   :members:
+
+.. automodule:: struttura.menu
+   :members:
+
+.. automodule:: struttura.sponsor
+   :members:
+
+.. automodule:: struttura.traceback
+   :members:
+
+.. automodule:: struttura.traceback_handler
+   :members:
+
+.. automodule:: struttura.version
+   :members:
+
+.. automodule:: tests.test_logger
+   :members:

@@ -56,8 +56,8 @@ class AppMenu:
         
         lang_menu = tk.Menu(settings_menu, tearoff=0)
         settings_menu.add_cascade(label=tr('menu_settings_language'), menu=lang_menu)
-        lang_menu.add_radiobutton(label=tr('menu_settings_language_en'), variable=self.app.lang_var, value='en', command=self.app.switch_language)
-        lang_menu.add_radiobutton(label=tr('menu_settings_language_it'), variable=self.app.lang_var, value='it', command=self.app.switch_language)
+        lang_menu.add_radiobutton(label=tr('menu_settings_language_en'), variable=self.app.language_var, value='en', command=self.app.switch_language)
+        lang_menu.add_radiobutton(label=tr('menu_settings_language_it'), variable=self.app.language_var, value='it', command=self.app.switch_language)
 
         settings_menu.add_separator()
         dark_mode_var = tk.BooleanVar(value=False) # This should be tied to the app's state

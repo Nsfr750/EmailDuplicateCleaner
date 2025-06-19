@@ -80,7 +80,7 @@ TRANSLATIONS = {
         # --- Labels and Frames ---
         'group_management_frame': 'Group Management',
         'email_actions_frame': 'Email Actions',
-        'preview_header_default': 'Select an email to preview its content.',
+        'preview_header': 'Select an email to preview its content.',
         'preview_header_group_selected': 'Select an individual email to see a preview.',
         'preview_header_error': 'Error Previewing Email',
 
@@ -188,11 +188,8 @@ TRANSLATIONS = {
         # About Window
         # ======================================================================
         'about_window_title': 'About Email Duplicate Cleaner',
-        'about_version_label': 'Version:',
-        'about_author_label': 'Author:',
-        'about_email_label': 'Email:',
-        'about_github_label': 'GitHub:',
-        'about_license_label': 'License:',
+        'version': 'Version:',
+        'about': 'About',
 
         # ======================================================================
         # Sponsor Window
@@ -210,7 +207,7 @@ TRANSLATIONS = {
         'help_title': 'Help',
         'usage_tab': 'Usage',
         'features_tab': 'Features',
-        'help_usage': 'This application helps you find and remove duplicate emails from your mail clients. Select your client, choose the folders to scan, and start the scan.',
+        'help_usage': 'This application helps you find and remove duplicate emails from your mail clients.\nSelect your client, choose the folders to scan, and start the scan.',
         'help_features': '- Supports Thunderbird, Apple Mail, Outlook, and generic clients.\n- Various detection criteria: Strict, Content, Headers, etc.\n- Preview duplicate emails before deleting.\n- Automatic or manual cleaning.',
 
         # ======================================================================
@@ -307,7 +304,7 @@ TRANSLATIONS = {
         # --- Labels and Frames ---
         'group_management_frame': 'Gestione Gruppi',
         'email_actions_frame': 'Azioni Email',
-        'preview_header_default': 'Seleziona un\'email per vederne l\'anteprima.',
+        'preview_header': 'Seleziona un\'email per vederne l\'anteprima.',
         'preview_header_group_selected': 'Seleziona una singola email per vederne l\'anteprima.',
         'preview_header_error': 'Errore Anteprima Email',
 
@@ -414,12 +411,9 @@ TRANSLATIONS = {
         # ======================================================================
         # About Window
         # ======================================================================
-        'about_window_title': 'Informazioni su Pulitore Duplicati Email',
-        'about_version_label': 'Versione:',
-        'about_author_label': 'Autore:',
-        'about_email_label': 'Email:',
-        'about_github_label': 'GitHub:',
-        'about_license_label': 'Licenza:',
+        'about_window_title': 'Informazioni su Email Duplicate Cleaner',
+        'version': 'Versione:',
+        'about': 'Informazioni',
 
         # ======================================================================
         # Sponsor Window
@@ -438,7 +432,7 @@ TRANSLATIONS = {
         'help_title': 'Aiuto',
         'usage_tab': 'Utilizzo',
         'features_tab': 'Funzionalità',
-        'help_usage': 'Questa applicazione ti aiuta a trovare e rimuovere email duplicate dai tuoi client di posta. Seleziona il tuo client, scegli le cartelle da analizzare e avvia la scansione.',
+        'help_usage': 'Questa applicazione ti aiuta a trovare e rimuovere email duplicate dai tuoi client di posta.\nSeleziona il tuo client, scegli le cartelle da analizzare e avvia la scansione.',
         'help_features': '- Supporta Thunderbird, Apple Mail, Outlook e client generici.\n- Diversi criteri di rilevamento: Stretto, Contenuto, Intestazioni, etc.\n- Anteprima delle email duplicate prima di eliminarle.\n- Pulizia automatica o manuale.',
 
         # ======================================================================

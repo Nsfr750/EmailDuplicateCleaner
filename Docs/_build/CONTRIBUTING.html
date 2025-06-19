@@ -1,0 +1,224 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contributing to Email Duplicate Cleaner &mdash; Email Duplicate Cleaner 2.4.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=4d935f96"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Email Duplicate Cleaner
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Modules</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Email Duplicate Cleaner</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Contributing to Email Duplicate Cleaner</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/CONTRIBUTING.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="contributing-to-email-duplicate-cleaner">
+<h1>Contributing to Email Duplicate Cleaner<a class="headerlink" href="#contributing-to-email-duplicate-cleaner" title="Link to this heading"></a></h1>
+<section id="welcome-contributors">
+<h2>Welcome Contributors!<a class="headerlink" href="#welcome-contributors" title="Link to this heading"></a></h2>
+<p>We appreciate your interest in contributing to Email Duplicate Cleaner. This document provides guidelines for contributing to the project.</p>
+</section>
+<section id="development-setup">
+<h2>Development Setup<a class="headerlink" href="#development-setup" title="Link to this heading"></a></h2>
+<ol class="arabic">
+<li><p><strong>Clone the Repository</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/Nsfr750/EmailDuplicateCleaner.git
+<span class="nb">cd</span><span class="w"> </span>EmailDuplicateCleaner
+</pre></div>
+</div>
+</li>
+<li><p><strong>Create a Virtual Environment</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>venv
+<span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w">  </span><span class="c1"># On Windows: venv\Scripts\activate</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Install Dependencies</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="contribution-workflow">
+<h2>Contribution Workflow<a class="headerlink" href="#contribution-workflow" title="Link to this heading"></a></h2>
+<ol class="arabic">
+<li><p><strong>Fork the Repository</strong></p></li>
+<li><p><strong>Create a Branch</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>feature/your-feature-name
+</pre></div>
+</div>
+</li>
+<li><p><strong>Make Changes</strong></p>
+<ul class="simple">
+<li><p>Follow PEP 8 style guidelines</p></li>
+<li><p>Write clear, concise code</p></li>
+<li><p>Add/update tests for new functionality</p></li>
+</ul>
+</li>
+<li><p><strong>Run Tests</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest
+</pre></div>
+</div>
+</li>
+<li><p><strong>Commit Changes</strong></p>
+<ul class="simple">
+<li><p>Use descriptive commit messages</p></li>
+<li><p>Reference issue numbers if applicable</p></li>
+</ul>
+</li>
+<li><p><strong>Push to Your Fork</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>feature/your-feature-name
+</pre></div>
+</div>
+</li>
+<li><p><strong>Create Pull Request</strong></p></li>
+</ol>
+</section>
+<section id="code-of-conduct">
+<h2>Code of Conduct<a class="headerlink" href="#code-of-conduct" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Be respectful and inclusive</p></li>
+<li><p>Provide constructive feedback</p></li>
+<li><p>Help maintain a welcoming community</p></li>
+</ul>
+</section>
+<section id="reporting-issues">
+<h2>Reporting Issues<a class="headerlink" href="#reporting-issues" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Use GitHub Issues</p></li>
+<li><p>Provide detailed information</p></li>
+<li><p>Include steps to reproduce</p></li>
+<li><p>Attach relevant logs or screenshots</p></li>
+</ul>
+</section>
+<section id="development-guidelines">
+<h2>Development Guidelines<a class="headerlink" href="#development-guidelines" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Use type hints</p></li>
+<li><p>Write docstrings for all functions</p></li>
+<li><p>Maintain modular architecture</p></li>
+<li><p>Keep dependencies up to date</p></li>
+</ul>
+</section>
+<section id="codebase-structure">
+<h2>Codebase Structure<a class="headerlink" href="#codebase-structure" title="Link to this heading"></a></h2>
+<p>The project is organized into a clean and modular structure to promote maintainability and ease of development. Key components include:</p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">email_duplicate_cleaner.py</span></code></strong>: The core logic for duplicate detection.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">email_cleaner_gui.py</span></code></strong>: The main file for the Tkinter-based GUI. It is responsible for the main window layout and coordinating UI events.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">struttura/</span></code></strong>: This directory contains all auxiliary GUI modules:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">menu.py</span></code>: Manages the main menu bar. To add or modify menu items, edit this file.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">about.py</span></code>, <code class="docutils literal notranslate"><span class="pre">help.py</span></code>, <code class="docutils literal notranslate"><span class="pre">sponsor.py</span></code>: These files define the dialog windows. Each window is a self-contained class.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">log_viewer.py</span></code>: A simple log viewer utility.</p></li>
+</ul>
+</li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">lang/</span></code></strong>: Contains language files for internationalization.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">tests/</span></code></strong>: Unit and integration tests.</p></li>
+</ul>
+<p>When contributing to the GUI, please follow the existing modular structure. New dialogs or complex UI components should be created in their own files within the <code class="docutils literal notranslate"><span class="pre">struttura/</span></code> directory.</p>
+</section>
+<section id="areas-of-contribution">
+<h2>Areas of Contribution<a class="headerlink" href="#areas-of-contribution" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Bug fixes</p></li>
+<li><p>Performance improvements</p></li>
+<li><p>New email client support</p></li>
+<li><p>UI/UX enhancements</p></li>
+<li><p>Documentation</p></li>
+</ul>
+</section>
+<section id="questions">
+<h2>Questions?<a class="headerlink" href="#questions" title="Link to this heading"></a></h2>
+<p>Open an issue or contact the maintainers.</p>
+<p>Thank you for contributing!</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Nsfr750.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
