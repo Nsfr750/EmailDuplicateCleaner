@@ -3,7 +3,7 @@ from tkinter import scrolledtext, ttk
 import sys
 import os
 import logging
-from queue import Queue
+import queue
 from tkinter import filedialog
 
 # Add project root to the Python path
@@ -17,7 +17,7 @@ class LogViewer(tk.Toplevel):
     """A Toplevel window to display logs."""
     def __init__(self, parent, log_queue):
         super().__init__(parent)
-        self.title(get_string("log_viewer_window_title"))
+        self.title(get_string("log_viewer_title"))
         self.geometry("700x400")
 
         self.log_queue = log_queue
@@ -34,7 +34,7 @@ class LogViewer(tk.Toplevel):
         controls_frame = ttk.Frame(main_frame)
         controls_frame.pack(fill=tk.X, pady=(0, 10))
 
-        log_level_label = ttk.Label(controls_frame, text=get_string('log_level'))
+        log_level_label = ttk.Label(controls_frame, text=get_string('log_level_label'))
         log_level_label.pack(side=tk.LEFT, padx=(0, 5))
 
         self.log_level_var = tk.StringVar(value="INFO")
@@ -54,9 +54,9 @@ class LogViewer(tk.Toplevel):
         self.log_tree = ttk.Treeview(main_frame, columns=("timestamp", "level", "message"), show="headings")
         self.log_tree.pack(fill=tk.BOTH, expand=True)
 
-        self.log_tree.heading("timestamp", text=get_string('log_timestamp'))
-        self.log_tree.heading("level", text=get_string('log_level_name'))
-        self.log_tree.heading("message", text=get_string('log_message'))
+        self.log_tree.heading("timestamp", text=get_string('log_timestamp_header'))
+        self.log_tree.heading("level", text=get_string('log_level_name_header'))
+        self.log_tree.heading("message", text=get_string('log_message_header'))
 
         self.log_tree.column("timestamp", width=150, stretch=False)
         self.log_tree.column("level", width=80, stretch=False)
@@ -70,7 +70,7 @@ class LogViewer(tk.Toplevel):
             while True:
                 record = self.log_queue.get_nowait()
                 self.display_log(record)
-        except Queue.Empty:
+        except queue.Empty:
             pass
         finally:
             self.after(100, self.process_queue)

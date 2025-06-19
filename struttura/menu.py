@@ -48,6 +48,7 @@ class AppMenu:
         tools_menu = tk.Menu(self.menu_bar, tearoff=0)
         self.menu_bar.add_cascade(label=tr('menu_tools'), menu=tools_menu)
         tools_menu.add_command(label=tr('menu_tools_log_viewer'), command=self.app.open_log_viewer)
+        tools_menu.add_checkbutton(label=tr('menu_tools_debug'), variable=self.app.debug_var, command=self.app.toggle_debug_mode)
 
         # Settings menu
         settings_menu = tk.Menu(self.menu_bar, tearoff=0)

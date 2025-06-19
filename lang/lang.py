@@ -23,10 +23,10 @@ TRANSLATIONS = {
 
         'menu_tools': 'Tools',
         'menu_tools_log_viewer': 'Log Viewer',
+        'menu_tools_debug': 'Debug Mode',
 
         'menu_view': 'View',
         'menu_view_dark_mode': 'Dark Mode',
-        'menu_view_debug_mode': 'Debug Mode',
 
         'menu_settings': 'Settings',
         'menu_settings_language': 'Language',
@@ -221,8 +221,8 @@ TRANSLATIONS = {
         'log_timestamp_header': 'Timestamp',
         'log_level_name_header': 'Level',
         'log_message_header': 'Message',
-        'log_clear_button': 'Clear Log',
-        'log_export_button': 'Export Log',
+        'clear_log': 'Clear Log',
+        'export_log': 'Export Log',
 
         # ======================================================================
         # Traceback Window
@@ -253,10 +253,10 @@ TRANSLATIONS = {
 
         'menu_tools': 'Strumenti',
         'menu_tools_log_viewer': 'Visualizzatore Log',
+        'menu_tools_debug': 'Modalità Debug',
 
         'menu_view': 'Visualizza',
         'menu_view_dark_mode': 'Modalità Scura',
-        'menu_view_debug_mode': 'Modalità Debug',
 
         'menu_settings': 'Impostazioni',
         'menu_settings_language': 'Lingua',
@@ -449,8 +449,8 @@ TRANSLATIONS = {
         'log_timestamp_header': 'Timestamp',
         'log_level_name_header': 'Livello',
         'log_message_header': 'Messaggio',
-        'log_clear_button': 'Pulisci Log',
-        'log_export_button': 'Esporta Log',
+        'clear_log': 'Pulisci Log',
+        'export_log': 'Esporta Log',
 
         # ======================================================================
         # Traceback Window

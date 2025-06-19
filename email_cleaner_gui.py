@@ -93,6 +93,7 @@ class EmailCleanerGUI:
         self.stdout_redirect = None
         self.temp_dir = None
         self.lang_var = tk.StringVar(value=lang_manager.language)
+        self.debug_var = tk.BooleanVar(value=False)
         self.menu = None
         
         # Setup logging and exception handling
@@ -697,6 +698,20 @@ class EmailCleanerGUI:
         except Exception as e:
             self.show_error(get_string('error_demo_mode').format(error=str(e)))
     
+    def toggle_debug_mode(self):
+        """Toggle debug mode"""
+        is_debug = self.debug_var.get()
+        if is_debug:
+            logging.info(get_string('debug_mode_enabled'))
+            # Enable detailed logging
+            logging.getLogger().setLevel(logging.DEBUG)
+            self.set_status(get_string('status_debug_enabled'))
+        else:
+            logging.info(get_string('debug_mode_disabled'))
+            # Disable detailed logging
+            logging.getLogger().setLevel(logging.INFO)
+            self.set_status(get_string('status_debug_disabled'))
+
     def toggle_dark_mode(self):
         """Toggle dark mode theme"""
         is_dark = self.dark_mode_var.get()
@@ -723,20 +738,6 @@ class EmailCleanerGUI:
         # Update console colors
         self.console.configure(bg='#1a1a1a' if is_dark else '#ffffff',
                              fg='#00ff00' if is_dark else '#000000')
-
-    def toggle_debug_mode(self):
-        """Toggle debug mode"""
-        is_debug = self.debug_mode_var.get()
-        if is_debug:
-            logging.info(get_string('debug_mode_enabled'))
-            # Enable detailed logging
-            logging.getLogger().setLevel(logging.DEBUG)
-            self.set_status(get_string('status_debug_enabled'))
-        else:
-            logging.info(get_string('debug_mode_disabled'))
-            # Disable detailed logging
-            logging.getLogger().setLevel(logging.INFO)
-            self.set_status(get_string('status_debug_disabled'))
 
     def show_error(self, message):
         """Show an error message"""
