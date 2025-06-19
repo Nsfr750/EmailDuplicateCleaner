@@ -12,7 +12,6 @@ if project_root not in sys.path:
 from lang.lang import get_string as tr
 
 # Sponsor Class
-
 class Sponsor(tk.Toplevel):
     def __init__(self, root):
         super().__init__(root)
