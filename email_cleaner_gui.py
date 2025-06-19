@@ -10,7 +10,7 @@ import sys
 import logging
 import threading
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox, scrolledtext, Toplevel
+from tkinter import ttk, filedialog, messagebox, simpledialog, scrolledtext, Toplevel
 import queue
 import sqlite3
 import webbrowser
@@ -94,6 +94,7 @@ class EmailCleanerGUI:
         self.temp_dir = None
         self.language_var = tk.StringVar(value=lang_manager.language)
         self.debug_var = tk.BooleanVar(value=False)
+        self.dark_mode_var = tk.BooleanVar(value=False)
         self.menu = None
         
         # Setup logging and exception handling
@@ -744,10 +745,8 @@ class EmailCleanerGUI:
         new_lang = self.language_var.get()
         lang_manager.set_language(new_lang)
         logging.info(f"Language switched to {new_lang}")
-        messagebox.showinfo(
-            "Language Switched",
-            "Please restart the application for the changes to take full effect."
-        )
+        # Removed the restart prompt so the change takes effect silently.
+        self.set_status(get_string('ready_status'))
 
     def show_error(self, message):
         """Show an error message"""
