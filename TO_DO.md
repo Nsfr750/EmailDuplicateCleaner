@@ -3,7 +3,6 @@
 ## 🔥 High Priority
 
 ### 🚀 Features
-
 - [ ] Add advanced email analysis options
 - [ ] Implement email recovery feature
 - [ ] Add email export functionality
@@ -11,7 +10,6 @@
 - [ ] Implement advanced search filters (e.g., by date range, sender, attachment presence).
 
 ### 🐛 Fixes
-
 - [ ] Resolve remaining GUI button functionality issues
 - [ ] Fix any remaining dark mode inconsistencies
 - [x] Improve error handling in web interface
@@ -20,24 +18,16 @@
 ## 🏗️ Medium Priority
 
 ### 🛠️ Development
-
 - [x] Refactor menu creation into a separate `struttura/menu.py` module.
 - [ ] Connect the dark mode toggle in the menu to the application's state.
 
 ### 🎨 UI/UX
-
 - [ ] Add loading indicators for long operations
 - [ ] Add more user-friendly error messages
 
 ## 📋 Low Priority
 
-### 📚 Documentation
-
-- [ ] Add more detailed API documentation
-- [ ] Create user guides for different use cases
-
 ### 🛠️ Technical
-
 - [ ] Investigate memory usage optimization
 - [ ] Implement caching strategies
 
