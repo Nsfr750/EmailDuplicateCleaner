@@ -3,8 +3,6 @@
 Email Duplicate Cleaner - Web Interface
 
 A web-based interface for the Email Duplicate Cleaner tool.
-This interface provides easy access to the functionality for scanning and removing
-duplicate emails from various email clients.
 """
 
 import os

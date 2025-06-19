@@ -4,8 +4,8 @@ A comprehensive Python tool designed to scan, identify, and remove duplicate ema
 
 ## 🚀 Version
 
-**Current Version:** 2.3.3 (Stable)
-[![GitHub release](https://img.shields.io/badge/release-v2.3.3-blue)](https://github.com/Nsfr750/EmailDuplicateCleaner)
+**Current Version:** 2.4.0RC
+[![GitHub release](https://img.shields.io/badge/release-v2.4.0-green)](https://github.com/Nsfr750/EmailDuplicateCleaner)
 [![Documentation](https://img.shields.io/badge/docs-available-brightgreen)](https://github.com/Nsfr750/EmailDuplicateCleaner/blob/master/README.md)
 [![Python Versions](https://img.shields.io/badge/python-3.8%20|%203.9%20|%203.10%20|%203.11%20|%203.12-blue)](https://www.python.org/)
 

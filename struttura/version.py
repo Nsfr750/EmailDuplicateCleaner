@@ -10,9 +10,6 @@ VERSION_QUALIFIER = 'rc'  # Could be 'alpha', 'beta', 'rc', or ''
 def get_version():
     """
     Generate a full version string.
-    
-    Returns:
-        str: Formatted version string
     """
     version_parts = [str(VERSION_MAJOR), str(VERSION_MINOR), str(VERSION_PATCH)]
     version_str = '.'.join(version_parts)
