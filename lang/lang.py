@@ -35,6 +35,12 @@ TRANSLATIONS = {
 
         'menu_help': 'Help',
         'menu_help_about': 'About',
+        'menu_check_updates': 'Check for Updates',
+        'update_available': 'Update Available',
+        'update_download': 'Download Now',
+        'update_later': 'Remind Me Later',
+        'update_error': 'Update Error',
+        'update_check_error': 'Failed to check for updates: {error}',
                 
         'menu_sponsor': 'Sponsor',
         'menu_sponsor_us': 'Sponsor Us',
@@ -262,6 +268,12 @@ TRANSLATIONS = {
 
         'menu_help': 'Aiuto',
         'menu_help_about': 'Informazioni',
+        'menu_check_updates': 'Controlla aggiornamenti',
+        'update_available': 'Aggiornamento disponibile',
+        'update_download': 'Scarica ora',
+        'update_later': 'Ricordamelo più tardi',
+        'update_error': 'Errore aggiornamento',
+        'update_check_error': 'Impossibile controllare gli aggiornamenti: {error}',
         'menu_sponsor_us': 'Sponsorizzaci',
         
         # ======================================================================
@@ -285,7 +297,7 @@ TRANSLATIONS = {
         'scan_client_outlook_radio': 'Outlook',
         'scan_client_generic_radio': 'Mbox Generico',
 
-        'scan_criteria_strict_radio': 'Stretto (Intestazioni + Contenuto)',
+        'scan_criteria_strict_radio': 'Strict (Intestazioni + Contenuto)',
         'scan_criteria_content_radio': 'Solo Contenuto',
         'scan_criteria_headers_radio': 'Solo Intestazioni',
         'scan_criteria_subject_sender_radio': 'Oggetto + Mittente',

@@ -23,6 +23,8 @@ from struttura.about import About
 from struttura.help import Help
 from struttura.sponsor import Sponsor
 from struttura.menu import AppMenu
+from struttura.updates import UpdateChecker
+from struttura.version import get_version
 from email_duplicate_cleaner import (
     EmailClientManager, DuplicateEmailFinder, create_test_mailbox,
     BaseEmailClientHandler, ThunderbirdMailHandler, AppleMailHandler,
@@ -97,6 +99,9 @@ class EmailCleanerGUI:
         self.dark_mode_var = tk.BooleanVar(value=False)
         self.menu = None
         
+        # Initialize update checker
+        self.update_checker = UpdateChecker(get_version())
+        
         # Setup logging and exception handling
         self.log_queue = setup_logging()
         setup_traceback_handler()
@@ -127,6 +132,9 @@ class EmailCleanerGUI:
         
         # Set initial status
         self.set_status(get_string('ready_status'))
+        
+        # Check for updates after a short delay to allow the UI to initialize
+        self.root.after(2000, self.check_for_updates)
 
     def create_main_frame(self):
         """Create the main frame structure"""
@@ -143,6 +151,26 @@ class EmailCleanerGUI:
         self.status_bar = ttk.Label(self.main_frame, textvariable=self.status_var, 
                                     relief=tk.SUNKEN, anchor=tk.W)
         self.status_bar.grid(row=1, column=0, sticky=(tk.W, tk.E))
+    
+    def check_for_updates(self, force_check=False):
+        """Check for application updates"""
+        try:
+            update_available, update_info = self.update_checker.check_for_updates(
+                parent=self.root,
+                force_check=force_check
+            )
+            
+            if update_available and update_info:
+                # Show update dialog with the new version
+                self.update_checker.show_update_dialog(self.root, update_info)
+                
+        except Exception as e:
+            logging.error(f"Error checking for updates: {e}")
+            messagebox.showerror(
+                get_string('error'),
+                get_string('update_check_error').format(error=str(e)),
+                parent=self.root
+            )
     
     def create_tabs(self):
         """Create the main tab structure"""

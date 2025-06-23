@@ -67,6 +67,7 @@ class AppMenu:
         help_menu = tk.Menu(self.menu_bar, tearoff=0)
         help_menu.add_command(label=tr('menu_help'), command=lambda: Help.show_help(self.root))
         help_menu.add_separator()
+        help_menu.add_command(label=tr('menu_check_updates'), command=lambda: self.app.check_for_updates(force_check=True))
         help_menu.add_command(label=tr('menu_help_about'), command=lambda: About.show_about(self.root))
         help_menu.add_command(label=tr('menu_sponsor_us'), command=lambda: Sponsor(self.root).show_sponsor())
         self.menu_bar.add_cascade(label=tr('menu_help'), menu=help_menu)  
