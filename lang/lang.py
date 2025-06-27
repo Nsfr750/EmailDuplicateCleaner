@@ -51,6 +51,35 @@ TRANSLATIONS = {
         # ======================================================================
         'tab_scan': 'Scan',
         'tab_results': 'Results',
+        'tab_analysis': 'Analysis',
+        
+        # ======================================================================
+        # Analysis Tab
+        # ======================================================================
+        'analysis_run_analysis': 'Run Analysis',
+        'analysis_senders': 'Senders',
+        'analysis_timeline': 'Timeline',
+        'analysis_attachments': 'Attachments',
+        'analysis_threads': 'Threads',
+        'analysis_duplicates': 'Duplicates',
+        'analysis_generate_report': 'Generate Report',
+        'analysis_report_format': 'Report Format:',
+        'analysis_report_formats': {
+            'text': 'Text',
+            'html': 'HTML',
+            'json': 'JSON'
+        },
+        'analysis_no_data': 'No analysis data available. Run an analysis first.',
+        'analysis_running': 'Analyzing emails...',
+        'analysis_complete': 'Analysis complete',
+        'analysis_error': 'Error during analysis: {error}',
+        'analysis_report_saved': 'Report saved to: {path}',
+        'analysis_report_error': 'Error generating report: {error}',
+        'analysis_section_senders': 'Top Senders',
+        'analysis_section_timeline': 'Email Timeline',
+        'analysis_section_attachments': 'Attachment Analysis',
+        'analysis_section_threads': 'Conversation Threads',
+        'analysis_section_duplicates': 'Duplicate Analysis',
 
         # ======================================================================
         # Scan Tab
@@ -213,8 +242,36 @@ TRANSLATIONS = {
         'help_title': 'Help',
         'usage_tab': 'Usage',
         'features_tab': 'Features',
-        'help_usage': 'This application helps you find and remove duplicate emails from your mail clients.\nSelect your client, choose the folders to scan, and start the scan.',
-        'help_features': '- Supports Thunderbird, Apple Mail, Outlook, and generic clients.\n- Various detection criteria: Strict, Content, Headers, etc.\n- Preview duplicate emails before deleting.\n- Automatic or manual cleaning.',
+        'analysis_tab': 'Analysis',
+        'help_usage': (
+            '1. Select your email source (IMAP, local file, or directory)\n'
+            '2. Choose duplicate detection criteria\n'
+            '3. Review the detected duplicates in the results tab\n'
+            '4. Use the Analysis tab to gain insights into your email data\n'
+            '5. Select actions for each duplicate group (keep, delete, mark, etc.)\n'
+            '6. Generate reports of your analysis if needed\n'
+            '7. Apply the changes when ready'
+        ),
+        'help_features': (
+            '• Advanced Duplicate Detection: Find and manage duplicate emails with multiple matching criteria\n'
+            '• Email Analysis: Comprehensive email analytics including senders, timeline, attachments, and threads\n'
+            '• Multi-Platform Support: Works with various email clients and formats\n'
+            '• Intuitive Interface: User-friendly GUI with dark/light theme support\n'
+            '• Batch Processing: Process multiple email accounts or folders at once\n'
+            '• Safe Operations: Preview changes before applying them\n'
+            '• Cross-Platform: Works on Windows, macOS, and Linux\n'
+            '• Exportable Reports: Generate detailed reports in multiple formats (Text, HTML, JSON)'
+        ),
+        'help_analysis': (
+            'The Analysis tab provides powerful tools to gain insights into your email data:\n'
+            '• Sender Analysis: Identify top senders and domains in your inbox\n'
+            '• Timeline Visualization: See email patterns and activity over time\n'
+            '• Attachment Statistics: Analyze file types, sizes, and frequencies\n'
+            '• Thread Analysis: View and manage conversation threads\n'
+            '• Duplicate Analysis: Get detailed insights into duplicate patterns\n'
+            '• Exportable Reports: Save your analysis in multiple formats for further processing'
+        ),
+        'close': 'Close',
 
         # ======================================================================
         # Log Viewer Window
@@ -281,6 +338,35 @@ TRANSLATIONS = {
         # ======================================================================
         'tab_scan': 'Scansione',
         'tab_results': 'Risultati',
+        'tab_analysis': 'Analisi',
+        
+        # ======================================================================
+        # Scheda Analisi
+        # ======================================================================
+        'analysis_run_analysis': 'Esegui Analisi',
+        'analysis_senders': 'Mittenti',
+        'analysis_timeline': 'Cronologia',
+        'analysis_attachments': 'Allegati',
+        'analysis_threads': 'Conversazioni',
+        'analysis_duplicates': 'Duplicati',
+        'analysis_generate_report': 'Genera Report',
+        'analysis_report_format': 'Formato Report:',
+        'analysis_report_formats': {
+            'text': 'Testo',
+            'html': 'HTML',
+            'json': 'JSON'
+        },
+        'analysis_no_data': 'Nessun dato di analisi disponibile. Esegui prima un\'analisi.',
+        'analysis_running': 'Analisi email in corso...',
+        'analysis_complete': 'Analisi completata',
+        'analysis_error': 'Errore durante l\'analisi: {error}',
+        'analysis_report_saved': 'Report salvato in: {path}',
+        'analysis_report_error': 'Errore durante la generazione del report: {error}',
+        'analysis_section_senders': 'Mittenti Principali',
+        'analysis_section_timeline': 'Cronologia Email',
+        'analysis_section_attachments': 'Analisi Allegati',
+        'analysis_section_threads': 'Conversazioni',
+        'analysis_section_duplicates': 'Analisi Duplicati',
 
         # ======================================================================
         # Scan Tab
@@ -444,8 +530,36 @@ TRANSLATIONS = {
         'help_title': 'Aiuto',
         'usage_tab': 'Utilizzo',
         'features_tab': 'Funzionalità',
-        'help_usage': 'Questa applicazione ti aiuta a trovare e rimuovere email duplicate dai tuoi client di posta.\nSeleziona il tuo client, scegli le cartelle da analizzare e avvia la scansione.',
-        'help_features': '- Supporta Thunderbird, Apple Mail, Outlook e client generici.\n- Diversi criteri di rilevamento: Stretto, Contenuto, Intestazioni, etc.\n- Anteprima delle email duplicate prima di eliminarle.\n- Pulizia automatica o manuale.',
+        'analysis_tab': 'Analisi',
+        'help_usage': (
+            '1. Seleziona la sorgente delle email (IMAP, file locale o directory)\n'
+            '2. Scegli i criteri di rilevamento dei duplicati\n'
+            '3. Rivedi i duplicati rilevati nella scheda dei risultati\n'
+            '4. Usa la scheda Analisi per approfondire i tuoi dati email\n'
+            '5. Seleziona le azioni per ogni gruppo di duplicati (mantieni, elimina, segna, ecc.)\n'
+            '6. Genera report della tua analisi se necessario\n'
+            '7. Applica le modifiche quando sei pronto'
+        ),
+        'help_features': (
+            '• Rilevamento Avanzato dei Duplicati: Trova e gestisci email duplicate con criteri di corrispondenza multipli\n'
+            '• Analisi Email: Analisi completa inclusi mittenti, cronologia, allegati e thread\n'
+            '• Supporto Multi-Piattaforma: Funziona con vari client e formati email\n'
+            '• Interfaccia Intuitiva: GUI user-friendly con supporto per temi chiari/scuri\n'
+            '• Elaborazione in Batch: Elabora più account o cartelle email contemporaneamente\n'
+            '• Operazioni Sicure: Anteprima delle modifiche prima di applicarle\n'
+            '• Cross-Platform: Funziona su Windows, macOS e Linux\n'
+            '• Report Esportabili: Genera report dettagliati in più formati (Testo, HTML, JSON)'
+        ),
+        'help_analysis': (
+            'La scheda Analisi fornisce strumenti potenti per approfondire i tuoi dati email:\n'
+            '• Analisi dei Mittenti: Identifica i mittenti e i domini principali nella tua posta\n'
+            '• Visualizzazione della Cronologia: Visualizza modelli e attività email nel tempo\n'
+            '• Statistiche sugli Allegati: Analizza tipi, dimensioni e frequenze dei file\n'
+            '• Analisi delle Conversazioni: Visualizza e gestisci i thread di discussione\n'
+            '• Analisi dei Duplicati: Ottieni approfondimenti dettagliati sui modelli di duplicazione\n'
+            '• Report Esportabili: Salva le tue analisi in più formati per ulteriori elaborazioni'
+        ),
+        'close': 'Chiudi',
 
         # ======================================================================
         # Log Viewer Window

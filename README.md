@@ -5,7 +5,7 @@ A comprehensive Python tool designed to scan, identify, and remove duplicate ema
 ## 🚀 Version
 
 **Current Version:**
-[![GitHub release](https://img.shields.io/badge/release-v2.4.0-green)](https://github.com/Nsfr750/EmailDuplicateCleaner)
+[![GitHub release](https://img.shields.io/badge/release-v2.5.0-green)](https://github.com/Nsfr750/EmailDuplicateCleaner)
 [![Documentation](https://img.shields.io/badge/docs-available-brightgreen)](https://github.com/Nsfr750/EmailDuplicateCleaner/blob/master/README.md)
 [![Python Versions](https://img.shields.io/badge/python-3.8%20|%203.9%20|%203.10%20|%203.11%20|%203.12-blue)](https://www.python.org/)
 
@@ -18,6 +18,16 @@ A comprehensive Python tool designed to scan, identify, and remove duplicate ema
   - Content Only: Message body analysis
   - Headers: Metadata-based matching
   - Subject+Sender: Focused identification
+
+### 📊 Email Analysis
+
+- Advanced email analytics:
+  - Sender analysis: Identify top senders and domains
+  - Timeline analysis: Visualize email patterns over time
+  - Attachment analysis: File types, sizes, and frequencies
+  - Thread analysis: View and manage conversation threads
+  - Duplicate analysis: Detailed duplicate detection insights
+  - Exportable reports in multiple formats (Text, HTML, JSON)
 
 ### 🖥️ Multi-Interface Support
 

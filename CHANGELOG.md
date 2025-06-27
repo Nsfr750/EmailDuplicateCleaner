@@ -5,19 +5,42 @@ All notable changes to Email Duplicate Cleaner will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 🚀 [2.5.0] - 2025-06-27
+
+### 🆕 Added
+
+- ✨ **Email Analysis Features**:
+  - Added comprehensive email analysis capabilities
+  - New Analysis tab in the UI with multiple analysis types:
+    - Sender analysis (top senders and domains)
+    - Timeline analysis (email patterns over time)
+    - Attachment analysis (file types, sizes, frequencies)
+    - Thread analysis (conversation threads)
+    - Duplicate analysis (detailed insights)
+  - Export analysis reports in multiple formats (Text, HTML, JSON)
+  - Support for both English and Italian languages
+
+### 🔧 Changed
+
+- ⬆️ Updated version to 2.5.0
+- 🌐 Added new UI strings for the analysis features
+- 📊 Enhanced README with new analysis capabilities
+
 ## 🚀 [2.4.0] - 2025-06-18
 
 ### 🐛 Fixed
+
 - 🌐 Web Interface:
-  - Resolved critical routing errors by adding missing `@app.route` decorators to all API endpoints.
-  - Corrected a JavaScript typo (`hystoryTab` -> `historyTab`) that prevented the history tab from functioning.
-  - Improved template handling to prevent unnecessary file operations.
-  - Strengthened error handling within API endpoints to provide clearer feedback.
-  - Ensured proper database session management to prevent resource leaks.
+  - Resolved critical routing errors by adding missing `@app.route` decorators to all API endpoints
+  - Corrected a JavaScript typo (`hystoryTab` -> `historyTab`) that prevented the history tab from functioning
+  - Improved template handling to prevent unnecessary file operations
+  - Strengthened error handling within API endpoints to provide clearer feedback
+  - Ensured proper database session management to prevent resource leaks
 
 ## 🚀 [2.3.0] - 2025-05-20 (Stable)
 
 ### 🆕 Added
+
 - 🌐 Modern Web Interface:
   - Fully responsive web interface built with Flask
   - Dark/light mode toggle
@@ -32,6 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Better type checking
 
 ### 🔧 Changed
+
 - 🏗️ Architecture:
   - Complete rewrite of web interface
   - Improved database management with SQLAlchemy
@@ -42,6 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Improved package management
 
 ### 🐛 Fixed
+
 - 🔍 Web Interface:
   - Resolved routing issues
   - Fixed template rendering problems
@@ -52,6 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Improved form handling
 
 ### 🔬 Technical Enhancements
+
 - Performance improvements
 - Better memory management
 - Enhanced logging system
@@ -60,6 +86,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 🚀 [2.2.4] - 2025-05-15 (Beta)
 
 ### 🆕 Added
+
 - 📄 Separate modular components:
   - `about.py`: Dedicated About dialog module
   - `sponsor.py`: Comprehensive sponsor information module
@@ -69,6 +96,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added badges and shields
 
 ### 🔧 Changed
+
 - 🏗️ Architectural Improvements:
   - Refactored GUI code for better modularity
   - Improved code organization
@@ -78,6 +106,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Implemented more robust version compatibility checks
 
 ### 🐛 Fixed
+
 - 🔍 Version Management:
   - Resolved syntax errors in version compatibility functions
   - Improved error handling mechanisms

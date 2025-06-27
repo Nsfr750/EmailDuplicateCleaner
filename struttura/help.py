@@ -24,7 +24,7 @@ class Help:
     @staticmethod
     def show_help(parent):
         """
-        Displays the help window with two tabs: Usage and Features.
+        Displays the help window with three tabs: Usage, Features, and Analysis.
         """
         help_window = tk.Toplevel(parent)
         help_window.title(tr('help_title'))
@@ -46,17 +46,44 @@ class Help:
 
         # ===== USAGE TAB =====
         usage_frame = ttk.Frame(notebook, padding=10)
-        notebook.add(usage_frame, text=tr('usage_tab'))
         usage_text = tr('help_usage')
         usage_label = ttk.Label(usage_frame, text=usage_text, justify=tk.LEFT, wraplength=650)
         usage_label.pack(fill=tk.BOTH, expand=True, anchor='nw')
 
         # ===== FEATURES TAB =====
         features_frame = ttk.Frame(notebook, padding=10)
-        notebook.add(features_frame, text=tr('features_tab'))
         features_text = tr('help_features')
         features_label = ttk.Label(features_frame, text=features_text, justify=tk.LEFT, wraplength=650)
         features_label.pack(fill=tk.BOTH, expand=True, anchor='nw')
+
+        # ===== ANALYSIS TAB =====
+        analysis_frame = ttk.Frame(notebook, padding=10)
+        analysis_text = tr('help_analysis')
+        
+        # Get theme colors
+        style = ttk.Style()
+        bg_color = style.lookup('TFrame', 'background')
+        fg_color = style.lookup('TLabel', 'foreground')
+        
+        analysis_text_widget = tk.Text(
+            analysis_frame, 
+            wrap=tk.WORD, 
+            font=("Segoe UI", 10), 
+            bg=bg_color, 
+            fg=fg_color,
+            bd=0,
+            relief=tk.FLAT,
+            padx=5,
+            pady=5
+        )
+        analysis_text_widget.insert(tk.END, analysis_text)
+        analysis_text_widget.config(state=tk.DISABLED)
+        analysis_text_widget.pack(expand=True, fill=tk.BOTH, padx=5, pady=5)
+        
+        # Add tabs
+        notebook.add(usage_frame, text=tr('usage_tab'))
+        notebook.add(features_frame, text=tr('features_tab'))
+        notebook.add(analysis_frame, text=tr('analysis_tab'))
 
         # Close button
         close_btn = ttk.Button(help_window, text=tr('close'), command=help_window.destroy)

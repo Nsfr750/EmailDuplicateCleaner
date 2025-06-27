@@ -24,10 +24,12 @@ import email.utils
 import email.message
 import tempfile
 import shutil
+import json
 from pathlib import Path
 from datetime import datetime
 from collections import defaultdict
-from typing import Dict, List, Set, Tuple, Optional, Any, Union
+from typing import Dict, List, Set, Tuple, Optional, Any, Union, DefaultVar
+from email_analyzer import EmailAnalyzer
 
 # Try to import rich for enhanced UI
 try:
@@ -565,9 +567,6 @@ class EmailClientManager:
         
         handler = self.handlers[client_name.lower()]
         return handler.find_mail_folders()
-
-
-class DuplicateEmailFinder:
     """Scan mailboxes and identify duplicate emails."""
     
     def __init__(self):
@@ -575,6 +574,8 @@ class DuplicateEmailFinder:
         self.duplicate_groups = []
         self.current_folder = None
         self.email_cache = {}  # Cache to store email content by group and index
+        self.analyzer = EmailAnalyzer()  # Initialize the email analyzer
+        self.analysis_results = {}  # Store analysis results
         
     def compute_email_hash(self, msg: email.message.Message, method: str) -> str:
         """
@@ -653,19 +654,177 @@ class DuplicateEmailFinder:
         
         return hasher.hexdigest()
     
-    def scan_folder(self, folder_info: Dict[str, Any], hash_method: str = 'strict') -> List[Dict[str, Any]]:
+    def scan_folder(self, folder_info: Dict[str, Any], hash_method: str = 'xxh64', 
+                   chunk_size: int = 100, use_cache: bool = True) -> List[Dict[str, Any]]:
         """
-        Scan a mail folder for duplicate messages.
+        Scan a mail folder for duplicate messages using optimized processing.
         
         Args:
             folder_info: Dictionary with folder path and info
-            hash_method: Method to use for determining duplicates
-        
+            hash_method: Method to use for determining duplicates ('xxh64', 'md5', 'sha1', etc.)
+            chunk_size: Number of messages to process in each chunk
+            use_cache: Whether to use the hash cache
+            
         Returns:
             List of duplicate groups in this folder
         """
         self.current_folder = folder_info
-        message_hash_map = defaultdict(list)
+        self.duplicate_groups = []
+        
+        try:
+            from optimized_email_processor import find_duplicates, EmailHashCache
+            
+            # Set up progress display
+            if self.console:
+                from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
+                progress = Progress(
+                    SpinnerColumn(),
+                    TextColumn("[progress.description]{task.description}"),
+                    BarColumn(),
+                    TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+                    TimeElapsedColumn(),
+                    console=self.console
+                )
+                progress.start()
+                task = progress.add_task(f"[cyan]Scanning {folder_info['display_name']}...", total=100)
+            
+            # Process the mailbox
+            cache = EmailHashCache() if use_cache else None
+            message_hash_map = {}
+            
+            # Process in chunks to show progress
+            for chunk in self._process_mailbox_chunked(folder_info['path'], chunk_size, hash_method, cache):
+                if self.console:
+                    progress.update(task, completed=(chunk['processed'] / chunk['total']) * 100)
+                
+                # Update the hash map with messages from this chunk
+                for msg in chunk['messages']:
+                    if msg['hash'] not in message_hash_map:
+                        message_hash_map[msg['hash']] = []
+                    message_hash_map[msg['hash']].append({
+                        'key': msg['key'],
+                        'message': msg.get('message'),
+                        'subject': msg['subject'],
+                        'from': msg['from'],
+                        'date': msg['date'],
+                        'folder': folder_info['display_name']
+                    })
+            
+            # Identify duplicate groups
+            duplicate_groups = []
+            for email_hash, messages in message_hash_map.items():
+                if len(messages) > 1:
+                    # Sort messages by date if available
+                    try:
+                        for msg in messages:
+                            if msg['date']:
+                                try:
+                                    parsed_date = email.utils.parsedate_to_datetime(msg['date'])
+                                    msg['parsed_date'] = parsed_date
+                                except (TypeError, ValueError):
+                                    msg['parsed_date'] = datetime.min
+                            else:
+                                msg['parsed_date'] = datetime.min
+                                
+                        messages.sort(key=lambda x: x['parsed_date'])
+                    except Exception:
+                        # If date sorting fails, continue without it
+                        pass
+                        
+                    duplicate_groups.append({
+                        'hash': email_hash,
+                        'messages': messages,
+                        'count': len(messages)
+                    })
+            
+            # Sort groups by number of duplicates (descending)
+            duplicate_groups.sort(key=lambda x: x['count'], reverse=True)
+            self.duplicate_groups = duplicate_groups
+            
+            if self.console:
+                progress.update(task, completed=100, visible=False)
+                progress.stop()
+                
+            return duplicate_groups
+            
+        except ImportError:
+            # Fall back to the original implementation if optimized module is not available
+            if self.console:
+                self.console.print("[yellow]Optimized processor not found, falling back to standard processing[/yellow]")
+            return self._scan_folder_fallback(folder_info, hash_method)
+            
+        except Exception as e:
+            error_msg = f"Error scanning folder {folder_info['display_name']}: {str(e)}"
+            if self.console:
+                self.console.print(f"[bold red]{error_msg}[/bold red]")
+            else:
+                print(error_msg)
+            return []
+    
+    def _process_mailbox_chunked(self, mbox_path: str, chunk_size: int, 
+                              hash_method: str, cache: Any) -> Generator[Dict[str, Any], None, None]:
+        """Process mailbox in chunks with progress tracking."""
+        try:
+            import mailbox
+            from optimized_email_processor import compute_email_hash_fast
+            
+            mbox = mailbox.mbox(mbox_path)
+            total_messages = len(mbox)
+            
+            for i in range(0, total_messages, chunk_size):
+                chunk_end = min(i + chunk_size, total_messages)
+                chunk_messages = []
+                
+                for j in range(i, chunk_end):
+                    try:
+                        msg = mbox[j]
+                        message_id = msg.get('Message-ID', f'no-id-{i}-{j}')
+                        
+                        # Check cache if available
+                        cached_hash = None
+                        if cache:
+                            cached_hash = cache.get_hash(message_id, mbox_path, hash_method)
+                        
+                        if cached_hash is not None:
+                            message_hash = cached_hash
+                        else:
+                            # Compute hash if not in cache
+                            message_hash = compute_email_hash_fast(msg, hash_method)
+                            # Update cache
+                            if cache:
+                                cache.set_hash(message_id, message_hash, mbox_path, hash_method)
+                        
+                        chunk_messages.append({
+                            'key': j,
+                            'message': msg,  # Store message object for later use
+                            'hash': message_hash,
+                            'subject': msg.get('Subject', '(No Subject)'),
+                            'from': msg.get('From', '(No Sender)'),
+                            'date': msg.get('Date', '')
+                        })
+                        
+                    except Exception as e:
+                        if self.console:
+                            self.console.print(f"[yellow]Error processing message {j}: {str(e)}[/yellow]")
+                
+                yield {
+                    'start_idx': i,
+                    'end_idx': chunk_end - 1,
+                    'total': total_messages,
+                    'messages': chunk_messages,
+                    'processed': chunk_end,
+                    'remaining': max(0, total_messages - chunk_end)
+                }
+                
+        except Exception as e:
+            raise Exception(f"Error processing mailbox: {str(e)}")
+        finally:
+            if 'mbox' in locals():
+                mbox.close()
+    
+    def _scan_folder_fallback(self, folder_info: Dict[str, Any], hash_method: str) -> List[Dict[str, Any]]:
+        """Fallback implementation for when optimized processor is not available."""
+        message_hash_map = {}
         
         try:
             mbox = mailbox.mbox(folder_info['path'])
@@ -680,12 +839,15 @@ class DuplicateEmailFinder:
                     TimeElapsedColumn(),
                     console=self.console
                 ) as progress:
-                    task = progress.add_task(f"Scanning {folder_info['display_name']}", total=total_messages)
+                    task = progress.add_task(f"[yellow]Fallback:[/yellow] Scanning {folder_info['display_name']}", total=total_messages)
                     
                     for i, msg_key in enumerate(mbox.keys()):
                         message = mbox[msg_key]
                         email_hash = self.compute_email_hash(message, hash_method)
                         
+                        if email_hash not in message_hash_map:
+                            message_hash_map[email_hash] = []
+                            
                         message_hash_map[email_hash].append({
                             'key': msg_key,
                             'message': message,
@@ -698,7 +860,7 @@ class DuplicateEmailFinder:
                         progress.update(task, advance=1)
             else:
                 # Basic console output
-                print(f"Scanning {folder_info['display_name']} ({total_messages} messages)")
+                print(f"Fallback: Scanning {folder_info['display_name']} ({total_messages} messages)")
                 for i, msg_key in enumerate(mbox.keys()):
                     if i % 100 == 0:
                         print(f"  Processed {i}/{total_messages} messages...", end='\r')
@@ -706,6 +868,9 @@ class DuplicateEmailFinder:
                     message = mbox[msg_key]
                     email_hash = self.compute_email_hash(message, hash_method)
                     
+                    if email_hash not in message_hash_map:
+                        message_hash_map[email_hash] = []
+                        
                     message_hash_map[email_hash].append({
                         'key': msg_key,
                         'message': message,
@@ -720,11 +885,10 @@ class DuplicateEmailFinder:
             duplicate_groups = []
             for email_hash, messages in message_hash_map.items():
                 if len(messages) > 1:
-                    # Sort messages by date, oldest first (if date parsing succeeds)
+                    # Sort messages by date if available
                     try:
                         for msg in messages:
                             if msg['date']:
-                                # Try to parse the date for sorting
                                 try:
                                     parsed_date = email.utils.parsedate_to_datetime(msg['date'])
                                     msg['parsed_date'] = parsed_date
@@ -735,7 +899,7 @@ class DuplicateEmailFinder:
                                 
                         messages.sort(key=lambda x: x['parsed_date'])
                     except Exception:
-                        # If date sorting fails, don't worry about it
+                        # If date sorting fails, continue without it
                         pass
                         
                     duplicate_groups.append({
@@ -744,15 +908,16 @@ class DuplicateEmailFinder:
                         'count': len(messages)
                     })
             
+            # Sort groups by number of duplicates (descending)
             duplicate_groups.sort(key=lambda x: x['count'], reverse=True)
-            self.duplicate_groups = duplicate_groups
             return duplicate_groups
             
         except Exception as e:
+            error_msg = f"Error in fallback scan of {folder_info['display_name']}: {str(e)}"
             if self.console:
-                self.console.print(f"[bold red]Error scanning folder {folder_info['display_name']}: {str(e)}[/bold red]")
+                self.console.print(f"[bold red]{error_msg}[/bold red]")
             else:
-                print(f"Error scanning folder {folder_info['display_name']}: {str(e)}")
+                print(error_msg)
             return []
     
     def display_duplicate_groups(self, limit: Optional[int] = None) -> None:
@@ -1392,119 +1557,23 @@ def main():
             total_dupes += folder_dupes
             total_groups += len(duplicate_groups)
             
+            # Create a test mailbox
+            test_mailbox = create_test_mailbox()
+            
+            # Scan the test mailbox
+            folder_info = {
+                'path': test_mailbox,
+                'display_name': 'Test Mailbox',
+                'type': 'mbox'
+            }
+            
             if console:
-                console.print(f"\n[bold green]Folder: {folder['display_name']}[/bold green]")
-                console.print(f"Found {len(duplicate_groups)} duplicate groups ({folder_dupes} duplicate emails)")
-            else:
-                print(f"\nFolder: {folder['display_name']}")
-                print(f"Found {len(duplicate_groups)} duplicate groups ({folder_dupes} duplicate emails)")
-            
-            # Display duplicates
-            duplicate_finder.display_duplicate_groups()
-            
-            if not args.auto_clean:
-                # Interactive deletion
-                if console:
-                    if Confirm.ask("Delete duplicates from this folder?", default=False):
-                        # Ask which groups to process
-                        group_input = Prompt.ask(
-                            "Enter group numbers to process (comma-separated), or 'all'",
-                            default="all"
-                        )
-                        
-                        if group_input.lower() == 'all':
-                            group_indices = list(range(len(duplicate_groups)))
-                        else:
-                            try:
-                                group_indices = [int(i.strip()) - 1 for i in group_input.split(',')]
-                            except ValueError:
-                                console.print("[red]Invalid input, no groups will be processed[/red]")
-                                group_indices = []
-                        
-                        if group_indices:
-                            deleted, errors = duplicate_finder.delete_duplicates(
-                                group_indices, selection_method='interactive'
-                            )
-                            
-                            console.print(f"[green]Deleted {deleted} duplicate emails[/green]")
-                            
-                            if errors:
-                                console.print("[yellow]Some errors occurred during deletion:[/yellow]")
-                                for error in errors[:5]:  # Show first 5 errors
-                                    console.print(f"  - {error}")
-                                if len(errors) > 5:
-                                    console.print(f"  ... and {len(errors) - 5} more errors")
-                else:
-                    if input("Delete duplicates from this folder? (y/N): ").lower() == 'y':
-                        # Ask which groups to process
-                        group_input = input("Enter group numbers to process (comma-separated), or 'all': ")
-                        
-                        if group_input.lower() == 'all':
-                            group_indices = list(range(len(duplicate_groups)))
-                        else:
-                            try:
-                                group_indices = [int(i.strip()) - 1 for i in group_input.split(',')]
-                            except ValueError:
-                                print("Invalid input, no groups will be processed")
-                                group_indices = []
-                        
-                        if group_indices:
-                            deleted, errors = duplicate_finder.delete_duplicates(
-                                group_indices, selection_method='interactive'
-                            )
-                            
-                            print(f"Deleted {deleted} duplicate emails")
-                            
-                            if errors:
-                                print("Some errors occurred during deletion:")
-                                for error in errors[:5]:  # Show first 5 errors
-                                    print(f"  - {error}")
-                                if len(errors) > 5:
-                                    print(f"  ... and {len(errors) - 5} more errors")
-            else:
-                # Automatic cleaning
-                if console:
-                    console.print("[bold]Auto-cleaning duplicates...[/bold]")
-                else:
-                    print("Auto-cleaning duplicates...")
-                    
-                deleted, errors = duplicate_finder.delete_duplicates(
-                    list(range(len(duplicate_groups))), selection_method='keep-first'
-                )
-                
-                if console:
-                    console.print(f"[green]Deleted {deleted} duplicate emails[/green]")
-                    
-                    if errors:
-                        console.print("[yellow]Some errors occurred during deletion:[/yellow]")
-                        for error in errors[:5]:
-                            console.print(f"  - {error}")
-                        if len(errors) > 5:
-                            console.print(f"  ... and {len(errors) - 5} more errors")
-                else:
-                    print(f"Deleted {deleted} duplicate emails")
-                    
-                    if errors:
-                        print("Some errors occurred during deletion:")
-                        for error in errors[:5]:
-                            print(f"  - {error}")
-                        if len(errors) > 5:
-                            print(f"  ... and {len(errors) - 5} more errors")
+                console.print(f"Scanned {len(folders_to_scan)} folders")
+                console.print(f"Found {total_groups} duplicate groups with {total_dupes} duplicate emails")
         else:
-            if console:
-                console.print(f"[yellow]No duplicates found in {folder['display_name']}[/yellow]")
-            else:
-                print(f"No duplicates found in {folder['display_name']}")
-    
-    # Summary
-    if console:
-        console.print("\n[bold]Scan Summary:[/bold]")
-        console.print(f"Scanned {len(folders_to_scan)} folders")
-        console.print(f"Found {total_groups} duplicate groups with {total_dupes} duplicate emails")
-    else:
-        print("\nScan Summary:")
-        print(f"Scanned {len(folders_to_scan)} folders")
-        print(f"Found {total_groups} duplicate groups with {total_dupes} duplicate emails")
+            print("\nScan Summary:")
+            print(f"Scanned {len(folders_to_scan)} folders")
+            print(f"Found {total_groups} duplicate groups with {total_dupes} duplicate emails")
     
     # Clean up temp directory if in demo mode
     if temp_dir and os.path.exists(temp_dir):
