@@ -48,16 +48,98 @@ TRANSLATIONS = {
         'update_error': 'Update Error',
         'update_check_error': 'Failed to check for updates: {error}',
 
-        'menu_sponsor': 'Sponsor',
+        'menu_sponsor_us': 'Sponsor',
         'menu_sponsor_message': 'Support Development',
         'menu_sponsor_dialog': 'Thank you for considering to support our development!',
 
         # ======================================================================
         # Scan Tab
         # ======================================================================
-        'tab_scan': 'Scan',
-        'tab_results': 'Results',
-        'tab_analysis': 'Analysis',
+        'tab_scan': 'Scansione',
+        'tab_results': 'Risultati',
+        'tab_analysis': 'Analisi',
+        
+        # Frame Titles
+        'frame_client_selection': 'Selezione Client Email',
+        'frame_scan_criteria': 'Criteri di Scansione',
+        'frame_folders': 'Cartelle',
+        'frame_actions': 'Azioni',
+        'frame_preview': 'Anteprima Email',
+        'frame_results': 'Gruppi di Duplicati',
+        'frame_analysis': 'Analisi Email',
+        'frame_analysis_summary': 'Riepilogo',
+        'frame_analysis_senders': 'Mittenti Principali',
+        'frame_analysis_subjects': 'Oggetti Comuni',
+        'frame_analysis_dates': 'Distribuzione Email',
+        
+        # Help Panel
+        'help_title': 'Guida e Documentazione',
+        'help_content': """# Guida di Email Duplicate Cleaner
+        
+## Panoramica
+Questo strumento ti aiuta a trovare e rimuovere le email duplicate da vari client di posta.
+
+## Come Usare
+1. Seleziona il tuo client email
+2. Scegli le cartelle da scansionare
+3. Imposta i criteri di scansione
+4. Clicca 'Cerca Duplicati'
+5. Rivedi e pulisci i duplicati
+
+## Supporto
+Per assistenza, visita il nostro [repository GitHub](https://github.com/your-repo)""",
+        'help_button': 'Mostra Guida',
+        
+        # Update Panel
+        'update_title': 'Controlla Aggiornamenti',
+        'update_button': 'Controlla Ora',
+        'update_available': 'Nuova versione disponibile: {version}',
+        'update_uptodate': 'Hai l\'ultima versione installata',
+        'update_checking': 'Controllo aggiornamenti in corso...',
+        'update_error': 'Errore nel controllo aggiornamenti',
+        'update_download': 'Scarica Aggiornamento',
+        'update_install': 'Installa Aggiornamento',
+        'update_later': 'Ricordamelo Più Tardi',
+        
+        # Sponsor Panel
+        'sponsor_title': 'Supporta lo Sviluppo',
+        'sponsor_message': 'Se trovi utile questo strumento, valuta di supportarne lo sviluppo.',
+        'sponsor_button': 'Diventa uno Sponsor',
+        'sponsor_thanks': 'Grazie per il tuo supporto!',
+        
+        # About Panel
+        'about_title': 'Informazioni su Email Duplicate Cleaner',
+        'about_version': 'Versione: {version}',
+        'about_author': 'Autore: Il Tuo Nome',
+        'about_license': 'Licenza: MIT',
+        'about_website': 'Sito Web: https://your-website.com',
+        'about_github': 'GitHub: https://github.com/your-repo',
+        
+        # Analysis Section
+        'analysis_run_button': 'Esegui Analisi',
+        'analysis_export_button': 'Esporta Report',
+        'analysis_summary_title': 'Riepilogo Email',
+        'analysis_total_emails': 'Email Totali',
+        'analysis_duplicate_emails': 'Email Duplicate',
+        'analysis_unique_emails': 'Email Uniche',
+        'analysis_space_saved': 'Spazio da Risparmiare',
+        'analysis_top_senders': 'Top 10 Mittenti',
+        'analysis_common_subjects': 'Oggetti Più Comuni',
+        'analysis_email_distribution': 'Distribuzione Email per Data',
+        'analysis_no_data': 'Nessun dato disponibile. Esegui prima l\'analisi.',
+        'analysis_generating': 'Generazione analisi in corso...',
+        'analysis_complete': 'Analisi completata',
+        'analysis_error': 'Errore durante la generazione dell\'analisi',
+        'analysis_export_success': 'Report esportato con successo',
+        'analysis_export_error': 'Errore durante l\'esportazione del report',
+        
+        # Analysis Chart Labels
+        'chart_senders': 'Mittenti',
+        'chart_emails': 'Email',
+        'chart_dates': 'Date',
+        'chart_count': 'Conteggio',
+        'chart_subject': 'Oggetto',
+        'chart_frequency': 'Frequenza',
         
         # --- Client Selection ---
         'scan_client_all_radio': 'All Clients',
@@ -227,9 +309,28 @@ TRANSLATIONS = {
         'update_error': 'Errore Aggiornamento',
         'update_check_error': 'Impossibile controllare gli aggiornamenti: {error}',
 
-        'menu_sponsor': 'Supportaci',
-        'menu_sponsor_message': 'Supporta lo Sviluppo',
-        'menu_sponsor_dialog': 'Grazie per aver considerato di supportare il nostro sviluppo!',
+        'menu_sponsor_us': 'Supportaci',
+        'sponsor':'Sponsorizzaci',
+        'support_on_github': 'Sponsoraci su GitHub', 
+        'join_discord':'Unisciti a Discord',
+        'buy_me_a_coffee':'Offrimi un Caffè',
+        'join_the_patreon':'Unisciti a Patreon',
+        'close':'Chiudi',
+
+        # ======================================================================
+        # Frames
+        # ======================================================================
+        'scan_folder_frame':'Cartelle da Scansionare',
+        'scan_autoclean_checkbox': 'Pulisci automaticamente i duplicati',
+        'scan_criteria_frame':'Criteri di Scansione',
+        'scan_button_frame':'Pulsanti di Scansione',
+        'console_frame_title':'Console',
+        'results_frame_title':'Risultati',
+        'analysis_frame_title':'Analisi',
+        'preview_header':'Anteprima',
+        'email_action_frame':'Azioni Email',
+        'group_management_frame': 'Gestione Gruppi',
+        'view_email_button':'Anteprima Email',
 
         # ======================================================================
         # Scan Tab
@@ -324,7 +425,16 @@ TRANSLATIONS = {
         'analysis_common_subjects': 'Oggetti Più Comuni',
         'analysis_email_distribution': 'Distribuzione Email per Data',
         'analysis_no_data': 'Nessun dato disponibile. Eseguire prima l\'analisi.',
-
+        'analysis_control': 'Controllo',
+        'analysis_run_analysis': 'Esegui Analisi',
+        'analysis_report_format': 'Formato Report',
+        'analysis_generate_report': 'Genera Report',
+        'analysis_sender': 'Mittenti',
+        'analysis_timeline': 'Timeline',
+        'analysis_attachments': 'Allegati',
+        'analysis_thread': 'Thread',
+        'analysis_duplicates': 'Duplicati',
+       
         # ======================================================================
         # Log Viewer
         # ======================================================================

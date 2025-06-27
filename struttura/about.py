@@ -9,23 +9,23 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from struttura.version import __version__
-from lang.lang import get_string as tr
+from lang.lang import get_string
 
 class About:
     @staticmethod
     def show_about(root):
         about_dialog = tk.Toplevel(root)
-        about_dialog.title(tr('about'))
+        about_dialog.title(get_string('about'))
         about_dialog.geometry('350x250')
         about_dialog.transient(root)
         about_dialog.grab_set()
 
         # Add app icon or logo here if you have one
-        title = ttk.Label(about_dialog, text=tr('app_title'), font=('Helvetica', 16, 'bold'))
+        title = ttk.Label(about_dialog, text=get_string('app_title'), font=('Helvetica', 16, 'bold'))
         title.pack(pady=20)
 
         # Get version dynamically from version.py
-        version = ttk.Label(about_dialog, text=f"{tr('version')} {__version__}")
+        version = ttk.Label(about_dialog, text=f"{get_string('version')} {__version__}")
         version.pack()
 
         description = ttk.Label(about_dialog, text='', justify=tk.CENTER)
@@ -34,4 +34,4 @@ class About:
         copyright = ttk.Label(about_dialog, text='© 2025 Nsfr750')
         copyright.pack(pady=10)
 
-        ttk.Button(about_dialog, text=tr('close'), command=about_dialog.destroy).pack(pady=20)
+        ttk.Button(about_dialog, text=get_string('close'), command=about_dialog.destroy).pack(pady=20)

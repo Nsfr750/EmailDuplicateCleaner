@@ -17,7 +17,7 @@ project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from lang.lang import get_string as tr
+from lang.lang import get_string
 
 class Help:
     
@@ -27,7 +27,7 @@ class Help:
         Displays the help window with three tabs: Usage, Features, and Analysis.
         """
         help_window = tk.Toplevel(parent)
-        help_window.title(tr('help_title'))
+        help_window.title(get_string('help_title'))
         help_window.geometry("700x500")
         help_window.minsize(600, 400)
 
@@ -46,19 +46,19 @@ class Help:
 
         # ===== USAGE TAB =====
         usage_frame = ttk.Frame(notebook, padding=10)
-        usage_text = tr('help_usage')
+        usage_text = get_string('help_usage')
         usage_label = ttk.Label(usage_frame, text=usage_text, justify=tk.LEFT, wraplength=650)
         usage_label.pack(fill=tk.BOTH, expand=True, anchor='nw')
 
         # ===== FEATURES TAB =====
         features_frame = ttk.Frame(notebook, padding=10)
-        features_text = tr('help_features')
+        features_text = get_string('help_features')
         features_label = ttk.Label(features_frame, text=features_text, justify=tk.LEFT, wraplength=650)
         features_label.pack(fill=tk.BOTH, expand=True, anchor='nw')
 
         # ===== ANALYSIS TAB =====
         analysis_frame = ttk.Frame(notebook, padding=10)
-        analysis_text = tr('help_analysis')
+        analysis_text = get_string('help_analysis')
         
         # Get theme colors
         style = ttk.Style()
@@ -81,12 +81,12 @@ class Help:
         analysis_text_widget.pack(expand=True, fill=tk.BOTH, padx=5, pady=5)
         
         # Add tabs
-        notebook.add(usage_frame, text=tr('usage_tab'))
-        notebook.add(features_frame, text=tr('features_tab'))
-        notebook.add(analysis_frame, text=tr('analysis_tab'))
+        notebook.add(usage_frame, text=get_string('usage_tab'))
+        notebook.add(features_frame, text=get_string('features_tab'))
+        notebook.add(analysis_frame, text=get_string('analysis_tab'))
 
         # Close button
-        close_btn = ttk.Button(help_window, text=tr('close'), command=help_window.destroy)
+        close_btn = ttk.Button(help_window, text=get_string('close'), command=help_window.destroy)
         close_btn.pack(pady=10)
         
         # Make the window modal
