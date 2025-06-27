@@ -26,7 +26,7 @@ from struttura.menu import AppMenu
 from struttura.updates import UpdateChecker
 from struttura.version import get_version
 from email_duplicate_cleaner import (
-    EmailClientManager, DuplicateEmailFinder, create_test_mailbox,
+    EmailClientManager, create_test_mailbox,
     BaseEmailClientHandler, ThunderbirdMailHandler, AppleMailHandler,
     OutlookHandler, GenericMailHandler
 )
@@ -85,7 +85,6 @@ class EmailCleanerGUI:
         
         # Set up instance variables
         self.client_manager = EmailClientManager()
-        self.duplicate_finder = DuplicateEmailFinder()
         self.mail_folders = []
         self.folder_listbox = None
         self.selected_folders = []
@@ -183,15 +182,22 @@ class EmailCleanerGUI:
         # Create Results tab
         self.results_tab = ttk.Frame(self.notebook, padding="10")
         
+        # Create Analysis tab
+        self.analysis_tab = ttk.Frame(self.notebook, padding="10")
+        
         # Add tabs to notebook
         self.notebook.add(self.scan_tab, text=get_string("tab_scan"))
         self.notebook.add(self.results_tab, text=get_string("tab_results"))
+        self.notebook.add(self.analysis_tab, text=get_string("tab_analysis"))
         
         # Set up the Scan tab content
         self.setup_scan_tab()
         
         # Set up the Results tab content
         self.setup_results_tab()
+        
+        # Set up the Analysis tab content
+        self.setup_analysis_tab()
     
     def setup_scan_tab(self):
         """Set up the content for the Scan tab"""
@@ -504,6 +510,9 @@ class EmailCleanerGUI:
         # Switch to results tab
         self.notebook.select(1)
         
+        # Get error message template in the main thread
+        error_template = get_string('error_scanning_folders')
+        
         # Start scanning thread
         self.set_status(get_string('status_scanning_folders').format(count=len(self.selected_folders)))
         
@@ -515,22 +524,34 @@ class EmailCleanerGUI:
                 
                 for folder in self.selected_folders:
                     logging.info("Scanning folder: %s", folder['display_name'])
-                    groups = self.duplicate_finder.scan_folder(folder, criteria)
+                    # Get the appropriate handler based on the folder client type
+                    client_type = folder.get('client_type', 'generic')
+                    handler = self.client_manager.handlers.get(client_type)
                     
-                    if groups:
-                        logging.info("Found %d duplicate groups in folder", len(groups))
-                        for group in groups:
-                            self.duplicate_groups.append(group)
+                    if handler:
+                        groups = handler.find_duplicates(folder['path'], criteria)
+                        if groups:
+                            logging.info("Found %d duplicate groups in folder", len(groups))
+                            for group in groups:
+                                group_with_metadata = {
+                                    'emails': group,
+                                    'folder': folder['display_name'],
+                                    'client_type': client_type
+                                }
+                                self.duplicate_groups.append(group_with_metadata)
+                        else:
+                            logging.info("No duplicates found in folder: %s", folder['display_name'])
                     else:
-                        logging.info("No duplicates found in folder: %s", folder['display_name'])
+                        logging.warning("No handler found for client type: %s", client_type)
                 
                 # Update UI in the main thread
                 self.root.after(0, self.update_results_tree)
                 
             except Exception as e:
-                error_msg = get_string('error_scanning_folders').format(error=str(e))
+                # Format the error message with the template we got in the main thread
+                error_msg = error_template.format(error=str(e))
                 logging.error(error_msg, exc_info=True)
-                self.root.after(0, lambda: self.show_error(error_msg))
+                self.root.after(0, lambda msg=error_msg: self.show_error(msg))
         
         logging.debug("Starting scan thread")
         self.scanning_thread = threading.Thread(target=scan_folders, daemon=True)
@@ -542,33 +563,43 @@ class EmailCleanerGUI:
             self.set_status(get_string('status_no_duplicates_found'))
             return
         
-        total_dupes = sum(group['count'] - 1 for group in self.duplicate_groups)
+        total_dupes = sum(len(group['emails']) - 1 for group in self.duplicate_groups)
         
         for i, group in enumerate(self.duplicate_groups):
             # Create group parent node
             group_id = get_string('group_prefix').format(index=i+1)
-            group_node = self.results_tree.insert("", "end", iid=f"group_{i}", text=group_id, open=True,
-                                           values=("", "", f"{len(group['messages'])} {get_string('emails_label')}", ""))
+            group_node = self.results_tree.insert(
+                "", "end", 
+                iid=f"group_{i}", 
+                text=group_id, 
+                open=True,
+                values=("", "", f"{len(group['emails'])} {get_string('emails_label')}", group['folder'])
+            )
             
             # Add each email in the group
-            for j, email_info in enumerate(group['messages']):
+            for j, email_info in enumerate(group['emails']):
                 email_node_id = f"group_{i}_{j}"
 
                 # Mark the original email
                 prefix = f"({get_string('original_prefix')}) " if j == 0 else ""
 
                 self.results_tree.insert(
-                    group_node, "end", iid=email_node_id,
+                    group_node, 
+                    "end", 
+                    iid=email_node_id,
                     text=f"{j+1}",
                     values=(
-                        email_info['date'],
-                        email_info['from'],
-                        prefix + email_info['subject'],
-                        email_info['folder']
+                        email_info.get('date', ''),
+                        email_info.get('from', ''),
+                        prefix + email_info.get('subject', '(No subject)'),
+                        group['folder']
                     )
                 )
         
-        self.set_status(get_string('status_found_duplicates').format(group_count=len(self.duplicate_groups), dupe_count=total_dupes))
+        self.set_status(get_string('status_found_duplicates').format(
+            group_count=len(self.duplicate_groups), 
+            dupe_count=total_dupes
+        ))
 
     def clean_selected_groups(self):
         """Clean duplicates from selected groups"""
@@ -767,14 +798,116 @@ class EmailCleanerGUI:
         # Update console colors
         self.console.configure(bg='#1a1a1a' if is_dark else '#ffffff',
                              fg='#00ff00' if is_dark else '#000000')
-
+                             
     def switch_language(self):
-        """Switch the application language."""
-        new_lang = self.language_var.get()
-        lang_manager.set_language(new_lang)
-        logging.info(f"Language switched to {new_lang}")
-        # Removed the restart prompt so the change takes effect silently.
-        self.set_status(get_string('ready_status'))
+        """Switch the application language and update the UI."""
+        try:
+            # Get the new language from the variable
+            new_lang = self.language_var.get()
+            
+            # Update the language in the language manager
+            lang_manager.set_language(new_lang)
+            
+            # Update window title
+            self.root.title(get_string('app_title'))
+            
+            # Recreate the menu to update all menu items
+            if hasattr(self, 'menu') and self.menu:
+                self.menu.destroy()
+                self.menu = AppMenu(self)
+            
+            # Update all UI elements
+            self.update_ui_language()
+            
+            # Log the language change
+            logging.info(f"Language switched to: {new_lang}")
+            
+        except Exception as e:
+            error_msg = get_string('error_switching_language').format(error=str(e))
+            logging.error(error_msg, exc_info=True)
+            self.show_error(error_msg)
+    
+    def update_ui_language(self):
+        """Update all UI elements with the current language."""
+        # Update status bar
+        if hasattr(self, 'status_bar'):
+            self.set_status(get_string('ready_status'))
+        
+        # Update tab titles
+        if hasattr(self, 'notebook'):
+            for i, tab_id in enumerate(self.notebook.tabs()):
+                tab_name = self.notebook.tab(tab_id)['text']
+                if tab_name in [get_string('tab_scan'), get_string('tab_results'), get_string('tab_analysis')]:
+                    self.notebook.tab(tab_id, text=get_string('tab_scan') if i == 0 else 
+                                        get_string('tab_results') if i == 1 else 
+                                        get_string('tab_analysis'))
+        
+        # Update scan tab elements
+        if hasattr(self, 'client_frame'):
+            self.client_frame.config(text=get_string('scan_client_frame'))
+            self.radio_client_all.config(text=get_string('scan_client_all_radio'))
+            self.radio_client_tb.config(text=get_string('scan_client_thunderbird_radio'))
+            self.radio_client_am.config(text=get_string('scan_client_apple_mail_radio'))
+            self.radio_client_ol.config(text=get_string('scan_client_outlook_radio'))
+            self.radio_client_gen.config(text=get_string('scan_client_generic_radio'))
+            
+        if hasattr(self, 'criteria_frame'):
+            self.criteria_frame.config(text=get_string('scan_criteria_frame'))
+            self.radio_crit_strict.config(text=get_string('scan_criteria_strict_radio'))
+            self.radio_crit_content.config(text=get_string('scan_criteria_content_radio'))
+            self.radio_crit_headers.config(text=get_string('scan_criteria_headers_radio'))
+            self.radio_crit_subj_send.config(text=get_string('scan_criteria_subject_sender_radio'))
+            
+        if hasattr(self, 'folder_frame'):
+            self.folder_frame.config(text=get_string('scan_folder_frame'))
+            
+        if hasattr(self, 'find_folders_button'):
+            self.find_folders_button.config(text=get_string('scan_find_folders_button'))
+            
+        if hasattr(self, 'select_all_button'):
+            self.select_all_button.config(text=get_string('scan_select_all_button'))
+            
+        if hasattr(self, 'scan_button'):
+            self.scan_button.config(text=get_string('scan_button'))
+        
+        # Update results tab elements
+        if hasattr(self, 'results_tree'):
+            self.results_tree.heading('#0', text=get_string('header_group'))
+            self.results_tree.heading('date', text=get_string('header_date'))
+            self.results_tree.heading('from', text=get_string('header_from'))
+            self.results_tree.heading('subject', text=get_string('header_subject'))
+            self.results_tree.heading('folder', text=get_string('header_folder'))
+            
+        if hasattr(self, 'preview_header'):
+            self.preview_header.config(text=get_string('preview_header'))
+        
+        # Update buttons in results tab
+        if hasattr(self, 'view_email_button'):
+            self.view_email_button.config(text=get_string('view_email_button'))
+        if hasattr(self, 'clean_selected_button'):
+            self.clean_selected_button.config(text=get_string('clean_selected_button'))
+        if hasattr(self, 'clean_all_button'):
+            self.clean_all_button.config(text=get_string('clean_all_button'))
+        if hasattr(self, 'expand_all_button'):
+            self.expand_all_button.config(text=get_string('expand_all_button'))
+        if hasattr(self, 'collapse_all_button'):
+            self.collapse_all_button.config(text=get_string('collapse_all_button'))
+            
+        # Update analysis tab elements
+        if hasattr(self, 'analysis_notebook'):
+            for i, tab_id in enumerate(self.analysis_notebook.tabs()):
+                tab_text = self.analysis_notebook.tab(tab_id, 'text')
+                if tab_text in [get_string('analysis_senders'), get_string('analysis_timeline'), 
+                               get_string('analysis_attachments'), get_string('analysis_threads'), 
+                               get_string('analysis_duplicates')]:
+                    self.analysis_notebook.tab(tab_id, text=get_string('analysis_senders') if i == 0 else
+                                              get_string('analysis_timeline') if i == 1 else
+                                              get_string('analysis_attachments') if i == 2 else
+                                              get_string('analysis_threads') if i == 3 else
+                                              get_string('analysis_duplicates'))
+        
+        # Force update the UI
+        self.root.update_idletasks()
 
     def show_error(self, message):
         """Show an error message"""
@@ -1091,6 +1224,103 @@ class EmailCleanerGUI:
             self.mailbox_list.activate(current_focus + 1)
             self.mailbox_list.see(current_focus + 1)
         return "break"
+        
+    def setup_analysis_tab(self):
+        """Set up the content for the Analysis tab"""
+        # Configure grid layout for analysis tab (2 columns, 2 rows)
+        self.analysis_tab.columnconfigure(0, weight=1)
+        self.analysis_tab.columnconfigure(1, weight=1)
+        self.analysis_tab.rowconfigure(0, weight=0)  # Controls row
+        self.analysis_tab.rowconfigure(1, weight=1)  # Content row
+        
+        # Analysis controls frame
+        controls_frame = ttk.LabelFrame(self.analysis_tab, text=get_string('analysis_controls'), padding="10")
+        controls_frame.grid(row=0, column=0, columnspan=2, sticky="ew", padx=5, pady=5)
+        
+        # Run Analysis button
+        run_btn = ttk.Button(controls_frame, text=get_string("analysis_run_analysis"), 
+                           command=self.run_analysis)
+        run_btn.pack(side=tk.LEFT, padx=5)
+        
+        # Report format dropdown
+        ttk.Label(controls_frame, text=get_string("analysis_report_format")).pack(side=tk.LEFT, padx=5)
+        self.report_format = tk.StringVar(value="html")
+        format_menu = ttk.OptionMenu(controls_frame, self.report_format, 
+                                   self.report_format.get(), 
+                                   *["html", "text", "json"])
+        format_menu.pack(side=tk.LEFT, padx=5)
+        
+        # Generate Report button
+        report_btn = ttk.Button(controls_frame, text=get_string("analysis_generate_report"),
+                              command=self.generate_analysis_report)
+        report_btn.pack(side=tk.LEFT, padx=5)
+        
+        # Analysis sections notebook
+        self.analysis_notebook = ttk.Notebook(self.analysis_tab)
+        self.analysis_notebook.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=5, pady=5)
+        
+        # Create analysis sections
+        self.create_analysis_section("senders", get_string("analysis_senders"))
+        self.create_analysis_section("timeline", get_string("analysis_timeline"))
+        self.create_analysis_section("attachments", get_string("analysis_attachments"))
+        self.create_analysis_section("threads", get_string("analysis_threads"))
+        self.create_analysis_section("duplicates", get_string("analysis_duplicates"))
+        
+        # Add initial help text
+        self.show_analysis_help()
+    
+    def create_analysis_section(self, name, title):
+        """Create a section in the analysis notebook"""
+        frame = ttk.Frame(self.analysis_notebook, padding="5")
+        self.analysis_notebook.add(frame, text=title)
+        
+        # Add a text widget for display
+        text = tk.Text(frame, wrap=tk.WORD, state=tk.DISABLED)
+        scrollbar = ttk.Scrollbar(frame, orient="vertical", command=text.yview)
+        text.configure(yscrollcommand=scrollbar.set)
+        
+        text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        # Store reference to the text widget
+        setattr(self, f"analysis_{name}_text", text)
+    
+    def show_analysis_help(self):
+        """Show help text in all analysis sections"""
+        for section in ["senders", "timeline", "attachments", "threads", "duplicates"]:
+            text_widget = getattr(self, f"analysis_{section}_text")
+            text_widget.config(state=tk.NORMAL)
+            text_widget.delete(1.0, tk.END)
+            text_widget.insert(tk.END, get_string("analysis_no_data"))
+            text_widget.config(state=tk.DISABLED)
+    
+    def run_analysis(self):
+        """Run the email analysis"""
+        if not hasattr(self, 'duplicate_groups') or not self.duplicate_groups:
+            messagebox.showinfo(
+                get_string("info_title"),
+                get_string("dialog_no_duplicates_message"),
+                parent=self.root
+            )
+            return
+            
+        self.set_status(get_string("analysis_running"))
+        # TODO: Implement actual analysis logic
+        self.set_status(get_string("analysis_complete"))
+    
+    def generate_analysis_report(self):
+        """Generate a report of the analysis"""
+        if not hasattr(self, 'duplicate_groups') or not self.duplicate_groups:
+            messagebox.showinfo(
+                get_string("info_title"),
+                get_string("dialog_no_duplicates_message"),
+                parent=self.root
+            )
+            return
+            
+        # TODO: Implement report generation logic
+        report_format = self.report_format.get()
+        self.set_status(f"Generating {report_format.upper()} report...")
 
 
 def main():

@@ -28,7 +28,7 @@ import json
 from pathlib import Path
 from datetime import datetime
 from collections import defaultdict
-from typing import Dict, List, Set, Tuple, Optional, Any, Union, DefaultVar
+from typing import Dict, List, Set, Tuple, Optional, Any, Union, Generator
 from email_analyzer import EmailAnalyzer
 
 # Try to import rich for enhanced UI
