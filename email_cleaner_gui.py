@@ -524,25 +524,24 @@ class EmailCleanerGUI:
                 
                 for folder in self.selected_folders:
                     logging.info("Scanning folder: %s", folder['display_name'])
-                    # Get the appropriate handler based on the folder client type
-                    client_type = folder.get('client_type', 'generic')
-                    handler = self.client_manager.handlers.get(client_type)
                     
-                    if handler:
-                        groups = handler.find_duplicates(folder['path'], criteria)
+                    try:
+                        # Use the client manager to scan the folder
+                        groups = self.client_manager.scan_folder(folder, criteria)
+                        
                         if groups:
                             logging.info("Found %d duplicate groups in folder", len(groups))
                             for group in groups:
                                 group_with_metadata = {
                                     'emails': group,
                                     'folder': folder['display_name'],
-                                    'client_type': client_type
+                                    'client_type': folder.get('client_type', 'generic')
                                 }
                                 self.duplicate_groups.append(group_with_metadata)
                         else:
                             logging.info("No duplicates found in folder: %s", folder['display_name'])
-                    else:
-                        logging.warning("No handler found for client type: %s", client_type)
+                    except Exception as e:
+                        logging.error("Error scanning folder %s: %s", folder['display_name'], str(e), exc_info=True)
                 
                 # Update UI in the main thread
                 self.root.after(0, self.update_results_tree)

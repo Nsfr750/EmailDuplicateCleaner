@@ -534,6 +534,11 @@ class EmailClientManager:
             'outlook': OutlookHandler(),
             'generic': GenericMailHandler()
         }
+        self.duplicate_groups = []
+        self.current_folder = None
+        self.email_cache = {}  # Cache to store email content by group and index
+        self.analyzer = EmailAnalyzer()  # Initialize the email analyzer
+        self.analysis_results = {}  # Store analysis results
         
     def get_all_mail_folders(self) -> List[Dict[str, Any]]:
         """Get mail folders from all supported email clients."""
@@ -569,13 +574,6 @@ class EmailClientManager:
         return handler.find_mail_folders()
     """Scan mailboxes and identify duplicate emails."""
     
-    def __init__(self):
-        self.console = Console() if RICH_AVAILABLE else None
-        self.duplicate_groups = []
-        self.current_folder = None
-        self.email_cache = {}  # Cache to store email content by group and index
-        self.analyzer = EmailAnalyzer()  # Initialize the email analyzer
-        self.analysis_results = {}  # Store analysis results
         
     def compute_email_hash(self, msg: email.message.Message, method: str) -> str:
         """
