@@ -11,16 +11,12 @@
   - [x] Thread/conversation analysis
   - [x] Email size distribution
   - [x] Duplicate detection with different matching strategies
-
 - [ ] Implement email recovery feature
-
 - [ ] Add email export functionality (PDF, EML, CSV)
-
 - [x] Improve performance for large email datasets
   - [x] Chunked processing
   - [x] Caching
   - [x] Parallel processing
-
 - [ ] Implement advanced search filters (e.g., by date range, sender, attachment presence)
   - [ ] Date range filtering
   - [ ] Sender/recipient filtering
@@ -51,7 +47,6 @@
   - [ ] Charts for sender distribution
   - [ ] Timeline visualization
   - [ ] Attachment type pie chart
-
 - [ ] Add export options for analysis reports (PDF, CSV, JSON)
 
 ## 📋 Low Priority
@@ -60,11 +55,6 @@
 
 - [ ] Investigate memory usage optimization
 - [ ] Implement caching strategies
-- [ ] Add support for more email clients
-  - [ ] Microsoft Exchange
-  - [ ] Gmail (via IMAP)
-  - [ ] Yahoo Mail
-
 - [ ] Add support for encrypted email analysis
 
 ### 🌐 Localization
@@ -74,6 +64,9 @@
   - [ ] French
   - [ ] German
   - [ ] Japanese
+  - [ ] Russian
+  - [ ] Portuguese
+  - [ ] Arabic
 
 ## ✅ Done
 - ✅ Initial release of all three interfaces (GUI, CLI, Web).
