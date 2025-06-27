@@ -288,27 +288,31 @@ class EmailCleanerGUI:
         self.results_tab.rowconfigure(1, weight=0)
 
         # Frame risultati (sinistra)
-        self.results_frame = ttk.Frame(self.results_tab)
+        self.results_frame = ttk.Frame(self.results_tab, padding=5)
         self.results_frame.grid(row=0, column=0, sticky=(tk.N, tk.S, tk.E, tk.W), pady=5)
         self.results_frame.columnconfigure(0, weight=1)
         self.results_frame.rowconfigure(0, weight=1)
 
-        # Treeview con scrollbar
+        # Create the treeview with columns
         self.results_tree = ttk.Treeview(
             self.results_frame,
-            columns=("date", "from", "subject", "folder"),
-            show="tree headings", selectmode="extended"
+            columns=('date', 'from', 'subject', 'folder'),
+            show='tree headings',
+            selectmode='extended',
+            height=15
         )
-        self.results_tree.heading("#0", text=get_string('header_group'))
-        self.results_tree.column("#0", width=60, stretch=False)
-        self.results_tree.heading("date", text=get_string('header_date'))
-        self.results_tree.column("date", width=120, stretch=False)
-        self.results_tree.heading("from", text=get_string('header_from'))
-        self.results_tree.column("from", width=150)
-        self.results_tree.heading("subject", text=get_string('header_subject'))
-        self.results_tree.column("subject", width=200)
-        self.results_tree.heading("folder", text=get_string('header_folder'))
-        self.results_tree.column("folder", width=180)
+        
+        # Configure columns and headings
+        self.results_tree.heading('#0', text=get_string('header_group'))
+        self.results_tree.column('#0', width=100, stretch=False)
+        self.results_tree.heading('date', text=get_string('header_date'))
+        self.results_tree.column('date', width=150, stretch=False)
+        self.results_tree.heading('from', text=get_string('header_from'))
+        self.results_tree.column('from', width=200)
+        self.results_tree.heading('subject', text=get_string('header_subject'))
+        self.results_tree.column('subject', width=300)
+        self.results_tree.heading('folder', text=get_string('header_folder'))
+        self.results_tree.column('folder', width=200)
 
         y_scrollbar = ttk.Scrollbar(self.results_frame, orient=tk.VERTICAL, command=self.results_tree.yview)
         self.results_tree.configure(yscrollcommand=y_scrollbar.set)
@@ -322,9 +326,16 @@ class EmailCleanerGUI:
         # Menu contestuale e binding eventi
         self.email_menu = tk.Menu(self.results_tree, tearoff=0)
         self.email_menu.add_command(label=get_string('menu_view_email'), command=self.view_email_content)
+        
+        # Binding per gli eventi del mouse
         self.results_tree.bind("<Button-3>", self.show_email_menu)
-        self.results_tree.bind("<Double-1>", self.on_item_double_click)
+        self.results_tree.bind("<Double-1>", self.toggle_expand_collapse)
         self.results_tree.bind("<<TreeviewSelect>>", self.update_preview_panel)
+        
+        # Assicurati che i pulsanti di espansione siano visibili
+        style = ttk.Style()
+        style.configure('Treeview', rowheight=25)  # Altezza riga adeguata
+        style.layout('Treeview', [('Treeview.treearea', {'sticky': 'nswe'})])  # Per assicurare che le righe occupino tutto lo spazio
 
         # Frame anteprima (destra)
         self.preview_frame = ttk.Frame(self.results_tab, padding=5)
@@ -556,31 +567,67 @@ class EmailCleanerGUI:
         self.scanning_thread = threading.Thread(target=scan_folders, daemon=True)
         self.scanning_thread.start()
     
+    def toggle_expand_collapse(self, event):
+        """Toggle expand/collapse on double-click"""
+        item = self.results_tree.identify_row(event.y)
+        if item:
+            if self.results_tree.get_children(item):  # If item has children
+                if self.results_tree.item(item, 'open'):
+                    self.results_tree.item(item, open=False)
+                else:
+                    self.results_tree.item(item, open=True)
+    
+    def expand_all_groups(self):
+        """Expand all groups in the results tree"""
+        for item in self.results_tree.get_children():
+            if self.results_tree.get_children(item):  # If item has children
+                self.results_tree.item(item, open=True)
+    
+    def collapse_all_groups(self):
+        """Collapse all groups in the results tree"""
+        for item in self.results_tree.get_children():
+            if self.results_tree.get_children(item):  # If item has children
+                self.results_tree.item(item, open=False)
+    
     def update_results_tree(self):
         """Update the results treeview with scanning results"""
         if not self.duplicate_groups:
             self.set_status(get_string('status_no_duplicates_found'))
             return
         
-        total_dupes = sum(len(group['emails']) - 1 for group in self.duplicate_groups)
+        # Clear existing items
+        for item in self.results_tree.get_children():
+            self.results_tree.delete(item)
+        
+        total_dupes = sum(len(group.get('messages', [])) - 1 for group in self.duplicate_groups)
         
         for i, group in enumerate(self.duplicate_groups):
             # Create group parent node
             group_id = get_string('group_prefix').format(index=i+1)
+            messages = group.get('messages', [])
+            folder_name = group.get('folder', 'Unknown')
+            
             group_node = self.results_tree.insert(
                 "", "end", 
                 iid=f"group_{i}", 
                 text=group_id, 
-                open=True,
-                values=("", "", f"{len(group['emails'])} {get_string('emails_label')}", group['folder'])
+                values=("", "", f"{len(messages)} {get_string('emails_label')}", folder_name)
             )
             
             # Add each email in the group
-            for j, email_info in enumerate(group['emails']):
+            for j, msg in enumerate(messages):
                 email_node_id = f"group_{i}_{j}"
 
                 # Mark the original email
                 prefix = f"({get_string('original_prefix')}) " if j == 0 else ""
+                
+                # Get email details
+                email_info = {
+                    'date': msg.get('date', ''),
+                    'from': msg.get('from', '(No Sender)'),
+                    'subject': msg.get('subject', '(No Subject)'),
+                    'message': msg.get('message')
+                }
 
                 self.results_tree.insert(
                     group_node, 
@@ -588,12 +635,15 @@ class EmailCleanerGUI:
                     iid=email_node_id,
                     text=f"{j+1}",
                     values=(
-                        email_info.get('date', ''),
-                        email_info.get('from', ''),
-                        prefix + email_info.get('subject', '(No subject)'),
-                        group['folder']
+                        email_info['date'],
+                        email_info['from'],
+                        prefix + email_info['subject'],
+                        folder_name
                     )
                 )
+        
+        # Expand all groups by default
+        self.expand_all_groups()
         
         self.set_status(get_string('status_found_duplicates').format(
             group_count=len(self.duplicate_groups), 
@@ -978,21 +1028,13 @@ class EmailCleanerGUI:
 
     def on_item_double_click(self, event):
         """Handle double-click on tree items"""
-        # Get the item under cursor
+        # Questo metodo ora è stato sostituito da toggle_expand_collapse
+        # ma lo manteniamo per compatibilità con altri eventuali binding
+        self.toggle_expand_collapse(event)
+        
+        # Seleziona l'elemento e mostra l'anteprima
         item = self.results_tree.identify_row(event.y)
-        if not item:
-            return
-            
-        # If it's a group item (parent is ""), toggle expand/collapse
-        if self.results_tree.parent(item) == "":
-            # Check if the item is already open
-            if self.results_tree.item(item, "open"):
-                self.results_tree.item(item, open=False)  # Collapse
-            else:
-                self.results_tree.item(item, open=True)   # Expand
-                
-        # If it's an email item (has a parent), view the email content
-        else:
+        if item:
             self.results_tree.selection_set(item)
             self.view_email_content()
 
