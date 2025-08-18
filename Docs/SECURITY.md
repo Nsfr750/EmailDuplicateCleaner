@@ -16,7 +16,7 @@ We take the security of our project seriously.
 If you discover a security vulnerability, please:
 
 1. **Do Not** create a public GitHub issue
-2. Email security@emailduplicatecleaner.com with details
+2. Email nsfr750@yandex.com with details
 3. Include:
    - Vulnerability description
    - Steps to reproduce
@@ -54,3 +54,4 @@ We are committed to:
 
 Security Team: nsfr750@yandex.com
 Project Maintainer: Nsfr750
+
