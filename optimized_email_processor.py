@@ -19,9 +19,9 @@ from typing import Dict, List, Tuple, Optional, Generator, Any, Set
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 
-# Set up logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+# Set up logging using the centralized logger
+from struttura.logger import logger as app_logger
+logger = app_logger  # Use the global logger instance
 
 # Constants
 CHUNK_SIZE = 1024 * 1024  # 1MB chunks for reading large messages

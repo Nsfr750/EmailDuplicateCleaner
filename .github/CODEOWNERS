@@ -1,0 +1,10 @@
+# These owners will be the default owners for everything in the repo
+*       @Nsfr750
+
+/docs/* @Nsfr750
+/templates/* @Nsfr750
+/assets/* @Nsfr750
+/lang/* @Nsfr750
+/static/* @Nsfr750
+/struttura/* @Nsfr750
+/ui/* @Nsfr750

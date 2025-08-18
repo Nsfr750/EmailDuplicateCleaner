@@ -32,9 +32,9 @@ from models import ScanHistory, EmailCleanRecord, UserSettings
 # Create Flask app
 app = create_app()  # Use the app from db_init that has database setup
 
-# Setup logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Set up logging using the centralized logger
+from struttura.logger import logger as app_logger
+logger = app_logger  # Use the global logger instance
 
 # Global variables
 global_state = {

@@ -1,5 +1,17 @@
 # 📝 TO_DO List
 
+## ✅ Completed in v2.5.2
+- [x] Update version information in all relevant files
+- [x] Fix version number display in the about dialog
+- [x] Update documentation to reflect the latest changes
+
+## ✅ Completed in v2.5.1
+- [x] Fix QAction import error in PySide6 GUI
+- [x] Add complete English translations
+- [x] Add GPL-3.0 license file
+- [x] Update version information
+- [x] Improve error handling in GUI initialization
+
 ## 🔥 High Priority
 
 ### 🚀 Features

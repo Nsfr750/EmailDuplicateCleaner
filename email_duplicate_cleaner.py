@@ -1397,23 +1397,40 @@ def main():
     """Main function to run the Email Duplicate Cleaner."""
     parser = argparse.ArgumentParser(
         description="Email Duplicate Cleaner 2.2.3- Find and remove duplicate emails from various email clients.",
-        epilog="Example: python email_duplicate_cleaner.py --client thunderbird --scan-all --criteria subject-sender"
+        epilog="Example: python email_duplicate_cleaner.py --gui"
     )
     
-    parser.add_argument("--scan-path", type=str, help="Manually specify a mail folder path to scan")
-    parser.add_argument("--scan-all", action="store_true", help="Scan all found email client profiles")
-    parser.add_argument("--client", type=str, choices=["thunderbird", "apple_mail", "outlook", "generic", "all"],
-                        default="all", help="Email client to scan (default: all)")
-    parser.add_argument("--criteria", type=str, choices=["strict", "content", "headers", "subject-sender"],
-                        default="strict", help="Criteria for detecting duplicates (default: strict)")
-    parser.add_argument("--auto-clean", action="store_true", 
-                        help="Automatically clean duplicates without interactive selection")
-    parser.add_argument("--list-folders", action="store_true", 
-                        help="List mail folders and exit without scanning")
-    parser.add_argument("--demo", action="store_true", 
-                        help="Run in demo mode with test emails")
+    # GUI option
+    parser.add_argument("--gui", action="store_true", help="Launch the PySide6-based graphical user interface")
+    
+    # Command-line only options
+    cli_group = parser.add_argument_group('Command-line Options')
+    cli_group.add_argument("--scan-path", type=str, help="Manually specify a mail folder path to scan")
+    cli_group.add_argument("--scan-all", action="store_true", help="Scan all found email client profiles")
+    cli_group.add_argument("--client", type=str, choices=["thunderbird", "apple_mail", "outlook", "generic", "all"],
+                         default="all", help="Email client to scan (default: all)")
+    cli_group.add_argument("--criteria", type=str, choices=["strict", "content", "headers", "subject-sender"],
+                         default="strict", help="Criteria for detecting duplicates (default: strict)")
+    cli_group.add_argument("--auto-clean", action="store_true", 
+                         help="Automatically clean duplicates without interactive selection")
+    cli_group.add_argument("--list-folders", action="store_true", 
+                         help="List mail folders and exit without scanning")
+    cli_group.add_argument("--demo", action="store_true", 
+                         help="Run in demo mode with test emails")
     
     args = parser.parse_args()
+    
+    # Check if GUI is requested
+    if args.gui:
+        try:
+            # Import PySide6 GUI
+            from email_cleaner_gui_pyside6 import main as gui_main
+            gui_main()
+            return
+        except ImportError as e:
+            print(f"Error: Failed to load PySide6 GUI: {e}")
+            print("Please install required dependencies: pip install PySide6 wand")
+            sys.exit(1)
     
     # Initialize client manager and duplicate finder
     client_manager = EmailClientManager()

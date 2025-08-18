@@ -5,9 +5,27 @@ A comprehensive Python tool designed to scan, identify, and remove duplicate ema
 ## 🚀 Version
 
 **Current Version:**
-[![GitHub release](https://img.shields.io/badge/release-v2.5.0-green)](https://github.com/Nsfr750/EmailDuplicateCleaner)
+[![GitHub release](https://img.shields.io/badge/release-v2.5.2-green)](https://github.com/Nsfr750/EmailDuplicateCleaner)
 [![Documentation](https://img.shields.io/badge/docs-available-brightgreen)](https://github.com/Nsfr750/EmailDuplicateCleaner/blob/master/README.md)
 [![Python Versions](https://img.shields.io/badge/python-3.8%20|%203.9%20|%203.10%20|%203.11%20|%203.12-blue)](https://www.python.org/)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![PyPI](https://img.shields.io/pypi/v/email-duplicate-cleaner)](https://pypi.org/project/email-duplicate-cleaner/)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://paypal.me/3dmega)
+[![Support](https://img.shields.io/badge/Support-Patreon-ff69b4.svg)](https://www.patreon.com/Nsfr750)
+
+## ✨ What's New in 2.5.2
+
+- 🚀 Updated to version 2.5.2
+- 🐛 Fixed version number display in the about dialog
+- 📚 Updated documentation to reflect the latest changes
+
+## ✨ What's New in 2.5.1
+
+- 🐛 Fixed QAction import error in PySide6 GUI
+- 🌐 Added complete English translations
+- 📄 Included GPL-3.0 license file
+- 🔄 Improved error handling in GUI initialization
+- ⬆️ Updated dependencies for better stability
 
 ## ✨ Features
 
@@ -31,9 +49,9 @@ A comprehensive Python tool designed to scan, identify, and remove duplicate ema
 
 ### 🖥️ Multi-Interface Support
 
-- Web Interface
-- Desktop GUI
-- Command-Line Interface
+- **Web Interface** - Modern, responsive design with dark/light mode
+- **Desktop GUI** - Native desktop experience with PySide6
+- **Command-Line Interface** - Powerful automation and scripting support
 
 ### 🌓 Enhanced User Experience
 
@@ -69,7 +87,18 @@ Supports:
 
 ## 🚀 Quick Start
 
-### Installation
+### 💰 Support This Project
+
+If you find this tool useful, please consider supporting its development:
+
+- [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://paypal.me/3dmega) Support via PayPal
+- [![Support](https://img.shields.io/badge/Support-Patreon-ff69b4.svg)](https://www.patreon.com/Nsfr750) Become a Patron
+- :money_with_wings: **Monero (XMR)**: 
+  ```
+  47Jc6MC47WJVFhiQFYwHyBNQP5BEsjUPG6tc8R37FwcTY8K5Y3LvFzveSXoGiaDQSxDrnCUBJ5WBj6Fgmsfix8VPD4w3gXF
+  ```
+
+## 📦 Installation
 
 1.  Clone the repository:
 
@@ -186,5 +215,5 @@ The `struttura/` directory contains all the auxiliary modules that support the G
 
 - [GitHub](https://github.com/sponsors/Nsfr750)
 - [Patreon](https://www.patreon.com/Nsfr750)
-- [Discord](https://discord.gg/BvvkUEP9)
+- [Discord](https://discord.gg/ryqNeuRYjD)
 - [Paypal](https://paypal.me/3dmega)

@@ -1,1378 +1,889 @@
-#!/usr/bin/env python3
 """
-Email Duplicate Cleaner - GUI Interface
+Email Duplicate Cleaner - PySide6 GUI
 
-A graphical user interface for the Email Duplicate Cleaner tool.
+This module provides a modern PySide6-based graphical user interface
+for the Email Duplicate Cleaner application.
 """
 
 import os
 import sys
 import logging
-import threading
-import tkinter as tk
-from tkinter import ttk, filedialog, messagebox, simpledialog, scrolledtext, Toplevel
-import queue
-import sqlite3
-import webbrowser
-from struttura.sponsor import Sponsor
-from lang.lang import lang_manager, get_string
-from struttura.logger import setup_logging
-from struttura.traceback import setup_traceback_handler
-from struttura.log_viewer import LogViewer
-from struttura.about import About
-from struttura.help import Help
-from struttura.sponsor import Sponsor
+from pathlib import Path
+from typing import Optional, List, Dict, Any, Tuple
+
+# Import the EmailClientManager from the main module
+from email_duplicate_cleaner import EmailClientManager
+
+from PySide6.QtWidgets import (
+    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
+    QListWidget, QListWidgetItem, QLabel, QTabWidget, QTextEdit, QComboBox,
+    QFileDialog, QMessageBox, QProgressBar, QSplitter, QGroupBox, QCheckBox,
+    QFormLayout, QSpinBox, QLineEdit, QDialog, QDialogButtonBox, QMenuBar,
+    QMenu, QStatusBar, QToolBar, QSplashScreen, QSizePolicy, QRadioButton
+)
+from PySide6.QtGui import QAction
+from PySide6.QtCore import (
+    Qt, QThread, Signal, QObject, QTimer, QSize, QUrl, QEvent, QSettings
+)
+from PySide6.QtGui import (
+    QIcon, QPixmap, QDesktopServices, QFont, QTextCursor, QTextCharFormat,
+    QColor, QTextOption, QFontMetrics, QGuiApplication, QScreen, QKeySequence
+)
+
+# Add project root to the Python path
+project_root = Path(__file__).parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+# Initialize language manager
+from lang.lang_manager import language_manager
+
+def tr(key: str, **kwargs) -> str:
+    """Convenience function for translations."""
+    return language_manager.get(key, **kwargs)
+
+# Import application modules
+from email_duplicate_cleaner import EmailClientManager
+from struttura.logger import setup_logging, ThreadSafeLogger
 from struttura.menu import AppMenu
 from struttura.updates import UpdateChecker
-from struttura.version import get_version
-from email_duplicate_cleaner import (
-    EmailClientManager, create_test_mailbox,
-    BaseEmailClientHandler, ThunderbirdMailHandler, AppleMailHandler,
-    OutlookHandler, GenericMailHandler
-)
+from struttura.help import Help
+from struttura.about import About
+from struttura.sponsor import SponsorDialog
+from struttura.version import show_version, get_version_info
+from struttura.traceback_handler import setup_traceback_handler
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+# Set up logging using the centralized logger
+from struttura.logger import logger as app_logger
+from struttura.logger import setup_logging
 
-class RedirectText:
-    """Redirect print statements to the GUI console"""
-    def __init__(self, text_widget):
-        self.text_widget = text_widget
-        self.queue = queue.Queue()
-        self.updating = True
-        self.update_me()
-        
-    def write(self, string):
-        self.queue.put(string)
-        
-    def flush(self):
-        pass
-        
-    def update_me(self):
-        if not self.updating:
-            return
-        try:
-            while True:
-                # Get output from queue
-                string = self.queue.get_nowait()
-                
-                # Update text widget with output
-                self.text_widget.configure(state="normal")
-                self.text_widget.insert(tk.END, string)
-                self.text_widget.see(tk.END)  # Auto-scroll to the end
-                self.text_widget.configure(state="disabled")
-                self.queue.task_done()
-        except queue.Empty:
-            pass
-        
-        # Schedule to check queue again after 100 ms
-        self.text_widget.after(100, self.update_me)
+# Initialize the logger with debug level
+logger = app_logger
+setup_logging(logging.DEBUG)
+
+# Log application startup
+logger.info("Application starting...")
+logger.info(f"Python version: {sys.version}")
+
+logger.info("Application starting...")
+logger.info(f"Python version: {sys.version}")
+logger.info(f"Working directory: {os.getcwd()}")
+logger.info(f"Python path: {sys.path}")
+
+# Set up global exception handler
+setup_traceback_handler()
+
+class EmailCleanerGUI(QMainWindow):
+    """Main application window for the Email Duplicate Cleaner."""
     
-    def stop(self):
-        self.updating = False
-
-class EmailCleanerGUI:
-    """Main GUI Application for Email Duplicate Cleaner"""
-    
-    def __init__(self, root):
-        self.root = root
-        self.root.title(get_string('app_title'))
-        self.root.geometry("950x650")
-        self.root.minsize(800, 600)
+    def __init__(self):
+        """Initialize the main window."""
+        super().__init__()
         
-        # Set up instance variables
-        self.client_manager = EmailClientManager()
-        self.mail_folders = []
-        self.folder_listbox = None
-        self.selected_folders = []
+        # Application state
+        self.email_manager = EmailClientManager()
+        self.current_folder = None
         self.duplicate_groups = []
-        self.scanning_thread = None
-        self.cleaning_thread = None
-        self.stdout_redirect = None
-        self.temp_dir = None
-        self.language_var = tk.StringVar(value=lang_manager.language)
-        self.debug_var = tk.BooleanVar(value=False)
-        self.dark_mode_var = tk.BooleanVar(value=False)
-        self.menu = None
+        self.settings = QSettings("EmailDuplicateCleaner", "EmailDuplicateCleaner")
         
-        # Initialize update checker
-        self.update_checker = UpdateChecker(get_version())
+        # Log viewer
+        self.log_viewer = None
         
-        # Setup logging and exception handling
-        self.log_queue = setup_logging()
-        setup_traceback_handler()
-        logging.info("Application started.")
-
-        # Create the main frame structure
-        self.create_main_frame()
+        # Connect language change signal
+        language_manager.language_changed.connect(self.on_language_changed)
         
-        # Create the menu bar
-        self.menu = AppMenu(self)
+        # Initialize UI
+        self.init_ui()
         
-        # Create tabs
-        self.create_tabs()
+        # Load settings
+        self.load_settings()
         
-        # Create the output console
-        self.create_console()
-        
-        # Configure app appearance
-        self.style = ttk.Style()
-        self.style.configure('TButton', font=('Arial', 10))
-        self.style.configure('TLabel', font=('Arial', 10))
-        self.style.configure('TCheckbutton', font=('Arial', 10))
-        self.style.configure('TRadiobutton', font=('Arial', 10))
-        
-        # Redirect stdout to our console
-        self.stdout_redirect = RedirectText(self.console)
-        sys.stdout = self.stdout_redirect
-        
-        # Set initial status
-        self.set_status(get_string('ready_status'))
-        
-        # Check for updates after a short delay to allow the UI to initialize
-        self.root.after(2000, self.check_for_updates)
-
-    def create_main_frame(self):
-        """Create the main frame structure"""
-        self.main_frame = ttk.Frame(self.root, padding="10")
-        self.main_frame.pack(fill=tk.BOTH, expand=True)
-        
-        # Configure grid layout (2 rows, 1 column)
-        self.main_frame.columnconfigure(0, weight=1)
-        self.main_frame.rowconfigure(0, weight=1)  # Tab content
-        self.main_frame.rowconfigure(1, weight=0)  # Status bar
-        
-        # Add status bar
-        self.status_var = tk.StringVar()
-        self.status_bar = ttk.Label(self.main_frame, textvariable=self.status_var, 
-                                    relief=tk.SUNKEN, anchor=tk.W)
-        self.status_bar.grid(row=1, column=0, sticky=(tk.W, tk.E))
+        # Check for updates after a short delay
+        QTimer.singleShot(1000, self.check_for_updates)
     
-    def check_for_updates(self, force_check=False):
-        """Check for application updates"""
-        try:
-            update_available, update_info = self.update_checker.check_for_updates(
-                parent=self.root,
-                force_check=force_check
-            )
-            
-            if update_available and update_info:
-                # Show update dialog with the new version
-                self.update_checker.show_update_dialog(self.root, update_info)
-                
-        except Exception as e:
-            logging.error(f"Error checking for updates: {e}")
-            messagebox.showerror(
-                get_string('error'),
-                get_string('update_check_error').format(error=str(e)),
-                parent=self.root
-            )
-    
-    def create_tabs(self):
-        """Create the main tab structure"""
-        self.notebook = ttk.Notebook(self.main_frame)
-        self.notebook.grid(row=0, column=0, sticky=(tk.N, tk.S, tk.E, tk.W))
+    def init_ui(self):
+        """Set up the user interface."""
+        self.setWindowTitle(f"Email Duplicate Cleaner {get_version_info()['full_version']}")
+        self.setMinimumSize(1024, 768)
         
-        # Create Scan tab
-        self.scan_tab = ttk.Frame(self.notebook, padding="10")
+        # Set application icon if available
+        icon_path = Path(__file__).parent / "icon.ico"
+        if icon_path.exists():
+            self.setWindowIcon(QIcon(str(icon_path)))
         
-        # Create Results tab
-        self.results_tab = ttk.Frame(self.notebook, padding="10")
+        # Create central widget and layout
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
         
-        # Create Analysis tab
-        self.analysis_tab = ttk.Frame(self.notebook, padding="10")
+        # Main layout
+        main_layout = QVBoxLayout(central_widget)
         
-        # Add tabs to notebook
-        self.notebook.add(self.scan_tab, text=get_string("tab_scan"))
-        self.notebook.add(self.results_tab, text=get_string("tab_results"))
-        self.notebook.add(self.analysis_tab, text=get_string("tab_analysis"))
+        # Create menu bar
+        self.create_menu_bar()
         
-        # Set up the Scan tab content
+        # Create toolbar
+        self.create_toolbar()
+        
+        # Create main content area
+        content_splitter = QSplitter(Qt.Horizontal)
+        
+        # Left panel - Email clients and folders
+        left_panel = QWidget()
+        left_layout = QVBoxLayout(left_panel)
+        left_layout.setContentsMargins(0, 0, 0, 0)
+        
+        # Email clients list
+        self.client_combo = QComboBox()
+        self.client_combo.currentIndexChanged.connect(self.on_client_changed)
+        email_client_label = QLabel()
+        email_client_label.setObjectName("emailClientLabel")
+        left_layout.addWidget(email_client_label)
+        left_layout.addWidget(self.client_combo)
+        
+        # Folders list
+        self.folder_list = QListWidget()
+        self.folder_list.itemClicked.connect(self.on_folder_selected)
+        folder_label = QLabel()
+        folder_label.setObjectName("folderLabel")
+        left_layout.addWidget(folder_label)
+        left_layout.addWidget(self.folder_list, 1)
+        
+        # Add left panel to splitter
+        content_splitter.addWidget(left_panel)
+        
+        # Right panel - Main content
+        right_panel = QWidget()
+        right_layout = QVBoxLayout(right_panel)
+        
+        # Tabs
+        self.tabs = QTabWidget()
+        
+        # Scan tab
+        self.scan_tab = QWidget()
         self.setup_scan_tab()
+        self.tabs.addTab(self.scan_tab, tr('tabs.scan'))
         
-        # Set up the Results tab content
-        self.setup_results_tab()
+        # Duplicates tab
+        self.duplicates_tab = QWidget()
+        self.setup_duplicates_tab()
+        self.tabs.addTab(self.duplicates_tab, tr('tabs.duplicates'))
         
-        # Set up the Analysis tab content
+        # Analysis tab
+        self.analysis_tab = QWidget()
         self.setup_analysis_tab()
+        self.tabs.addTab(self.analysis_tab, tr('tabs.analysis'))
+        
+        # Results tab
+        self.results_tab = QWidget()
+        self.setup_results_tab()
+        self.tabs.addTab(self.results_tab, tr('tabs.results'))
+        
+        # Tools tab
+        self.tools_tab = QWidget()
+        self.setup_tools_tab()
+        self.tabs.addTab(self.tools_tab, tr('tabs.tools'))
+        
+        # Settings tab
+        self.settings_tab = QWidget()
+        self.setup_settings_tab()
+        self.tabs.addTab(self.settings_tab, tr('tabs.settings'))
+        
+        right_layout.addWidget(self.tabs)
+        
+        # Status bar
+        self.status_bar = QStatusBar()
+        self.setStatusBar(self.status_bar)
+        self.status_bar.showMessage("Ready")
+        
+        # Progress bar
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setVisible(False)
+        self.status_bar.addPermanentWidget(self.progress_bar)
+        
+        # Add right panel to splitter
+        content_splitter.addWidget(right_panel)
+        
+        # Set initial sizes
+        content_splitter.setSizes([300, 700])
+        
+        # Add splitter to main layout
+        main_layout.addWidget(content_splitter)
+        
+        # Load email clients
+        self.load_email_clients()
     
-    def setup_scan_tab(self):
-        """Set up the content for the Scan tab"""
-        # Configure grid
-        self.scan_tab.columnconfigure(0, weight=0)  # Label column
-        self.scan_tab.columnconfigure(1, weight=1)  # Content column
-        
-        # Client selection
-        self.client_frame = ttk.LabelFrame(self.scan_tab, text=get_string('scan_client_frame'))
-        self.client_frame.grid(row=0, column=0, columnspan=2, sticky=(tk.W, tk.E), padx=5, pady=5)
-        
-        self.client_var = tk.StringVar(value="all")
-        self.radio_client_all = ttk.Radiobutton(self.client_frame, text=get_string('scan_client_all_radio'), value="all", 
-                      variable=self.client_var)
-        self.radio_client_all.pack(side=tk.LEFT, padx=5)
-        self.radio_client_tb = ttk.Radiobutton(self.client_frame, text=get_string('scan_client_thunderbird_radio'), value="thunderbird", 
-                      variable=self.client_var)
-        self.radio_client_tb.pack(side=tk.LEFT, padx=5)
-        self.radio_client_am = ttk.Radiobutton(self.client_frame, text=get_string('scan_client_apple_mail_radio'), value="apple_mail", 
-                      variable=self.client_var)
-        self.radio_client_am.pack(side=tk.LEFT, padx=5)
-        self.radio_client_ol = ttk.Radiobutton(self.client_frame, text=get_string('scan_client_outlook_radio'), value="outlook", 
-                      variable=self.client_var)
-        self.radio_client_ol.pack(side=tk.LEFT, padx=5)
-        self.radio_client_gen = ttk.Radiobutton(self.client_frame, text=get_string('scan_client_generic_radio'), value="generic", 
-                      variable=self.client_var)
-        self.radio_client_gen.pack(side=tk.LEFT, padx=5)
-        
-        # Duplicate detection criteria
-        self.criteria_frame = ttk.LabelFrame(self.scan_tab, text=get_string('scan_criteria_frame'))
-        self.criteria_frame.grid(row=1, column=0, columnspan=2, sticky=(tk.W, tk.E), padx=5, pady=5)
-        
-        self.criteria_var = tk.StringVar(value="strict")
-        self.radio_crit_strict = ttk.Radiobutton(self.criteria_frame, text=get_string('scan_criteria_strict_radio'), value="strict", 
-                      variable=self.criteria_var)
-        self.radio_crit_strict.pack(side=tk.LEFT, padx=5)
-        self.radio_crit_content = ttk.Radiobutton(self.criteria_frame, text=get_string('scan_criteria_content_radio'), value="content", 
-                      variable=self.criteria_var)
-        self.radio_crit_content.pack(side=tk.LEFT, padx=5)
-        self.radio_crit_headers = ttk.Radiobutton(self.criteria_frame, text=get_string('scan_criteria_headers_radio'), value="headers", 
-                      variable=self.criteria_var)
-        self.radio_crit_headers.pack(side=tk.LEFT, padx=5)
-        self.radio_crit_subj_send = ttk.Radiobutton(self.criteria_frame, text=get_string('scan_criteria_subject_sender_radio'), value="subject-sender", 
-                      variable=self.criteria_var)
-        self.radio_crit_subj_send.pack(side=tk.LEFT, padx=5)
-        
-        # Mail folder list
-        self.folder_frame = ttk.LabelFrame(self.scan_tab, text=get_string('scan_folder_frame'))
-        self.folder_frame.grid(row=2, column=0, columnspan=2, sticky=(tk.N, tk.S, tk.E, tk.W), padx=5, pady=5)
-        self.scan_tab.rowconfigure(2, weight=1)
-        self.folder_frame.columnconfigure(0, weight=1)
-        self.folder_frame.rowconfigure(0, weight=1)
-
-        self.folder_listbox = tk.Listbox(self.folder_frame, selectmode=tk.EXTENDED, exportselection=False)
-        self.folder_listbox.grid(row=0, column=0, sticky='nsew')
-
-        y_scrollbar = ttk.Scrollbar(self.folder_frame, orient=tk.VERTICAL, command=self.folder_listbox.yview)
-        self.folder_listbox.configure(yscrollcommand=y_scrollbar.set)
-        y_scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
-
-        # Action buttons for scan tab
-        button_frame = ttk.Frame(self.scan_tab)
-        button_frame.grid(row=3, column=0, columnspan=2, sticky=(tk.W, tk.E), padx=5, pady=5)
-        
-        self.auto_clean_var = tk.BooleanVar(value=False)
-        self.check_auto_clean = ttk.Checkbutton(button_frame, text=get_string('scan_autoclean_checkbox'), 
-                       variable=self.auto_clean_var)
-        self.check_auto_clean.pack(side=tk.LEFT, padx=5)
-        
-        self.find_folders_button = ttk.Button(button_frame, text=get_string('scan_find_folders_button'), 
-                                                command=self.find_mail_folders)
-        self.find_folders_button.pack(side=tk.LEFT, padx=5)
-        
-        self.select_all_button = ttk.Button(button_frame, text=get_string('scan_select_all_button'), 
-                                              command=self.select_all_folders)
-        self.select_all_button.pack(side=tk.LEFT, padx=5)
-        
-        self.scan_button = ttk.Button(button_frame, text=get_string('scan_button'), 
-                                        command=self.scan_selected_folders)
-        self.scan_button.pack(side=tk.LEFT, padx=5)
-    
-    def setup_results_tab(self):
-        """Set up the content for the Results tab"""
-        # Configura la griglia: 1 riga, 2 colonne
-        self.results_tab.columnconfigure(0, weight=3)
-        self.results_tab.columnconfigure(1, weight=2)
-        self.results_tab.rowconfigure(0, weight=1)
-        self.results_tab.rowconfigure(1, weight=0)
-
-        # Frame risultati (sinistra)
-        self.results_frame = ttk.Frame(self.results_tab, padding=5)
-        self.results_frame.grid(row=0, column=0, sticky=(tk.N, tk.S, tk.E, tk.W), pady=5)
-        self.results_frame.columnconfigure(0, weight=1)
-        self.results_frame.rowconfigure(0, weight=1)
-
-        # Create the treeview with columns
-        self.results_tree = ttk.Treeview(
-            self.results_frame,
-            columns=('date', 'from', 'subject', 'folder'),
-            show='tree headings',
-            selectmode='extended',
-            height=15
+    def on_open_folder(self):
+        """Handle open folder action."""
+        folder = QFileDialog.getExistingDirectory(
+            self,
+            "Select Folder",
+            "",
+            QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks
         )
         
-        # Configure columns and headings
-        self.results_tree.heading('#0', text=get_string('header_group'))
-        self.results_tree.column('#0', width=100, stretch=False)
-        self.results_tree.heading('date', text=get_string('header_date'))
-        self.results_tree.column('date', width=150, stretch=False)
-        self.results_tree.heading('from', text=get_string('header_from'))
-        self.results_tree.column('from', width=200)
-        self.results_tree.heading('subject', text=get_string('header_subject'))
-        self.results_tree.column('subject', width=300)
-        self.results_tree.heading('folder', text=get_string('header_folder'))
-        self.results_tree.column('folder', width=200)
-
-        y_scrollbar = ttk.Scrollbar(self.results_frame, orient=tk.VERTICAL, command=self.results_tree.yview)
-        self.results_tree.configure(yscrollcommand=y_scrollbar.set)
-        x_scrollbar = ttk.Scrollbar(self.results_frame, orient=tk.HORIZONTAL, command=self.results_tree.xview)
-        self.results_tree.configure(xscrollcommand=x_scrollbar.set)
-
-        self.results_tree.grid(row=0, column=0, sticky=(tk.N, tk.S, tk.E, tk.W))
-        y_scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
-        x_scrollbar.grid(row=1, column=0, sticky=(tk.E, tk.W))
-
-        # Menu contestuale e binding eventi
-        self.email_menu = tk.Menu(self.results_tree, tearoff=0)
-        self.email_menu.add_command(label=get_string('menu_view_email'), command=self.view_email_content)
-        
-        # Binding per gli eventi del mouse
-        self.results_tree.bind("<Button-3>", self.show_email_menu)
-        self.results_tree.bind("<Double-1>", self.toggle_expand_collapse)
-        self.results_tree.bind("<<TreeviewSelect>>", self.update_preview_panel)
-        
-        # Assicurati che i pulsanti di espansione siano visibili
-        style = ttk.Style()
-        style.configure('Treeview', rowheight=25)  # Altezza riga adeguata
-        style.layout('Treeview', [('Treeview.treearea', {'sticky': 'nswe'})])  # Per assicurare che le righe occupino tutto lo spazio
-
-        # Frame anteprima (destra)
-        self.preview_frame = ttk.Frame(self.results_tab, padding=5)
-        self.preview_frame.grid(row=0, column=1, sticky=(tk.N, tk.S, tk.E, tk.W))
-        self.preview_frame.columnconfigure(0, weight=1)
-        self.preview_frame.rowconfigure(1, weight=1)
-
-        # Header
-        self.preview_header = tk.Label(self.preview_frame, text=get_string('preview_header'), anchor="w", justify="left", font=("Arial", 10, "bold"))
-        self.preview_header.grid(row=0, column=0, sticky="ew", pady=(0, 5))
-
-        # Contenuto (ScrolledText)
-        self.preview_text = scrolledtext.ScrolledText(self.preview_frame, wrap=tk.WORD, font=('Arial', 10), width=50, height=20, state="disabled")
-        self.preview_text.grid(row=1, column=0, sticky="nsew")
-
-        # Button frame (sotto)
-        button_frame = ttk.Frame(self.results_tab)
-        button_frame.grid(row=1, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=10)
-
-        # Group management buttons
-        self.group_buttons_frame = ttk.LabelFrame(button_frame, text=get_string('group_management_frame'))
-        self.group_buttons_frame.pack(side=tk.LEFT, padx=10, fill=tk.X)
-        self.expand_all_button = ttk.Button(self.group_buttons_frame, text=get_string('expand_all_button'), command=self.expand_all_groups)
-        self.expand_all_button.pack(side=tk.LEFT, padx=5, pady=5)
-        self.collapse_all_button = ttk.Button(self.group_buttons_frame, text=get_string('collapse_all_button'), command=self.collapse_all_groups)
-        self.collapse_all_button.pack(side=tk.LEFT, padx=5, pady=5)
-
-        # Email action buttons
-        self.action_buttons_frame = ttk.LabelFrame(button_frame, text=get_string('email_actions_frame'))
-        self.action_buttons_frame.pack(side=tk.LEFT, padx=10, fill=tk.X)
-        self.view_email_button = ttk.Button(self.action_buttons_frame, text=get_string('view_email_button'), command=self.view_email_content)
-        self.view_email_button.pack(side=tk.LEFT, padx=5, pady=5)
-        self.clean_selected_button = ttk.Button(self.action_buttons_frame, text=get_string('clean_selected_button'), command=self.clean_selected_groups)
-        self.clean_selected_button.pack(side=tk.LEFT, padx=5, pady=5)
-        self.clean_all_button = ttk.Button(self.action_buttons_frame, text=get_string('clean_all_button'), command=self.clean_all_groups)
-        self.clean_all_button.pack(side=tk.LEFT, padx=5, pady=5)
-
-    def update_preview_panel(self, event=None):
-        """Updates the preview panel with the selected email's content."""
-        self.preview_header.config(text="")
-        self.preview_text.config(state="normal")
-        self.preview_text.delete("1.0", tk.END)
-
-        selected = self.results_tree.selection()
-        if not selected:
-            self.preview_header.config(text=get_string('preview_header'))
-            self.preview_text.config(state="disabled")
-            return
-
-        item_id = selected[0]
-        
-        # Only proceed if it's an email item (not a group)
-        if self.results_tree.parent(item_id) == "":
-            self.preview_header.config(text=get_string('preview_header_group_selected'))
-            self.preview_text.config(state="disabled")
-            return
-        
-        try:
-            # Get the parent item (group) and the index in the group
-            parent_id = self.results_tree.parent(item_id)
-            group_idx = int(parent_id.split('_')[1])
-            
-            # Get email index from the item text
-            email_idx_text = self.results_tree.item(item_id)['text']
-            email_idx = int(email_idx_text) - 1
-
-            # Get email info and content
-            email_info = self.duplicate_groups[group_idx]['messages'][email_idx]
-            email_content = self.duplicate_finder.get_email_content(group_idx, email_idx)
-
-            # Update header
-            header_text = (
-                f"{get_string('header_from')}: {email_info['from']}\n"
-                f"{get_string('header_to')}: {email_info.get('to', get_string('header_to_na'))}\n"
-                f"{get_string('header_date')}: {email_info['date']}\n"
-                f"{get_string('header_subject')}: {email_info['subject']}"
-            )
-            self.preview_header.config(text=header_text)
-
-            # Update content
-            if isinstance(email_content, bytes):
-                try:
-                    email_content = email_content.decode('utf-8')
-                except UnicodeDecodeError:
-                    try:
-                        email_content = email_content.decode('latin-1')
-                    except UnicodeDecodeError:
-                        email_content = str(email_content)
-            
-            self.preview_text.insert('1.0', email_content)
-
-        except (ValueError, IndexError, KeyError) as e:
-            self.preview_header.config(text=get_string('preview_header_error'))
-            self.preview_text.insert('1.0', f"{get_string('error_previewing_email')}\n\n{e}")
-            logging.error(f"Error updating preview panel: {e}", exc_info=True)
-        finally:
-            self.preview_text.config(state="disabled")
-
-    def create_console(self):
-        """Create the output console area"""
-        self.console_frame = ttk.LabelFrame(self.main_frame, text=get_string('console_frame_title'))
-        self.console_frame.grid(row=2, column=0, sticky=(tk.W, tk.E, tk.S), pady=5)
-        
-        # Configure the frame
-        self.console_frame.columnconfigure(0, weight=1)
-        self.console_frame.rowconfigure(0, weight=1)
-        
-        # Create the console with scrollbars
-        self.console = scrolledtext.ScrolledText(self.console_frame, wrap=tk.WORD, 
-                                              height=6, width=80,
-                                              bg="black", fg="white")
-        self.console.grid(row=0, column=0, sticky=(tk.W, tk.E))
-        self.console.configure(state="disabled")  # Read-only
+        if folder:
+            self.current_folder = folder
+            self.status_bar.showMessage(f"Selected folder: {folder}")
     
-    def set_status(self, message):
-        """Update the status bar message"""
-        self.status_var.set(message)
+    def create_menu_bar(self):
+        """Create the menu bar using the AppMenu class."""
+        # Create the AppMenu instance
+        self.app_menu = AppMenu(self)
+        self.setMenuBar(self.app_menu.menu_bar)
+        
+        # Connect menu signals to our methods
+        self.app_menu.open_folder_triggered.connect(self.on_open_folder)
+        self.app_menu.show_help_triggered.connect(self.show_help)
+        self.app_menu.show_about_triggered.connect(self.show_about)
+        self.app_menu.show_sponsor_triggered.connect(self.show_sponsor)
+        self.app_menu.exit_triggered.connect(self.close)
+        
+        # Connect language selection signal
+        self.app_menu.language_selected.connect(language_manager.set_language)
+        
+        # Set initial language in the menu
+        current_lang = language_manager.get_language()
+        for action in self.app_menu.language_group.actions():
+            if action.data() == current_lang:
+                action.setChecked(True)
+                break
+        
+        # Only connect debug and dark mode toggles if the methods exist
+        if hasattr(self, 'set_debug_mode'):
+            self.app_menu.debug_mode_toggled.connect(self.set_debug_mode)
+            self.app_menu.debug_action.setChecked(False)  # Or get from settings
+            
+        if hasattr(self, 'toggle_dark_mode'):
+            self.app_menu.dark_mode_toggled.connect(self.toggle_dark_mode)
+            self.app_menu.dark_mode_action.setChecked(False)  # Or get from settings
+        
+        # Connect to the open_log_viewer_triggered signal if the method exists
+        if hasattr(self, 'open_log_viewer'):
+            self.app_menu.open_log_viewer_triggered.connect(self.open_log_viewer)
+            
+        # Add check for updates action to the help menu
+        check_updates_action = QAction("Check for &Updates...", self)
+        check_updates_action.triggered.connect(self.check_for_updates)
+        self.app_menu.help_menu.addAction(check_updates_action)
     
-    def find_mail_folders(self):
-        """Find mail folders for the selected email client"""
-        logging.info("Finding mail folders for client: %s", self.client_var.get())
-        self.folder_listbox.delete(0, tk.END)
-        self.set_status(get_string('status_searching_folders'))
-
-        def search_folders():
-            try:
-                client = self.client_var.get()
-                logging.debug("Selected client: %s", client)
-                
-                if client == "all":
-                    logging.info("Searching for all mail folders")
-                    self.mail_folders = self.client_manager.get_all_mail_folders()
-                else:
-                    logging.info("Searching for folders for client: %s", client)
-                    self.mail_folders = self.client_manager.get_client_folders(client)
-                
-                logging.info("Found %d folders", len(self.mail_folders))
-                
-                # Update UI in the main thread
-                self.root.after(0, self.update_folder_list)
-                
-            except Exception as e:
-                error_msg = get_string('error_finding_folders').format(error=str(e))
-                logging.error(error_msg, exc_info=True)
-                self.root.after(0, lambda: self.show_error(error_msg))
+    def create_toolbar(self):
+        """Create the toolbar."""
+        self.toolbar = self.addToolBar("Tools")
+        self.toolbar.setObjectName("mainToolbar")  # Set object name for state saving
         
-        # Run in a separate thread to keep UI responsive
-        logging.debug("Starting folder search thread")
-        threading.Thread(target=search_folders, daemon=True).start()
+        # Add actions
+        self.toolbar.addAction("Scan Folder").triggered.connect(self.on_scan_folder)
+        self.toolbar.addSeparator()
+        self.toolbar.addAction("Analyze").triggered.connect(self.on_analyze)
+        self.toolbar.addAction("Clean Up").triggered.connect(self.on_clean_up)
+        
+        # Add toolbar toggle action
+        self.toolbar_toggle = QAction("Show Toolbar", self)
+        self.toolbar_toggle.setCheckable(True)
+        self.toolbar_toggle.setChecked(True)
+        self.toolbar_toggle.triggered.connect(
+            lambda checked: self.toolbar.setVisible(checked)
+        )
     
-    def update_folder_list(self):
-        """Update the folder listbox with found mail folders"""
-        if not self.mail_folders:
-            self.set_status(get_string('status_no_folders_found'))
-            return
+    def setup_scan_tab(self):
+        """Set up the scan tab."""
+        layout = QVBoxLayout(self.scan_tab)
         
-        for folder in self.mail_folders:
-            self.folder_listbox.insert(tk.END, folder['display_name'])
+        # Add scan tab content here
+        scan_label = QLabel(tr('scan_description'))
+        scan_label.setWordWrap(True)
+        layout.addWidget(scan_label)
         
-        self.set_status(get_string('status_found_folders').format(count=len(self.mail_folders)))
+        # Add scan button
+        scan_button = QPushButton(tr('scan_button'))
+        scan_button.clicked.connect(self.on_scan_folder)
+        layout.addWidget(scan_button)
+        
+        # Add stretch to push content to the top
+        layout.addStretch()
     
-    def select_all_folders(self):
-        """Select all folders in the listbox"""
-        self.folder_listbox.selection_set(0, tk.END)
+    def setup_duplicates_tab(self):
+        """Set up the duplicates tab."""
+        layout = QVBoxLayout(self.duplicates_tab)
+        
+        # Add duplicates tab content here
+        duplicates_label = QLabel(tr('tabs.duplicates'))
+        layout.addWidget(duplicates_label)
+        
+        # Add stretch to push content to the top
+        layout.addStretch()
+        
+        # Duplicate groups list
+        self.duplicate_groups_list = QListWidget()
+        self.duplicate_groups_list.itemSelectionChanged.connect(self.on_duplicate_group_selected)
+        
+        # Email preview
+        self.email_preview = QTextEdit()
+        self.email_preview.setReadOnly(True)
+        
+        # Splitter for duplicates and preview
+        splitter = QSplitter(Qt.Vertical)
+        splitter.addWidget(self.duplicate_groups_list)
+        splitter.addWidget(self.email_preview)
+        splitter.setSizes([300, 200])
+        
+        layout.addWidget(splitter)
     
-    def scan_selected_folders(self):
-        """Scan selected folders for duplicate emails"""
-        logging.info("Starting folder scan")
-        selections = self.folder_listbox.curselection()
-        
-        if not selections:
-            logging.warning("No folders selected for scanning")
-            messagebox.showwarning(get_string('no_selection_title'), get_string('no_folder_selection_message'))
-            return
-        
-        # Get selected folders
-        self.selected_folders = [self.mail_folders[i] for i in selections]
-        logging.info("Scanning %d folders", len(self.selected_folders))
-        
-        # Clear previous results
-        self.results_tree.delete(*self.results_tree.get_children())
-
-        # Switch to results tab
-        self.notebook.select(1)
-        
-        # Get error message template in the main thread
-        error_template = get_string('error_scanning_folders')
-        
-        # Start scanning thread
-        self.set_status(get_string('status_scanning_folders').format(count=len(self.selected_folders)))
-        
-        def scan_folders():
-            try:
-                self.duplicate_groups = []
-                criteria = self.criteria_var.get()
-                logging.info("Using scan criteria: %s", criteria)
-                
-                for folder in self.selected_folders:
-                    logging.info("Scanning folder: %s", folder['display_name'])
-                    
-                    try:
-                        # Use the client manager to scan the folder
-                        groups = self.client_manager.scan_folder(folder, criteria)
-                        
-                        if groups:
-                            logging.info("Found %d duplicate groups in folder", len(groups))
-                            for group in groups:
-                                group_with_metadata = {
-                                    'emails': group,
-                                    'folder': folder['display_name'],
-                                    'client_type': folder.get('client_type', 'generic')
-                                }
-                                self.duplicate_groups.append(group_with_metadata)
-                        else:
-                            logging.info("No duplicates found in folder: %s", folder['display_name'])
-                    except Exception as e:
-                        logging.error("Error scanning folder %s: %s", folder['display_name'], str(e), exc_info=True)
-                
-                # Update UI in the main thread
-                self.root.after(0, self.update_results_tree)
-                
-            except Exception as e:
-                # Format the error message with the template we got in the main thread
-                error_msg = error_template.format(error=str(e))
-                logging.error(error_msg, exc_info=True)
-                self.root.after(0, lambda msg=error_msg: self.show_error(msg))
-        
-        logging.debug("Starting scan thread")
-        self.scanning_thread = threading.Thread(target=scan_folders, daemon=True)
-        self.scanning_thread.start()
-    
-    def toggle_expand_collapse(self, event):
-        """Toggle expand/collapse on double-click"""
-        item = self.results_tree.identify_row(event.y)
-        if item:
-            if self.results_tree.get_children(item):  # If item has children
-                if self.results_tree.item(item, 'open'):
-                    self.results_tree.item(item, open=False)
-                else:
-                    self.results_tree.item(item, open=True)
-    
-    def expand_all_groups(self):
-        """Expand all groups in the results tree"""
-        for item in self.results_tree.get_children():
-            if self.results_tree.get_children(item):  # If item has children
-                self.results_tree.item(item, open=True)
-    
-    def collapse_all_groups(self):
-        """Collapse all groups in the results tree"""
-        for item in self.results_tree.get_children():
-            if self.results_tree.get_children(item):  # If item has children
-                self.results_tree.item(item, open=False)
-    
-    def update_results_tree(self):
-        """Update the results treeview with scanning results"""
-        if not self.duplicate_groups:
-            self.set_status(get_string('status_no_duplicates_found'))
-            return
-        
-        # Clear existing items
-        for item in self.results_tree.get_children():
-            self.results_tree.delete(item)
-        
-        total_dupes = sum(len(group.get('messages', [])) - 1 for group in self.duplicate_groups)
-        
-        for i, group in enumerate(self.duplicate_groups):
-            # Create group parent node
-            group_id = get_string('group_prefix').format(index=i+1)
-            messages = group.get('messages', [])
-            folder_name = group.get('folder', 'Unknown')
-            
-            group_node = self.results_tree.insert(
-                "", "end", 
-                iid=f"group_{i}", 
-                text=group_id, 
-                values=("", "", f"{len(messages)} {get_string('emails_label')}", folder_name)
-            )
-            
-            # Add each email in the group
-            for j, msg in enumerate(messages):
-                email_node_id = f"group_{i}_{j}"
-
-                # Mark the original email
-                prefix = f"({get_string('original_prefix')}) " if j == 0 else ""
-                
-                # Get email details
-                email_info = {
-                    'date': msg.get('date', ''),
-                    'from': msg.get('from', '(No Sender)'),
-                    'subject': msg.get('subject', '(No Subject)'),
-                    'message': msg.get('message')
-                }
-
-                self.results_tree.insert(
-                    group_node, 
-                    "end", 
-                    iid=email_node_id,
-                    text=f"{j+1}",
-                    values=(
-                        email_info['date'],
-                        email_info['from'],
-                        prefix + email_info['subject'],
-                        folder_name
-                    )
-                )
-        
-        # Expand all groups by default
-        self.expand_all_groups()
-        
-        self.set_status(get_string('status_found_duplicates').format(
-            group_count=len(self.duplicate_groups), 
-            dupe_count=total_dupes
-        ))
-
-    def clean_selected_groups(self):
-        """Clean duplicates from selected groups"""
-        logging.info("Starting group cleaning")
-        selected_items = self.results_tree.selection()
-        
-        if not selected_items:
-            logging.warning("No groups selected for cleaning")
-            messagebox.showwarning(get_string('no_selection_title'), get_string('no_group_selection_message'))
-            return
-
-        # Find selected group indices
-        group_indices = set()
-        for item_id in selected_items:
-            try:
-                # Only process top-level items (groups)
-                if self.results_tree.parent(item_id) == "":
-                    group_index = int(item_id.split('_')[1])
-                    group_indices.add(group_index)
-                else:
-                    # If an email is selected, get its group
-                    parent_id = self.results_tree.parent(item_id)
-                    if parent_id and parent_id.startswith("group_"):
-                        group_index = int(parent_id.split('_')[1])
-                        group_indices.add(group_index)
-            except (ValueError, IndexError) as e:
-                logging.error("Error processing selected item: %s", str(e))
-                continue
-        
-        if not group_indices:
-            logging.warning("No valid groups found for cleaning")
-            messagebox.showwarning(get_string('no_valid_groups_title'), get_string('no_valid_groups_message'))
-            return
-
-        # Confirm deletion
-        if not messagebox.askyesno(get_string('confirm_deletion_title'), 
-                                  get_string('confirm_deletion_message')):
-            logging.info("Cleaning cancelled by user")
-            return
-
-        # Start cleaning thread
-        self.set_status(get_string('status_cleaning_groups').format(count=len(group_indices)))
-
-        def clean_groups():
-            try:
-                deleted, errors = self.duplicate_finder.delete_duplicates(
-                    list(group_indices), selection_method='keep-first'
-                )
-                logging.info("Deleted %d emails with %d errors", deleted, len(errors))
-                
-                # Update UI in the main thread
-                self.root.after(0, lambda: self.update_after_cleaning(deleted, errors))
-                
-            except Exception as e:
-                error_msg = get_string('error_cleaning_duplicates').format(error=str(e))
-                logging.error(error_msg, exc_info=True)
-                self.root.after(0, lambda: self.show_error(error_msg))
-        
-        logging.debug("Starting cleaning thread")
-        self.cleaning_thread = threading.Thread(target=clean_groups, daemon=True)
-        self.cleaning_thread.start()
-    
-    def clean_all_groups(self):
-        """Clean duplicates from all groups"""
-        if not self.duplicate_groups:
-            messagebox.showwarning(get_string('no_duplicates_title'), get_string('no_duplicates_message'))
-            return
-
-        # Confirm deletion
-        if not messagebox.askyesno(get_string('confirm_deletion_title'), 
-                                 get_string('confirm_deletion_all_message')):
-            return
-
-        # Start cleaning thread
-        self.set_status(get_string('status_cleaning_all_groups').format(count=len(self.duplicate_groups)))
-
-        def clean_all():
-            try:
-                deleted, errors = self.duplicate_finder.delete_duplicates(
-                    list(range(len(self.duplicate_groups))), selection_method='keep-first'
-                )
-                
-                # Update UI in the main thread
-                self.root.after(0, lambda: self.update_after_cleaning(deleted, errors))
-            except Exception as e:
-                self.root.after(0, lambda: self.show_error(get_string('error_cleaning_duplicates').format(error=str(e))))
-
-        self.cleaning_thread = threading.Thread(target=clean_all, daemon=True)
-        self.cleaning_thread.start()
-    
-    def update_after_cleaning(self, deleted, errors):
-        """Update the UI after cleaning duplicates"""
-        if errors:
-            error_msg = get_string('cleaning_error_message').format(deleted=deleted, error_count=len(errors))
-            self.set_status(error_msg)
-
-            detailed_errors = "\n".join(errors[:10])
-            if len(errors) > 10:
-                detailed_errors += f"\n... and {len(errors) - 10} more errors"
-
-            messagebox.showwarning(get_string('cleaning_errors_title'), 
-                                 f"{error_msg}\n\n{get_string('errors_label')}:\n{detailed_errors}")
-        else:
-            success_msg = get_string('cleaning_success_message').format(deleted=deleted)
-            self.set_status(success_msg)
-            messagebox.showinfo(get_string('cleaning_complete_title'), success_msg)
-
-        # Remove cleaned groups and rescan
-        self.scan_selected_folders()
-    
-    def open_folder(self):
-        """Open a custom folder for scanning"""
-        folder_path = filedialog.askdirectory(title=get_string('dialog_select_folder_title'))
-
-        if folder_path:
-            self.mail_folders = []
-            self.folder_listbox.delete(0, tk.END)
-            
-            # Create a generic mail handler for this path
-            custom_handler = GenericMailHandler()
-            custom_handler.profile_paths = [folder_path]
-            
-            try:
-                self.mail_folders = custom_handler.find_mail_folders()
-                self.update_folder_list()
-            except Exception as e:
-                self.show_error(get_string('error_scanning_folder').format(error=str(e)))
-
-    def run_demo_mode(self):
-        """Run the application in demo mode with test emails"""
-        try:
-            if messagebox.askyesno(get_string('demo_mode_title'), 
-                                 get_string('demo_mode_confirm_message')):
-                logging.info(get_string('demo_mode_running'))
-                
-                # Create test mailbox
-                self.temp_dir, profile_path = create_test_mailbox()
-                
-                # Set up a generic mail handler for this path
-                custom_handler = GenericMailHandler()
-                custom_handler.profile_paths = [profile_path]
-                
-                # Clear previous folders and find new ones
-                self.mail_folders = []
-                self.folder_listbox.delete(0, tk.END)
-                
-                self.mail_folders = custom_handler.find_mail_folders()
-                self.update_folder_list()
-                
-                # Select all folders
-                self.select_all_folders()
-                
-                # Notify user
-                messagebox.showinfo(get_string('demo_mode_title'), 
-                                  get_string('demo_mode_info_message'))
-        except Exception as e:
-            self.show_error(get_string('error_demo_mode').format(error=str(e)))
-    
-    def toggle_debug_mode(self):
-        """Toggle debug mode"""
-        is_debug = self.debug_var.get()
-        if is_debug:
-            logging.info(get_string('debug_mode_enabled'))
-            # Enable detailed logging
-            logging.getLogger().setLevel(logging.DEBUG)
-            self.set_status(get_string('status_debug_enabled'))
-        else:
-            logging.info(get_string('debug_mode_disabled'))
-            # Disable detailed logging
-            logging.getLogger().setLevel(logging.INFO)
-            self.set_status(get_string('status_debug_disabled'))
-
-    def toggle_dark_mode(self):
-        """Toggle dark mode theme"""
-        is_dark = self.dark_mode_var.get()
-        bg_color = '#1a1a1a' if is_dark else '#ffffff'
-        fg_color = '#e0e0e0' if is_dark else '#000000'
-        selected_bg = '#404040' if is_dark else '#0078d7'
-        
-        self.root.configure(bg=bg_color)
-        
-        # Update all frames and widgets
-        for widget in self.root.winfo_children():
-            if isinstance(widget, (ttk.Frame, ttk.LabelFrame)):
-                widget.configure(style='Dark.TFrame' if is_dark else 'TFrame')
-            elif isinstance(widget, ttk.Label):
-                widget.configure(style='Dark.TLabel' if is_dark else 'TLabel')
-            elif isinstance(widget, ttk.Button):
-                widget.configure(style='Dark.TButton' if is_dark else 'TButton')
-                
-        # Update styles
-        self.style.configure('Dark.TFrame', background=bg_color)
-        self.style.configure('Dark.TLabel', background=bg_color, foreground=fg_color)
-        self.style.configure('Dark.TButton', background=selected_bg)
-        
-        # Update console colors
-        self.console.configure(bg='#1a1a1a' if is_dark else '#ffffff',
-                             fg='#00ff00' if is_dark else '#000000')
-                             
-    def switch_language(self):
-        """Switch the application language and update the UI."""
-        try:
-            # Get the new language from the variable
-            new_lang = self.language_var.get()
-            
-            # Update the language in the language manager
-            lang_manager.set_language(new_lang)
-            
-            # Update window title
-            self.root.title(get_string('app_title'))
-            
-            # Recreate the menu to update all menu items
-            if hasattr(self, 'menu') and self.menu:
-                self.menu.destroy()
-                self.menu = AppMenu(self)
-            
-            # Update all UI elements
-            self.update_ui_language()
-            
-            # Log the language change
-            logging.info(f"Language switched to: {new_lang}")
-            
-        except Exception as e:
-            error_msg = get_string('error_switching_language').format(error=str(e))
-            logging.error(error_msg, exc_info=True)
-            self.show_error(error_msg)
-    
-    def update_ui_language(self):
-        """Update all UI elements with the current language."""
-        # Update status bar
-        if hasattr(self, 'status_bar'):
-            self.set_status(get_string('ready_status'))
-        
-        # Update tab titles
-        if hasattr(self, 'notebook'):
-            for i, tab_id in enumerate(self.notebook.tabs()):
-                tab_name = self.notebook.tab(tab_id)['text']
-                if tab_name in [get_string('tab_scan'), get_string('tab_results'), get_string('tab_analysis')]:
-                    self.notebook.tab(tab_id, text=get_string('tab_scan') if i == 0 else 
-                                        get_string('tab_results') if i == 1 else 
-                                        get_string('tab_analysis'))
-        
-        # Update scan tab elements
-        if hasattr(self, 'client_frame'):
-            self.client_frame.config(text=get_string('scan_client_frame'))
-            self.radio_client_all.config(text=get_string('scan_client_all_radio'))
-            self.radio_client_tb.config(text=get_string('scan_client_thunderbird_radio'))
-            self.radio_client_am.config(text=get_string('scan_client_apple_mail_radio'))
-            self.radio_client_ol.config(text=get_string('scan_client_outlook_radio'))
-            self.radio_client_gen.config(text=get_string('scan_client_generic_radio'))
-            
-        if hasattr(self, 'criteria_frame'):
-            self.criteria_frame.config(text=get_string('scan_criteria_frame'))
-            self.radio_crit_strict.config(text=get_string('scan_criteria_strict_radio'))
-            self.radio_crit_content.config(text=get_string('scan_criteria_content_radio'))
-            self.radio_crit_headers.config(text=get_string('scan_criteria_headers_radio'))
-            self.radio_crit_subj_send.config(text=get_string('scan_criteria_subject_sender_radio'))
-            
-        if hasattr(self, 'folder_frame'):
-            self.folder_frame.config(text=get_string('scan_folder_frame'))
-            
-        if hasattr(self, 'find_folders_button'):
-            self.find_folders_button.config(text=get_string('scan_find_folders_button'))
-            
-        if hasattr(self, 'select_all_button'):
-            self.select_all_button.config(text=get_string('scan_select_all_button'))
-            
-        if hasattr(self, 'scan_button'):
-            self.scan_button.config(text=get_string('scan_button'))
-        
-        # Update results tab elements
-        if hasattr(self, 'results_tree'):
-            self.results_tree.heading('#0', text=get_string('header_group'))
-            self.results_tree.heading('date', text=get_string('header_date'))
-            self.results_tree.heading('from', text=get_string('header_from'))
-            self.results_tree.heading('subject', text=get_string('header_subject'))
-            self.results_tree.heading('folder', text=get_string('header_folder'))
-            
-        if hasattr(self, 'preview_header'):
-            self.preview_header.config(text=get_string('preview_header'))
-        
-        # Update buttons in results tab
-        if hasattr(self, 'view_email_button'):
-            self.view_email_button.config(text=get_string('view_email_button'))
-        if hasattr(self, 'clean_selected_button'):
-            self.clean_selected_button.config(text=get_string('clean_selected_button'))
-        if hasattr(self, 'clean_all_button'):
-            self.clean_all_button.config(text=get_string('clean_all_button'))
-        if hasattr(self, 'expand_all_button'):
-            self.expand_all_button.config(text=get_string('expand_all_button'))
-        if hasattr(self, 'collapse_all_button'):
-            self.collapse_all_button.config(text=get_string('collapse_all_button'))
-            
-        # Update analysis tab elements
-        if hasattr(self, 'analysis_notebook'):
-            for i, tab_id in enumerate(self.analysis_notebook.tabs()):
-                tab_text = self.analysis_notebook.tab(tab_id, 'text')
-                if tab_text in [get_string('analysis_senders'), get_string('analysis_timeline'), 
-                               get_string('analysis_attachments'), get_string('analysis_threads'), 
-                               get_string('analysis_duplicates')]:
-                    self.analysis_notebook.tab(tab_id, text=get_string('analysis_senders') if i == 0 else
-                                              get_string('analysis_timeline') if i == 1 else
-                                              get_string('analysis_attachments') if i == 2 else
-                                              get_string('analysis_threads') if i == 3 else
-                                              get_string('analysis_duplicates'))
-        
-        # Force update the UI
-        self.root.update_idletasks()
-
-    def show_error(self, message):
-        """Show an error message"""
-        logging.error(message)
-        messagebox.showerror(get_string('error_title'), message)
-        self.set_status(f"{get_string('error_prefix')}: {message}")
-
-    def report_bug(self):
-        """Open the GitHub issues page in a browser"""
-        webbrowser.open("https://github.com/Nsfr750/EmailDuplicateCleaner/issues")
-
-    def on_closing(self):
-        """Clean up when closing the application."""
-        # Restore stdout
-        if self.stdout_redirect:
-            sys.stdout = sys.__stdout__
-            self.stdout_redirect.stop()
-
-        # Remove temp directory if in demo mode
-        if self.temp_dir and os.path.exists(self.temp_dir):
-            try:
-                import shutil
-                shutil.rmtree(self.temp_dir)
-                logging.info("Cleaned up demo environment.")
-            except Exception as e:
-                logging.error(get_string('error_cleanup_temp_dir').format(error=e))
-        
-        self.root.destroy()
-
-    def expand_all_groups(self):
-        """Expand all groups in the results tree"""
-        try:
-            logging.debug(get_string('expanding_all_groups'))
-            children = self.results_tree.get_children()
-            logging.debug(get_string('found_top_level_items').format(count=len(children)))
-            
-            for item in children:
-                self.results_tree.item(item, open=True)
-                
-            self.set_status(get_string('status_all_groups_expanded'))
-        except Exception as e:
-            logging.error(f"Error expanding groups: {e}")
-            self.show_error(get_string('error_expanding_groups').format(error=str(e)))
-
-    def collapse_all_groups(self):
-        """Collapse all groups in the results tree"""
-        try:
-            logging.debug(get_string('collapsing_all_groups'))
-            children = self.results_tree.get_children()
-            logging.debug(get_string('found_top_level_items').format(count=len(children)))
-            
-            for item in children:
-                self.results_tree.item(item, open=False)
-                
-            self.set_status(get_string('status_all_groups_collapsed'))
-        except Exception as e:
-            logging.error(f"Error collapsing groups: {e}")
-            self.show_error(get_string('error_collapsing_groups').format(error=str(e)))
-
-    def show_email_menu(self, event):
-        """Show the context menu for email items"""
-        # Get the item under cursor
-        item = self.results_tree.identify_row(event.y)
-        if item:
-            # Only show menu for email items (not group items)
-            if self.results_tree.parent(item) != "":
-                self.results_tree.selection_set(item)
-                self.email_menu.post(event.x_root, event.y_root)
-
-    def on_item_double_click(self, event):
-        """Handle double-click on tree items"""
-        # Questo metodo ora è stato sostituito da toggle_expand_collapse
-        # ma lo manteniamo per compatibilità con altri eventuali binding
-        self.toggle_expand_collapse(event)
-        
-        # Seleziona l'elemento e mostra l'anteprima
-        item = self.results_tree.identify_row(event.y)
-        if item:
-            self.results_tree.selection_set(item)
-            self.view_email_content()
-
-    def view_email_content(self):
-        """View the content of the selected email"""
-        selected_items = self.results_tree.selection()
-        if not selected_items:
-            messagebox.showwarning(get_string('no_selection_title'), get_string('no_email_selection_message'))
-            return
-        
-        # Get the first selected item
-        item_id = selected_items[0]
-        
-        # Only proceed if it's an email item (not a group)
-        if self.results_tree.parent(item_id) == "":
-            messagebox.showwarning(get_string('invalid_selection_title'), get_string('invalid_selection_email_message'))
-            return
-        
-        # Get the parent item (group) and the index in the group
-        parent_id = self.results_tree.parent(item_id)
-        
-        # Get group index (from iid: "group_X")
-        group_idx = int(parent_id.split('_')[1])
-        
-        # Get email index from the item text
-        email_idx_text = self.results_tree.item(item_id)['text']  # "Y"
-        email_idx = int(email_idx_text) - 1  # Convert to 0-based index
-        
-        try:
-            # Get email content
-            email_content = self.duplicate_finder.get_email_content(group_idx, email_idx)
-            
-            # Create email viewer window
-            viewer = tk.Toplevel(self.root)
-            viewer.title(get_string('email_viewer_title').format(subject=self.duplicate_groups[group_idx]['messages'][email_idx]['subject']))
-            viewer.geometry("700x500")
-            viewer.minsize(500, 400)
-            
-            # Make it modal
-            viewer.transient(self.root)
-            viewer.grab_set()
-            
-            # Configure grid
-            viewer.columnconfigure(0, weight=1)
-            viewer.rowconfigure(1, weight=1)
-            
-            # Header frame
-            header_frame = ttk.LabelFrame(viewer, text=get_string('email_headers_frame'), padding="5")
-            header_frame.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
-            
-            # Add header information
-            email_info = self.duplicate_groups[group_idx]['messages'][email_idx]
-            headers = [
-                (get_string('header_from'), email_info['from']),
-                (get_string('header_to'), email_info.get('to', get_string('header_to_na'))),
-                (get_string('header_date'), email_info['date']),
-                (get_string('header_subject'), email_info['subject']),
-                (get_string('header_folder'), email_info['folder'])
-            ]
-            
-            for i, (label, value) in enumerate(headers):
-                ttk.Label(header_frame, text=label, font=('Arial', 10, 'bold')).grid(
-                    row=i, column=0, sticky=tk.W, padx=(0, 10))
-                ttk.Label(header_frame, text=value, wraplength=500).grid(
-                    row=i, column=1, sticky=tk.W)
-            
-            # Content frame
-            content_frame = ttk.LabelFrame(viewer, text=get_string('email_content_frame'), padding="5")
-            content_frame.grid(row=1, column=0, sticky=(tk.N, tk.S, tk.E, tk.W), padx=5, pady=5)
-            content_frame.columnconfigure(0, weight=1)
-            content_frame.rowconfigure(0, weight=1)
-            
-            # Email content text widget
-            content_text = scrolledtext.ScrolledText(
-                content_frame, wrap=tk.WORD, font=('Arial', 10),
-                width=80, height=20
-            )
-            content_text.grid(row=0, column=0, sticky=(tk.N, tk.S, tk.E, tk.W))
-            
-            # Insert email content
-            if isinstance(email_content, bytes):
-                try:
-                    email_content = email_content.decode('utf-8')
-                except UnicodeDecodeError:
-                    try:
-                        email_content = email_content.decode('latin-1')
-                    except UnicodeDecodeError:
-                        email_content = str(email_content)
-            
-            content_text.insert('1.0', email_content)
-            content_text.configure(state='disabled')  # Make read-only
-            
-            # Button frame
-            button_frame = ttk.Frame(viewer)
-            button_frame.grid(row=2, column=0, sticky=(tk.E, tk.W), padx=5, pady=5)
-            
-            # Close button
-            ttk.Button(button_frame, text=get_string('close_button'), command=viewer.destroy).pack(side=tk.RIGHT)
-            
-            # Center the window on screen
-            viewer.update_idletasks()
-            width = viewer.winfo_width()
-            height = viewer.winfo_height()
-            x = (viewer.winfo_screenwidth() // 2) - (width // 2)
-            y = (viewer.winfo_screenheight() // 2) - (height // 2)
-            viewer.geometry(f"{width}x{height}+{x}+{y}")
-            
-            # Set focus to the viewer window
-            viewer.focus_set()
-            
-        except Exception as e:
-            self.show_error(get_string('error_viewing_email').format(error=str(e)))
-
-    def open_log_viewer(self):
-        if not hasattr(self, 'log_viewer') or not self.log_viewer.winfo_exists():
-            self.log_viewer = LogViewer(self.root, self.log_queue)
-        else:
-            self.log_viewer.lift()
-
-    def on_folder_shift_up(self, event):
-        listbox = self.folder_listbox
-        
-        if not listbox.curselection():
-            listbox.selection_set(tk.ACTIVE)
-            listbox.selection_anchor(tk.ACTIVE)
-
-        active_idx = listbox.index(tk.ACTIVE)
-        anchor_idx = listbox.index(tk.ANCHOR)
-
-        if active_idx > 0:
-            listbox.activate(active_idx - 1)
-            new_active_idx = listbox.index(tk.ACTIVE)
-            
-            listbox.selection_clear(0, tk.END)
-            listbox.selection_set(anchor_idx, new_active_idx)
-            listbox.see(new_active_idx)
-            
-        return "break"
-
-    def on_folder_shift_down(self, event):
-        listbox = self.folder_listbox
-
-        if not listbox.curselection():
-            listbox.selection_set(tk.ACTIVE)
-            listbox.selection_anchor(tk.ACTIVE)
-
-        active_idx = listbox.index(tk.ACTIVE)
-        anchor_idx = listbox.index(tk.ANCHOR)
-
-        if active_idx < listbox.size() - 1:
-            listbox.activate(active_idx + 1)
-            new_active_idx = listbox.index(tk.ACTIVE)
-            
-            listbox.selection_clear(0, tk.END)
-            listbox.selection_set(anchor_idx, new_active_idx)
-            listbox.see(new_active_idx)
-            
-        return "break"
-
-    def on_folder_ctrl_arrow(self, direction):
-        listbox = self.folder_listbox
-        active_idx = listbox.index(tk.ACTIVE)
-        
-        if direction == "up" and active_idx > 0:
-            listbox.activate(active_idx - 1)
-            listbox.see(active_idx - 1)
-        elif direction == "down" and active_idx < listbox.size() - 1:
-            listbox.activate(active_idx + 1)
-            listbox.see(active_idx + 1)
-            
-        return "break"
-
-    def on_mailbox_listbox_select(self, event):
-        selections = self.mailbox_list.curselection()
-        if selections:
-            self.last_anchor = selections[0]
-
-    def on_mailbox_shift_up(self, event, control_pressed=False):
-        selections = list(self.mailbox_list.curselection())
-        current_focus = self.mailbox_list.index(tk.ACTIVE)
-
-        if not selections:
-            self.mailbox_list.selection_set(current_focus)
-            return "break"
-
-        if not hasattr(self, 'last_anchor') or self.last_anchor is None:
-            self.last_anchor = selections[0]
-
-        if not control_pressed:
-            self.mailbox_list.selection_clear(0, tk.END)
-
-        if current_focus > 0:
-            self.mailbox_list.activate(current_focus - 1)
-            new_focus = self.mailbox_list.index(tk.ACTIVE)
-            self.mailbox_list.selection_set(self.last_anchor, new_focus)
-            self.mailbox_list.see(new_focus)
-
-        return "break"
-
-    def on_mailbox_shift_down(self, event, control_pressed=False):
-        selections = list(self.mailbox_list.curselection())
-        current_focus = self.mailbox_list.index(tk.ACTIVE)
-
-        if not selections:
-            self.mailbox_list.selection_set(current_focus)
-            return "break"
-
-        if not hasattr(self, 'last_anchor') or self.last_anchor is None:
-            self.last_anchor = selections[0]
-
-        if not control_pressed:
-            self.mailbox_list.selection_clear(0, tk.END)
-
-        if current_focus < self.mailbox_list.size() - 1:
-            self.mailbox_list.activate(current_focus + 1)
-            new_focus = self.mailbox_list.index(tk.ACTIVE)
-            self.mailbox_list.selection_set(self.last_anchor, new_focus)
-            self.mailbox_list.see(new_focus)
-
-        return "break"
-
-    def on_mailbox_ctrl_arrow(self, direction):
-        current_focus = self.mailbox_list.index(tk.ACTIVE)
-        if direction == "up" and current_focus > 0:
-            self.mailbox_list.activate(current_focus - 1)
-            self.mailbox_list.see(current_focus - 1)
-        elif direction == "down" and current_focus < self.mailbox_list.size() - 1:
-            self.mailbox_list.activate(current_focus + 1)
-            self.mailbox_list.see(current_focus + 1)
-        return "break"
-        
     def setup_analysis_tab(self):
-        """Set up the content for the Analysis tab"""
-        # Configure grid layout for analysis tab (2 columns, 2 rows)
-        self.analysis_tab.columnconfigure(0, weight=1)
-        self.analysis_tab.columnconfigure(1, weight=1)
-        self.analysis_tab.rowconfigure(0, weight=0)  # Controls row
-        self.analysis_tab.rowconfigure(1, weight=1)  # Content row
+        """Set up the analysis tab."""
+        layout = QVBoxLayout(self.analysis_tab)
         
-        # Analysis controls frame
-        controls_frame = ttk.LabelFrame(self.analysis_tab, text=get_string('analysis_controls'), padding="10")
-        controls_frame.grid(row=0, column=0, columnspan=2, sticky="ew", padx=5, pady=5)
+        # Add analysis tab content here
+        analysis_label = QLabel(tr('tabs.analysis'))
+        layout.addWidget(analysis_label)
         
-        # Run Analysis button
-        run_btn = ttk.Button(controls_frame, text=get_string("analysis_run_analysis"), 
-                           command=self.run_analysis)
-        run_btn.pack(side=tk.LEFT, padx=5)
-        
-        # Report format dropdown
-        ttk.Label(controls_frame, text=get_string("analysis_report_format")).pack(side=tk.LEFT, padx=5)
-        self.report_format = tk.StringVar(value="html")
-        format_menu = ttk.OptionMenu(controls_frame, self.report_format, 
-                                   self.report_format.get(), 
-                                   *["html", "text", "json"])
-        format_menu.pack(side=tk.LEFT, padx=5)
-        
-        # Generate Report button
-        report_btn = ttk.Button(controls_frame, text=get_string("analysis_generate_report"),
-                              command=self.generate_analysis_report)
-        report_btn.pack(side=tk.LEFT, padx=5)
-        
-        # Analysis sections notebook
-        self.analysis_notebook = ttk.Notebook(self.analysis_tab)
-        self.analysis_notebook.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=5, pady=5)
-        
-        # Create analysis sections
-        self.create_analysis_section("senders", get_string("analysis_senders"))
-        self.create_analysis_section("timeline", get_string("analysis_timeline"))
-        self.create_analysis_section("attachments", get_string("analysis_attachments"))
-        self.create_analysis_section("threads", get_string("analysis_threads"))
-        self.create_analysis_section("duplicates", get_string("analysis_duplicates"))
-        
-        # Add initial help text
-        self.show_analysis_help()
+        # Add stretch to push content to the top
+        layout.addStretch()
     
-    def create_analysis_section(self, name, title):
-        """Create a section in the analysis notebook"""
-        frame = ttk.Frame(self.analysis_notebook, padding="5")
-        self.analysis_notebook.add(frame, text=title)
+    def setup_results_tab(self):
+        """Set up the results tab."""
+        layout = QVBoxLayout(self.results_tab)
         
-        # Add a text widget for display
-        text = tk.Text(frame, wrap=tk.WORD, state=tk.DISABLED)
-        scrollbar = ttk.Scrollbar(frame, orient="vertical", command=text.yview)
-        text.configure(yscrollcommand=scrollbar.set)
+        # Add results tab content here
+        results_label = QLabel(tr('tabs.results'))
+        layout.addWidget(results_label)
         
-        text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        
-        # Store reference to the text widget
-        setattr(self, f"analysis_{name}_text", text)
+        # Add stretch to push content to the top
+        layout.addStretch()
     
-    def show_analysis_help(self):
-        """Show help text in all analysis sections"""
-        for section in ["senders", "timeline", "attachments", "threads", "duplicates"]:
-            text_widget = getattr(self, f"analysis_{section}_text")
-            text_widget.config(state=tk.NORMAL)
-            text_widget.delete(1.0, tk.END)
-            text_widget.insert(tk.END, get_string("analysis_no_data"))
-            text_widget.config(state=tk.DISABLED)
+    def setup_tools_tab(self):
+        """Set up the tools tab."""
+        layout = QVBoxLayout(self.tools_tab)
+        
+        # Add tools tab content here
+        tools_label = QLabel(tr('tabs.tools'))
+        layout.addWidget(tools_label)
+        
+        # Add stretch to push content to the top
+        layout.addStretch()
     
-    def run_analysis(self):
-        """Run the email analysis"""
-        if not hasattr(self, 'duplicate_groups') or not self.duplicate_groups:
-            messagebox.showinfo(
-                get_string("info_title"),
-                get_string("dialog_no_duplicates_message"),
-                parent=self.root
+    def setup_settings_tab(self):
+        """Set up the settings tab."""
+        layout = QVBoxLayout(self.settings_tab)
+        
+        # Add settings tab content here
+        settings_label = QLabel(tr('tabs.settings'))
+        layout.addWidget(settings_label)
+        
+        # Add language selection
+        lang_group = QGroupBox(tr('menu_settings_language'))
+        lang_layout = QVBoxLayout()
+        
+        # English radio button
+        self.en_radio = QRadioButton(tr('menu_settings_language_en'))
+        self.en_radio.toggled.connect(lambda: self.on_language_selected('en'))
+        lang_layout.addWidget(self.en_radio)
+        
+        # Italian radio button
+        self.it_radio = QRadioButton(tr('menu_settings_language_it'))
+        self.it_radio.toggled.connect(lambda: self.on_language_selected('it'))
+        lang_layout.addWidget(self.it_radio)
+        
+        # Set current language
+        current_lang = language_manager.get_language()
+        if current_lang == 'it':
+            self.it_radio.setChecked(True)
+        else:
+            self.en_radio.setChecked(True)
+        
+        lang_group.setLayout(lang_layout)
+        layout.addWidget(lang_group)
+        
+        # Add stretch to push content to the top
+        layout.addStretch()
+        # Analysis results
+        self.analysis_results = QTextEdit()
+        self.analysis_results.setReadOnly(True)
+        
+        layout.addWidget(QLabel("Analysis Results:"))
+        layout.addWidget(self.analysis_results, 1)
+    
+    def load_email_clients(self):
+        """Load available email clients."""
+        self.client_combo.clear()
+        
+        # Add supported email clients
+        self.client_combo.addItem(tr('email_client.select'), None)
+        self.client_combo.addItem(tr('email_client.thunderbird'), "thunderbird")
+        self.client_combo.addItem(tr('email_client.apple_mail'), "apple_mail")
+        self.client_combo.addItem(tr('email_client.outlook'), "outlook")
+        self.client_combo.addItem(tr('email_client.generic'), "generic")
+    
+    def on_client_changed(self, index):
+        """Handle email client selection change."""
+        client_id = self.client_combo.currentData()
+        if not client_id:
+            self.folder_list.clear()
+            return
+        
+        # TODO: Load folders for the selected client
+        self.folder_list.clear()
+        self.folder_list.addItem("Loading folders...")
+        
+        # Simulate loading folders
+        QTimer.singleShot(1000, self.load_folders)
+    
+    def load_folders(self):
+        """Load folders for the selected email client."""
+        client_id = self.client_combo.currentData()
+        if not client_id:
+            return
+        
+        self.folder_list.clear()
+        
+        # TODO: Load actual folders from the email client
+        # This is a placeholder - replace with actual implementation
+        folders = [
+            "Inbox", "Sent", "Drafts", "Trash", "Junk",
+            "Archive", "Important", "Starred", "Personal", "Work"
+        ]
+        
+        for folder in folders:
+            self.folder_list.addItem(folder)
+    
+    def on_folder_selected(self, item):
+        """Handle folder selection."""
+        self.current_folder = item.text()
+        self.status_bar.showMessage(f"Selected folder: {self.current_folder}")
+    
+    def on_scan_folder(self):
+        """Handle scan folder action."""
+        if not self.current_folder:
+            QMessageBox.warning(self, "No Folder Selected", "Please select a folder to scan.")
+            return
+        
+        # Show progress
+        self.status_bar.showMessage(f"Scanning folder: {self.current_folder}...")
+        self.progress_bar.setRange(0, 0)  # Indeterminate progress
+        self.progress_bar.setVisible(True)
+        
+        # Simulate scanning
+        QTimer.singleShot(2000, self.on_scan_complete)
+    
+    def on_scan_complete(self):
+        """Handle scan completion."""
+        self.progress_bar.setVisible(False)
+        self.status_bar.showMessage("Scan complete")
+        
+        # Show results
+        QMessageBox.information(
+            self,
+            "Scan Complete",
+            f"Found 5 duplicate email groups in {self.current_folder}."
+        )
+        
+        # Update UI with results
+        self.update_duplicates_list()
+    
+    def update_duplicates_list(self):
+        """Update the duplicates list with sample data."""
+        self.duplicate_groups_list.clear()
+        
+        # Sample data - replace with actual results
+        groups = [
+            "Meeting Invitation (5 duplicates)",
+            "Newsletter: Weekly Digest (3 duplicates)",
+            "Invoice #12345 (2 duplicates)",
+            "Project Update (4 duplicates)",
+            "Vacation Photos (2 duplicates)"
+        ]
+        
+        for group in groups:
+            self.duplicate_groups_list.addItem(group)
+    
+    def on_duplicate_group_selected(self):
+        """Handle selection of a duplicate group."""
+        current_item = self.duplicate_groups_list.currentItem()
+        if not current_item:
+            return
+        
+        # Update email preview with sample content
+        self.email_preview.setPlainText(
+            f"Preview of selected duplicate group: {current_item.text()}\n\n"
+            "This is a preview of the email content. In a real implementation, "
+            "this would show the actual email content of the selected duplicate group."
+        )
+    
+    def on_analyze(self):
+        """Handle analyze action."""
+        if not self.current_folder:
+            QMessageBox.warning(self, "No Folder Selected", "Please select a folder to analyze.")
+            return
+        
+        # Show progress
+        self.status_bar.showMessage(f"Analyzing folder: {self.current_folder}...")
+        self.progress_bar.setRange(0, 0)  # Indeterminate progress
+        self.progress_bar.setVisible(True)
+        
+        # Simulate analysis
+        QTimer.singleShot(1500, self.on_analysis_complete)
+    
+    def on_analysis_complete(self):
+        """Handle analysis completion."""
+        self.progress_bar.setVisible(False)
+        self.status_bar.showMessage("Analysis complete")
+        
+        # Update analysis tab with results
+        self.analysis_results.setPlainText(
+            "Analysis Results for 'Inbox':\n"
+            "----------------------------------------\n"
+            "Total emails: 1,245\n"
+            "Duplicate emails: 42 (3.4%)\n"
+            "Potential space savings: 12.7 MB\n\n"
+            "Top duplicate senders:\n"
+            "- newsletter@example.com (15 duplicates)\n"
+            "- notifications@service.com (8 duplicates)\n"
+            "- noreply@social.net (5 duplicates)\n\n"
+            "Largest duplicate groups:\n"
+            "- \"Meeting Invitation\" (5 duplicates, 2.1 MB)\n"
+            "- \"Weekly Digest\" (3 duplicates, 1.8 MB)\n"
+            "- \"Your Order Confirmation\" (3 duplicates, 1.2 MB)"
+        )
+        
+        # Switch to analysis tab
+        self.tabs.setCurrentWidget(self.analysis_tab)
+    
+    def on_clean_up(self):
+        """Handle clean up action."""
+        if self.duplicate_groups_list.count() == 0:
+            QMessageBox.information(
+                self,
+                "No Duplicates Found",
+                "No duplicate emails were found to clean up."
             )
             return
+        
+        # Show confirmation dialog
+        reply = QMessageBox.question(
+            self,
+            "Confirm Clean Up",
+            "This will remove all duplicate emails, keeping only the first occurrence "
+            "of each. This action cannot be undone.\n\n"
+            "Are you sure you want to continue?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            # Show progress
+            self.status_bar.showMessage("Cleaning up duplicates...")
+            self.progress_bar.setRange(0, 0)  # Indeterminate progress
+            self.progress_bar.setVisible(True)
             
-        self.set_status(get_string("analysis_running"))
-        # TODO: Implement actual analysis logic
-        self.set_status(get_string("analysis_complete"))
+            # Simulate cleanup
+            QTimer.singleShot(2500, self.on_cleanup_complete)
     
-    def generate_analysis_report(self):
-        """Generate a report of the analysis"""
-        if not hasattr(self, 'duplicate_groups') or not self.duplicate_groups:
-            messagebox.showinfo(
-                get_string("info_title"),
-                get_string("dialog_no_duplicates_message"),
-                parent=self.root
-            )
-            return
+    def on_cleanup_complete(self):
+        """Handle cleanup completion."""
+        self.progress_bar.setVisible(False)
+        self.status_bar.showMessage("Cleanup complete")
+        
+        # Show results
+        QMessageBox.information(
+            self,
+            "Cleanup Complete",
+            "Successfully removed 12 duplicate emails, freeing up 5.3 MB of disk space."
+        )
+        
+        # Refresh the UI
+        self.duplicate_groups_list.clear()
+        self.email_preview.clear()
+    
+    def toggle_toolbar(self, visible):
+        """Toggle toolbar visibility."""
+        self.toolbar.setVisible(visible)
+    
+    def show_sponsor(self):
+        """Show sponsor dialog."""
+        try:
+            print("\n=== Starting show_sponsor ===")
+            print("Creating SponsorDialog instance...")
             
-        # TODO: Implement report generation logic
-        report_format = self.report_format.get()
-        self.set_status(f"Generating {report_format.upper()} report...")
+            # Create the dialog
+            sponsor_dialog = SponsorDialog(self)
+            print("SponsorDialog instance created successfully")
+            
+            # Set window flags to ensure proper dialog behavior
+            sponsor_dialog.setWindowFlags(
+                Qt.Window | 
+                Qt.Dialog | 
+                Qt.WindowTitleHint | 
+                Qt.WindowCloseButtonHint |
+                Qt.WindowSystemMenuHint
+            )
+            
+            # Show the dialog modally
+            print("Executing SponsorDialog...")
+            result = sponsor_dialog.exec_()
+            print(f"SponsorDialog closed with result: {result}")
+            
+        except ImportError as e:
+            error_msg = f"Import error in show_sponsor: {str(e)}"
+            print(error_msg)
+            QMessageBox.critical(
+                self,
+                "Import Error",
+                f"Failed to load required modules: {str(e)}\n\nPlease make sure all dependencies are installed."
+            )
+        except Exception as e:
+            error_msg = f"Unexpected error in show_sponsor: {str(e)}"
+            print(error_msg)
+            import traceback
+            traceback.print_exc()
+            QMessageBox.critical(
+                self,
+                "Error",
+                f"An unexpected error occurred while showing the sponsor dialog.\n\n{str(e)}"
+            )
+        finally:
+            print("=== show_sponsor completed ===\n")
+    
+    def show_about(self):
+        """Show about dialog."""
+        About.show_about(self)
+    
+    def show_help(self):
+        """Show help dialog."""
+        Help.show_help(self)
+        
+    def open_log_viewer(self):
+        """Open the log viewer dialog."""
+        try:
+            from struttura.view_log import LogViewer
+            self.log_viewer = LogViewer(self)
+            self.log_viewer.finished.connect(self.log_viewer_finished)
+            self.log_viewer.show()
+            self.log_viewer.raise_()
+            self.log_viewer.activateWindow()
+        except Exception as e:
+            logger.error(f"Error opening log viewer: {str(e)}", exc_info=True)
+            QMessageBox.critical(
+                self,
+                tr('error_title'),
+                f"Error opening log viewer: {str(e)}"
+            )
+    
+    def log_viewer_finished(self):
+        """Handle log viewer close event."""
+        if self.log_viewer:
+            self.log_viewer.deleteLater()
+        self.log_viewer = None
+    
+    def check_for_updates(self):
+        """Check for application updates."""
+        self.status_bar.showMessage("Checking for updates...")
+        
+        # Get current version from the version module
+        from struttura.version import __version__
+        
+        # Create and configure the update checker
+        self.update_checker = UpdateChecker(current_version=__version__)
+        self.update_checker.update_available.connect(self.on_update_available)
+        self.update_checker.no_update_available.connect(self.on_no_update_available)
+        self.update_checker.check_failed.connect(self.on_update_check_failed)
+        
+        # Start the update check
+        self.update_checker.check_update()
+    
+    def on_update_available(self, release_info):
+        """Handle update available event."""
+        self.status_bar.showMessage("Update available!")
+        
+        # Show update dialog
+        from struttura.updates import UpdateDialog
+        dialog = UpdateDialog(release_info, self)
+        if dialog.exec_() == QDialog.Accepted:
+            # User chose to update
+            QDesktopServices.openUrl(QUrl(release_info['html_url']))
+    
+    def on_no_update_available(self):
+        """Handle no update available event."""
+        self.status_bar.showMessage("You have the latest version.", 3000)
+    
+    def on_update_check_failed(self, error):
+        """Handle update check failure."""
+        self.status_bar.showMessage(f"Update check failed: {error}", 5000)
+        QMessageBox.warning(
+            self,
+            "Update Check Failed",
+            f"Failed to check for updates: {error}"
+        )
+    
+    def load_settings(self):
+        """Load application settings."""
+        # Window geometry
+        if self.settings.value("window/geometry"):
+            self.restoreGeometry(self.settings.value("window/geometry"))
+        
+        # Window state
+        if self.settings.value("window/state"):
+            self.restoreState(self.settings.value("window/state"))
+        
+        # Other settings
+        toolbar_visible = self.settings.value("ui/toolbar_visible", True, type=bool)
+        if hasattr(self, 'toolbar_toggle'):
+            self.toolbar_toggle.setChecked(toolbar_visible)
+        if hasattr(self, 'toolbar'):
+            self.toolbar.setVisible(toolbar_visible)
+    
+    def save_settings(self):
+        """Save application settings."""
+        # Window geometry and state
+        self.settings.setValue("window/geometry", self.saveGeometry())
+        self.settings.setValue("window/state", self.saveState())
+        
+        # Other settings
+        self.settings.setValue("ui/toolbar_visible", self.toolbar_toggle.isChecked())
+    
+    def on_language_selected(self, lang_code):
+        """Handle language selection from radio buttons."""
+        if lang_code != language_manager.get_language():
+            language_manager.set_language(lang_code)
+    
+    def on_language_changed(self, lang_code):
+        """Handle language change and update the UI."""
+        logger.info(f"Language changed to: {lang_code}")
+        try:
+            # Update the menu
+            if hasattr(self, 'app_menu'):
+                self.app_menu.set_language(lang_code)
+            
+            # Retranslate the UI
+            self.retranslate_ui()
+            
+            # Show status message
+            self.status_bar.showMessage(tr('status.language_changed').format(language=lang_code.upper()))
+            
+        except Exception as e:
+            logger.error(f"Error changing language: {str(e)}", exc_info=True)
+            self.status_bar.showMessage(tr('error.language_change_failed'))
+    
+    def retranslate_ui(self):
+        """Retranslate UI elements when language changes."""
+        try:
+            # Window title
+            self.setWindowTitle(tr('app.title').format(version=get_version_info()['full_version']))
+            
+            # Email client selection
+            if hasattr(self, 'client_combo') and self.client_combo.count() > 0:
+                self.client_combo.setItemText(0, tr('email_client.select'))
+            
+            # Folder list
+            if hasattr(self, 'folder_list') and hasattr(self.folder_list, 'parent'):
+                folder_label = self.folder_list.parent().layout().itemAt(0).widget()
+                if isinstance(folder_label, QLabel):
+                    folder_label.setText(tr('folders.label'))
+            
+            # Tabs
+            if hasattr(self, 'tabs') and self.tabs.count() >= 2:
+                self.tabs.setTabText(0, tr('tabs.duplicates'))
+                self.tabs.setTabText(1, tr('tabs.analysis'))
+            
+            # Toolbar actions
+            if hasattr(self, 'toolbar'):
+                for action in self.toolbar.actions():
+                    if action.text() == tr('actions.scan_folder') or action.text() == "Scan Folder":
+                        action.setText(tr('actions.scan_folder'))
+                    elif action.text() == tr('actions.analyze') or action.text() == "Analyze":
+                        action.setText(tr('actions.analyze'))
+                    elif action.text() == tr('actions.clean_up') or action.text() == "Clean Up":
+                        action.setText(tr('actions.clean_up'))
+            
+            # Status bar
+            if hasattr(self, 'status_bar'):
+                self.status_bar.showMessage(tr('status.ready'))
+            
+            # Menu items
+            if hasattr(self, 'app_menu') and hasattr(self.app_menu, 'retranslate_ui'):
+                self.app_menu.retranslate_ui()
+                
+            logger.info(f"UI retranslated to: {language_manager.get_language()}")
+            
+        except Exception as e:
+            logger.error(f"Error retranslating UI: {str(e)}", exc_info=True)
+    
+    def closeEvent(self, event):
+        """Handle window close event."""
+        self.save_settings()
+        event.accept()
+
+
+def show_splash_screen():
+    """Show a splash screen while the application loads."""
+    # Create and show the splash screen
+    splash_pix = QPixmap(400, 200)
+    splash_pix.fill(Qt.white)
+    
+    splash = QSplashScreen(splash_pix)
+    splash.show()
+    
+    # Add some text to the splash screen
+    splash.showMessage(
+        "Loading Email Duplicate Cleaner...",
+        Qt.AlignBottom | Qt.AlignHCenter,
+        Qt.black
+    )
+    
+    # Simulate loading time
+    QApplication.processEvents()
+    
+    return splash
 
 
 def main():
-    """Main function to run the GUI application"""
-    root = tk.Tk()
-    app = EmailCleanerGUI(root)
-
-    # Set up clean exit
-    root.protocol("WM_DELETE_WINDOW", app.on_closing)
-
-    root.mainloop()
+    """Main entry point for the application."""
+    try:
+        # Set up the application
+        app = QApplication(sys.argv)
+        
+        # Set application metadata
+        app.setApplicationName("Email Duplicate Cleaner")
+        app.setApplicationVersion(get_version_info()['full_version'])
+        app.setOrganizationName("Nsfr750")
+        app.setOrganizationDomain("github.com/Nsfr750")
+        
+        # Set style
+        app.setStyle('Fusion')
+        
+        # Show splash screen
+        splash = show_splash_screen()
+        
+        # Create and show the main window
+        print("Creating main window...")
+        window = EmailCleanerGUI()
+        print("Main window created")
+        
+        # Center the window on screen
+        screen = QGuiApplication.primaryScreen().geometry()
+        window_rect = window.frameGeometry()
+        window_rect.moveCenter(screen.center())
+        window.move(window_rect.topLeft())
+        
+        # Show the main window and finish splash screen
+        window.show()
+        splash.finish(window)
+        print("Main window shown and splash screen finished")
+        
+        # Debug info
+        print(f"Window geometry: {window.geometry()}")
+        print(f"Window is visible: {window.isVisible()}")
+        print(f"Window is active: {window.isActiveWindow()}")
+        
+        # Start the event loop
+        print("Starting event loop...")
+        return app.exec()
+        
+    except Exception as e:
+        print(f"Fatal error: {e}")
+        import traceback
+        traceback.print_exc()
+        input("Press Enter to exit...")
+        return 1
 
 
 if __name__ == "__main__":

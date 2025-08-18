@@ -5,6 +5,29 @@ All notable changes to Email Duplicate Cleaner will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 🚀 [2.5.2] - 2025-08-18
+
+### 🛠 Fixed
+
+- Updated version information in all relevant files
+- Fixed version number display in the about dialog
+- Updated documentation to reflect the latest changes
+
+## 🚀 [2.5.1] - 2025-08-17
+
+### 🛠 Fixed
+
+- Fixed QAction import error in PySide6 GUI implementation
+- Updated language files with complete English translations
+- Added missing GPL-3.0 license file
+- Fixed version number in various UI elements
+
+### 🔄 Changed
+
+- Improved error handling in GUI initialization
+- Updated dependencies in requirements.txt
+
+
 ## 🚀 [2.5.0] - 2025-06-27
 
 ### 🆕 Added
