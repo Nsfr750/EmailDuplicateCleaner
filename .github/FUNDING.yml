@@ -1,5 +1,11 @@
 # These are supported funding model platforms
 
+# Funding Goal
+# Help support the development and maintenance of MSR605 Tool
+# Goal: $500/month to cover development and server costs
+
 github: Nsfr750
-patreon: Nsfr750
-custom: ["https://www.paypal.me/3dmega"]
+custom: 
+  - "https://www.paypal.me/3dmega"
+  - "Monero: 47Jc6MC47WJVFhiQFYwHyBNQP5BEsjUPG6tc8R37FwcTY8K5Y3LvFzveSXoGiaDQSxDrnCUBJ5WBj6Fgmsfix8VPD4w3gXF"
+
