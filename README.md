@@ -11,7 +11,6 @@ A comprehensive Python tool designed to scan, identify, and remove duplicate ema
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![PyPI](https://img.shields.io/pypi/v/email-duplicate-cleaner)](https://pypi.org/project/email-duplicate-cleaner/)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://paypal.me/3dmega)
-[![Support](https://img.shields.io/badge/Support-Patreon-ff69b4.svg)](https://www.patreon.com/Nsfr750)
 
 ## ✨ What's New in 2.5.2
 
@@ -214,6 +213,4 @@ The `struttura/` directory contains all the auxiliary modules that support the G
 ## Social Links
 
 - [GitHub](https://github.com/sponsors/Nsfr750)
-- [Patreon](https://www.patreon.com/Nsfr750)
-- [Discord](https://discord.gg/ryqNeuRYjD)
 - [Paypal](https://paypal.me/3dmega)
