@@ -65,3 +65,4 @@ gui.bat
 EmailDupFinder.exe
 INFO.txt
 /venv_py39
+/setup

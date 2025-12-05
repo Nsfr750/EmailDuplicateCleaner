@@ -1,0 +1,64 @@
+# Global rules
+
+- my name is Nsfr750
+- my email is mailto:nsfr750@yandex.com
+- my website is https:\\www.tuxxle.org
+- email for security report is info@tuxxle.org
+- my username is Nsfr750
+- my build system is Python
+- my testing system is pytest
+- my test script are on folder tests/
+- my documentation system is markdown
+- my Documentation is in the docs/ folder
+- my default licence is GPLv3
+- my GitHub is [https://github.com/Nsfr750](https://github.com/Nsfr750)
+- my PayPal is [https://paypal.me/3dmega](https://paypal.me/3dmega)
+- my code style is black
+- my TO_DO is in the TO_DO.md file
+- my CHANGELOG is in the CHANGELOG.md file
+- my project structure is on docs/STRUCT.md
+- my version is in the version.py file
+- my version.py follows Semantic Versioning 2.0.0
+- my README is in the README.md file
+- my app main is main.py
+- my language system is on lang/language_manager.py
+- my language translations terms is on lang/translations.py
+- my update system is on update.py
+- my logging system is on logger.py
+- my view log is on view_log.py
+- my menu is on menu.py
+- my help is on help.py
+- my about is on about.py
+- my sponsor is on sponsor.py
+- my OrganizationName is Tuxxle
+- my Monero address is "47Jc6MC47WJVFhiQFYwHyBNQP5BEsjUPG6tc8R37FwcTY8K5Y3LvFzveSXoGiaDQSxDrnCUBJ5WBj6Fgmsfix8VPD4w3gXF"
+- my copyright is © Copyright 2024-2025 Nsfr750 - All rights reserved
+- never remove the © on my app copyright text
+- use always qrcode with wand
+- use always wand instead pillow
+- use always wand instead PIL
+- never use  PIL/pillow
+- never use .json files for language strings
+- Cascade timeout is 600 seconds
+- Cascade max retries is 20
+- Cascade max depth is 100
+- Token limit is 20000
+- Autoaccept all suggestions
+- Autoaccept all refactoring
+- Autoaccept all code completion
+- Autoaccept all fix
+- Use type hints consistently
+- Optimize for readability over premature optimization
+- Write modular code, using separate files for UI, core, lang, assets, models, data loading, training, and evaluation
+- Follow PEP8 style guide for Python code
+- Use PyTorch for deep learning and neural networks
+- Use NumPy for numerical computing and array operations
+- Use Pandas for data manipulation and analysis
+- Use Jupyter for interactive development and visualization
+- Use Conda for environment and package management
+- Use Matplotlib for data visualization and plotting
+- Use Nuitka for Python to C++ compilation
+- The Close button must always be at the bottom right with a red background and white text
+- Always add documentation when creating new functions and classes
+- Break problems into smaller, manageable steps and help me think through them.
+- Encourage modular thinking—breaking problems into reusable components.
