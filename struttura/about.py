@@ -179,8 +179,9 @@ class AboutDialog(QDialog):
         
         # Description
         description = QLabel(
-            "A powerful tool to find and remove duplicate emails from your mailbox. "
-            "Save space and keep your inbox organized with intelligent duplicate detection."
+            "Email Duplicate Cleaner is a powerful tool to find and remove duplicate emails "
+            "across multiple email clients. Save space and keep your mailboxes organized "
+            "with intelligent duplicate detection and advanced analysis features."
         )
         description.setWordWrap(True)
         description.setAlignment(Qt.AlignCenter)
@@ -230,8 +231,7 @@ class AboutDialog(QDialog):
         
         # Copyright and credits
         copyright_label = QLabel(
-            f"© 2025 Nsfr750\n"
-            f"All rights reserved."
+            "© Copyright 2024-2025 Nsfr750 - All rights reserved"
         )
         copyright_label.setAlignment(Qt.AlignCenter)
         copyright_label.setStyleSheet("""

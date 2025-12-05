@@ -439,35 +439,23 @@ class HelpDialog(QDialog):
         
         # Add tabs with sample content
         self._add_tab('getting_started', '🚀 Getting Started', """
-        # Getting Started
-        
-        Welcome to the Help documentation! This guide will help you get started with the application.
-        
+        # Getting Started with Email Duplicate Cleaner
+
+        Welcome to Email Duplicate Cleaner! This guide will help you get started with the application.
+
         ## First Steps
-        1. **Open** your email file or connect to your email account
-        2. **Scan** for duplicate emails
-        3. **Review** the results
-        4. **Remove** unwanted duplicates
-        
+        1. **Choose a mode**: GUI, Web, or CLI
+        2. **Scan** for duplicate emails using your preferred criteria
+        3. **Review** the results and previews
+        4. **Remove** unwanted duplicates safely
+
         ## Features
         - Fast duplicate detection using advanced algorithms
         - Multiple selection options for precise control
         - Preview emails before deletion
-        - Customizable search criteria
+        - Customizable search criteria (strict, content, headers, subject-sender)
         - Batch processing for large email collections
-        
-        ```python
-        # Example: How to use the API
-        from email_duplicate_cleaner import clean_emails
-        
-        # Clean duplicates from a directory
-        results = clean_emails(
-            source="/path/to/emails",
-            method="content",
-            recursive=True
-        )
-        ```
-        
+
         > **Note:** Always back up your emails before performing any cleanup operations.
         """)
         
@@ -506,29 +494,25 @@ class HelpDialog(QDialog):
         - Keep your application updated to the latest version
         """)
         
-        self._add_tab('contact', '📞 Contact Support', """
-        # Contact Support
-        
-        If you need further assistance, please don't hesitate to contact our support team.
-        
+        self._add_tab('contact', '📞 Contact & Support', """
+        # Contact & Support
+
+        If you need further assistance with Email Duplicate Cleaner, please use the channels below.
+
         ## Email Support
-        [support@example.com](mailto:support@example.com)
-        
+        [Support](mailto:info@tuxxle.org)
+
         ## Documentation
-        Visit our [online documentation](https://example.com/docs) for more detailed guides and tutorials.
-        
-        ## Community
-        - [Community Forum](https://example.com/community)
-        - [GitHub Issues](https://github.com/your-repo/issues)
-        - [Discord Server](https://discord.gg/your-invite)
-        
-        ## Business Hours
-        Our support team is available:
-        - Monday to Friday: 9:00 AM - 6:00 PM (GMT)
-        - Response time: Usually within 24 hours
-        
-        ## Emergency Support
-        For critical issues, please include "URGENT" in your subject line.
+        Visit the project documentation and README on GitHub:
+        - [Project README](https://github.com/Nsfr750/EmailDuplicateCleaner#readme)
+        - [Docs folder](https://github.com/Nsfr750/EmailDuplicateCleaner/tree/master/docs)
+
+        ## Community & Issues
+        - [GitHub Issues](https://github.com/Nsfr750/EmailDuplicateCleaner/issues)
+        - [GitHub Sponsors](https://github.com/sponsors/Nsfr750)
+
+        ## Notes
+        - Please include details about your OS, Python version and application version (2.5.2) when reporting issues.
         """)
         
         # Add tab widget to layout

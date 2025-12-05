@@ -87,7 +87,7 @@ def show_version(parent=None):
         <h2>Email Duplicate Cleaner</h2>
         <p><b>Version:</b> {version_info['full_version']}</p>
         <p><b>Build:</b> {version_info['major']}.{version_info['minor']}.{version_info['patch']}</p>
-        <p> 2024 Nsfr750. All rights reserved.</p>
+        <p>© Copyright 2024-2025 Nsfr750 - All rights reserved</p>
         <hr>
         <p style="font-size: 9pt; color: #666;">
             This software is licensed under the GPL v3.0 License.<br>

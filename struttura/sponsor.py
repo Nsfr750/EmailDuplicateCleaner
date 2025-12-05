@@ -35,19 +35,24 @@ logger = logging.getLogger(__name__)
 class SponsorDialog(QDialog):
     def __init__(self, parent=None, language_manager=None):
         super().__init__(parent)
-        self.setWindowTitle("Support")
+        self.setWindowTitle("Support Email Duplicate Cleaner")
         self.setMinimumSize(500, 400)
         
         layout = QVBoxLayout(self)
         
         # Title
-        title = QLabel("Support OpenPGP")
+        title = QLabel("Support Email Duplicate Cleaner")
         title.setStyleSheet("font-size: 18px; font-weight: bold; margin-bottom: 20px;")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(title)
         
         # Message
-        message = QLabel("This application is developed and maintained by a single developer.\nIf you find this application useful, please consider supporting its development.\nYour support helps keep the project alive, allows for new features and improvements and encourages further development.\n\n")
+        message = QLabel(
+            "Email Duplicate Cleaner is developed and maintained by a single developer.\n"
+            "If you find this application useful, please consider supporting its development.\n"
+            "Your support helps keep the project alive, allows for new features and improvements,\n"
+            "and encourages further development.\n\n"
+        )
         message.setWordWrap(True)
         message.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(message)
@@ -254,10 +259,10 @@ class SponsorDialog(QDialog):
         """)
         self.copy_monero_btn.clicked.connect(lambda: self.copy_to_clipboard(monero_address))
         
-        button_layout.addWidget(close_btn)
-        button_layout.addStretch()
         button_layout.addWidget(self.copy_monero_btn)
         button_layout.addWidget(donate_btn)
+        button_layout.addStretch()
+        button_layout.addWidget(close_btn)
         
         layout.addLayout(button_layout)
     

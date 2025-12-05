@@ -56,10 +56,17 @@ class ThreadSafeLogger:
         self._initialized = True
 
     def __del__(self):
-        """Clean up resources."""
-        if hasattr(self, '_rotation_timer'):
-            self._rotation_timer.stop()
-        logging.shutdown()
+        """Clean up resources without touching Qt objects that may be deleted.
+
+        We intentionally avoid accessing QTimer or other Qt objects here to
+        prevent RuntimeError when the underlying C++ objects have already been
+        destroyed during application shutdown.
+        """
+        try:
+            logging.shutdown()
+        except Exception:
+            # Best-effort cleanup; ignore errors during interpreter shutdown
+            pass
 
     def _get_log_file_path(self) -> Path:
         """Generate log file path with current date."""

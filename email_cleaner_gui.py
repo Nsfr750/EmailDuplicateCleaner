@@ -619,7 +619,7 @@ class EmailCleanerGUI(QMainWindow):
             
             # Show the dialog modally
             print("Executing SponsorDialog...")
-            result = sponsor_dialog.exec_()
+            result = sponsor_dialog.exec()
             print(f"SponsorDialog closed with result: {result}")
             
         except ImportError as e:
