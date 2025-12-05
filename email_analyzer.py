@@ -1,5 +1,5 @@
 """
-Email Analysis Module
+Email Analysis Module 2.5.2
 
 Provides advanced analysis of email collections including:
 - Sender analysis

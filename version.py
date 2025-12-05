@@ -3,4 +3,4 @@
 Version information for Email Duplicate Cleaner
 """
 
-__version__ = "2.1.0"
+__version__ = "2.5.2"

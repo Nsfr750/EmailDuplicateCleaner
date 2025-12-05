@@ -55,6 +55,3 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
-
-// Rest of your existing JavaScript code
-// ... (your existing code here)

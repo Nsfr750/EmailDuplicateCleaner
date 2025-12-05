@@ -1,5 +1,5 @@
 """
-Email Duplicate Cleaner - Database Initialization
+Email Duplicate Cleaner - Database Initializator 2.5.2
 
 This script initializes the database for the Email Duplicate Cleaner application.
 It creates tables, sets up migrations, and provides utility functions for database management.
