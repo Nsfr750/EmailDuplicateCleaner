@@ -204,7 +204,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **GUI**: Restored automatic scrolling to ensure the active item is always visible when navigating lists with the keyboard.
 - **GUI**: Corrected an `IndentationError` that prevented the application from starting.
 
-## [Unreleased]
+## [1.1.0]
 
 ### Added
 - New `AppMenu` class in `struttura/menu.py` to handle menu creation and management.
@@ -222,13 +222,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `SyntaxError` in `struttura/about.py`.
 - Missing and incorrect translation keys in `lang/lang.py`.
 
-## [2.2.1] - 2025-04-25
+## [1.0.0] - 2025-04-25
 
 ### Fixed
 - Minor bug fixes
 - Performance improvements
 
-## [2.2.0] - 2025-04-15
+## [0.5.0] - 2025-04-15
 
 ### Added
 - Initial beta release

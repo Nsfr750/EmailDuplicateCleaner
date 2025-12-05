@@ -116,12 +116,3 @@ This guide helps you resolve common issues with EmailDuplicateCleaner. If you do
 2. Describe what you were doing when the error occurred
 3. Attach relevant log files (remove sensitive information)
 4. Include your operating system and application version
-
-### Support Channels:
-- [GitHub Issues](https://github.com/Nsfr750/EmailDuplicateCleaner/issues)
-- [Discord](https://discord.gg/ryqNeuRYjD)
-- Email: nsfr750@yandex.com
-
----
-
-© 2024 Nsfr750. All rights reserved.

@@ -16,11 +16,13 @@ This guide provides detailed instructions on how to use EmailDuplicateCleaner ef
 ### Launching the Application
 
 #### GUI Mode
+
 ```bash
 python email_cleaner_gui.py
 ```
 
 #### Web Interface
+
 ```bash
 python email_cleaner_web.py
 ```

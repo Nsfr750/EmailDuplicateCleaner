@@ -91,7 +91,6 @@ Supports:
 If you find this tool useful, please consider supporting its development:
 
 - [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://paypal.me/3dmega) Support via PayPal
-- [![Support](https://img.shields.io/badge/Support-Patreon-ff69b4.svg)](https://www.patreon.com/Nsfr750) Become a Patron
 - :money_with_wings: **Monero (XMR)**: 
   ```
   47Jc6MC47WJVFhiQFYwHyBNQP5BEsjUPG6tc8R37FwcTY8K5Y3LvFzveSXoGiaDQSxDrnCUBJ5WBj6Fgmsfix8VPD4w3gXF
@@ -140,7 +139,7 @@ Interested in contributing? Check out our [Contributing Guidelines](CONTRIBUTING
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the GPL3 License.
 
 ## 🐛 Issues
 

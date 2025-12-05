@@ -36,12 +36,14 @@ EmailDuplicateCleaner is a powerful tool designed to help you manage and clean u
 ### Steps
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/Nsfr750/EmailDuplicateCleaner.git
    cd EmailDuplicateCleaner
    ```
 
 2. Create and activate a virtual environment (recommended):
+
    ```bash
    python -m venv venv
    .\venv\Scripts\activate  # On Windows
@@ -49,6 +51,7 @@ EmailDuplicateCleaner is a powerful tool designed to help you manage and clean u
    ```
 
 3. Install the required packages:
+
    ```bash
    pip install -r requirements.txt
    ```
@@ -91,4 +94,4 @@ This project is licensed under the GPLv3 License - see the [LICENSE](LICENSE) fi
 
 ---
 
-© 2025 Nsfr750. All rights reserved.
+© 2024-2025 Nsfr750. All rights reserved.
