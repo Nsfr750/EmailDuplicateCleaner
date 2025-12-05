@@ -1,5 +1,5 @@
 """
-Email Duplicate Cleaner - Database Models
+Email Duplicate Cleaner - Database Models 2.5.2
 
 This module contains database models for the Email Duplicate Cleaner application.
 These models are used to store email scanning history, user settings, and other data.
