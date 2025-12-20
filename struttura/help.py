@@ -1,35 +1,46 @@
 """
-Help Dialog Module
+Help Dialog Module for EmailDuplicateCleaner
 
 This module provides a modern, responsive Help dialog with tabbed interface,
 dark theme, and improved content display using PySide6.
 
 Features:
-- Dark theme with smooth animations
-- Tabbed interface for organized content
-- Responsive layout with proper scrolling
-- Syntax highlighting for code blocks
-- Custom animated close button
+- Dark theme with smooth animations and transitions
+- Tabbed interface for organized content navigation
+- Responsive layout with proper scrolling and content wrapping
+- Syntax highlighting for code blocks and markdown support
+- Custom animated UI components with visual feedback
+- Accessibility features including keyboard navigation
+- Support for multiple languages through the language manager
 
 License: GPL v3.0 (see LICENSE)
+Copyright © 2024-2025 Nsfr750 - All rights reserved
 """
 
 import sys
 import os
 import markdown
 from pathlib import Path
-from typing import Optional, Dict, List, Tuple, Any
+from typing import Optional, Dict, List, Tuple, Any, Union, Callable
 
+# Qt Imports
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QTabWidget, QTextBrowser, QPushButton,
     QWidget, QLabel, QHBoxLayout, QScrollArea, QFrame,
     QSizePolicy, QGraphicsDropShadowEffect, QSpacerItem
 )
-from PySide6.QtCore import Qt, QSize, QUrl, QPropertyAnimation, QEasingCurve, QPoint
+
+from PySide6.QtCore import (
+    Qt, QSize, QUrl, QPropertyAnimation, 
+    QEasingCurve, QPoint, QRect, QObject,
+    QEvent, QTimer
+)
+
 from PySide6.QtGui import (
-    QTextCursor, QFont, QDesktopServices, QTextCharFormat, QTextCursor,
-    QColor, QPainter, QLinearGradient, QBrush, QPalette, QPainterPath,
-    QFontMetrics, QIcon, QPixmap
+    QTextCursor, QFont, QDesktopServices, QTextCharFormat,
+    QColor, QPainter, QLinearGradient, QBrush, QPalette, 
+    QPainterPath, QFontMetrics, QIcon, QPixmap, QKeyEvent,
+    QPaintEvent, QMouseEvent, QResizeEvent, QShowEvent, QCloseEvent
 )
 
 # Add project root to the Python path
@@ -40,40 +51,97 @@ if str(project_root) not in sys.path:
 from lang.lang_manager import get_string
 
 class AnimatedButton(QPushButton):
-    """Custom button with hover and click animations."""
+    """
+    A modern, animated button with hover and click effects.
+    
+    Features:
+    - Smooth color transitions on hover and click
+    - Rounded corners with subtle shadows
+    - Customizable colors and animations
+    - Accessibility support
+    """
+    
+    # Class constants for default styling
+    NORMAL_COLOR = QColor("#4a5568")
+    HOVER_COLOR = QColor("#2d3748")
+    PRESSED_COLOR = QColor("#1a202c")
+    TEXT_COLOR = QColor("#e2e8f0")
+    ANIMATION_DURATION = 200
+    BORDER_RADIUS = 6
+    MIN_HEIGHT = 40
     
     def __init__(self, text: str = "", parent: Optional[QWidget] = None):
+        """
+        Initialize the animated button.
+        
+        Args:
+            text: Button text
+            parent: Parent widget
+        """
         super().__init__(text, parent)
+        
+        # Animation setup
         self._animation = QPropertyAnimation(self, b"color")
-        self._animation.setDuration(200)
-        self._normal_color = QColor("#4a5568")
-        self._hover_color = QColor("#2d3748")
-        self._pressed_color = QColor("#1a202c")
+        self._animation.setDuration(self.ANIMATION_DURATION)
+        
+        # Color states
+        self._normal_color = self.NORMAL_COLOR
+        self._hover_color = self.HOVER_COLOR
+        self._pressed_color = self.PRESSED_COLOR
         self._current_color = self._normal_color
-        self._text_color = QColor("#e2e8f0")
+        self._text_color = self.TEXT_COLOR
+        
+        # UI Configuration
         self.setCursor(Qt.PointingHandCursor)
-        self.setMinimumHeight(40)
+        self.setMinimumHeight(self.MIN_HEIGHT)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        self.setFocusPolicy(Qt.StrongFocus)
+        
+        # Accessibility
+        self.setAccessibleName(text)
+        self.setAccessibleDescription(f"Button: {text}")
     
-    def enterEvent(self, event):
+    # Event Handlers
+    def enterEvent(self, event: QEvent) -> None:
+        """Handle mouse enter event with hover animation."""
         self._animate_color(self._hover_color)
         super().enterEvent(event)
     
-    def leaveEvent(self, event):
+    def leaveEvent(self, event: QEvent) -> None:
+        """Handle mouse leave event with return animation."""
         self._animate_color(self._normal_color)
         super().leaveEvent(event)
     
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event: QMouseEvent) -> None:
+        """Handle mouse press with visual feedback."""
         if event.button() == Qt.LeftButton:
             self._animate_color(self._pressed_color, 100)
         super().mousePressEvent(event)
     
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent(self, event: QMouseEvent) -> None:
+        """Handle mouse release with visual feedback."""
         if event.button() == Qt.LeftButton:
             self._animate_color(self._hover_color, 100)
         super().mouseReleaseEvent(event)
     
-    def _animate_color(self, target_color: QColor, duration: int = 200):
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        """Handle keyboard interaction (Enter/Space for click)."""
+        if event.key() in (Qt.Key_Return, Qt.Key_Enter, Qt.Key_Space):
+            self.animateClick()
+        super().keyPressEvent(event)
+    
+    # Animation Methods
+    def _animate_color(self, target_color: QColor, duration: int = None) -> None:
+        """
+        Animate the button's color transition.
+        
+        Args:
+            target_color: The target color to animate to
+            duration: Animation duration in milliseconds
+        """
+        if duration is None:
+            duration = self.ANIMATION_DURATION
+            
         self._animation.stop()
         self._animation.setDuration(duration)
         self._animation.setStartValue(self._current_color)
@@ -81,23 +149,41 @@ class AnimatedButton(QPushButton):
         self._animation.valueChanged.connect(self._update_color)
         self._animation.start(QPropertyAnimation.DeleteWhenStopped)
     
-    def _update_color(self, color: QColor):
+    def _update_color(self, color: QColor) -> None:
+        """Update the button's current color and trigger a repaint."""
         self._current_color = color
         self.update()
     
-    def paintEvent(self, event):
+    # Rendering
+    def paintEvent(self, event: QPaintEvent) -> None:
+        """Render the button with custom styling and animations."""
         painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHints(
+            QPainter.Antialiasing | 
+            QPainter.TextAntialiasing |
+            QPainter.SmoothPixmapTransform
+        )
         
-        # Draw background
-        painter.setBrush(self._current_color)
+        # Draw background with rounded corners
+        path = QPainterPath()
+        path.addRoundedRect(
+            self.rect().adjusted(0.5, 0.5, -0.5, -0.5),  # Slight adjustment for crisp edges
+            self.BORDER_RADIUS,
+            self.BORDER_RADIUS
+        )
+        
         painter.setPen(Qt.NoPen)
-        painter.drawRoundedRect(self.rect(), 6, 6)
+        painter.setBrush(self._current_color)
+        painter.drawPath(path)
         
-        # Draw text
+        # Draw text with proper alignment and padding
+        text_rect = self.rect().adjusted(10, 0, -10, 0)  # Horizontal padding
         painter.setPen(self._text_color)
+        
+        # Configure font
         font = self.font()
         font.setBold(True)
+        font.setPixelSize(14)  # Slightly larger, more readable text
         painter.setFont(font)
         painter.drawText(self.rect(), Qt.AlignCenter, self.text())
 
@@ -120,20 +206,8 @@ class HelpContentWidget(QWidget):
         """Set up the user interface with modern design."""
         # Main layout
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-        
-        # Create a scroll area
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setFrameShape(QScrollArea.NoFrame)
-        
-        # Create a container widget for the scroll area
-        container = QWidget()
-        container.setObjectName("contentContainer")
-        container_layout = QVBoxLayout(container)
-        container_layout.setContentsMargins(25, 20, 35, 25)  # Right margin for scrollbar
-        container_layout.setSpacing(15)
+        layout.setContentsMargins(5, 10, 5, 10)  # Add some padding around the content
+        layout.setSpacing(5)  # Spacing between elements
         
         # Create a text browser for the content
         self.text_browser = QTextBrowser()
@@ -145,12 +219,8 @@ class HelpContentWidget(QWidget):
         self.text_browser.viewport().setAutoFillBackground(False)
         
         # Add to layout
-        container_layout.addWidget(self.text_browser)
-        container_layout.addStretch()
-        
-        # Set up the scroll area
-        scroll.setWidget(container)
-        layout.addWidget(scroll)
+        layout.addWidget(self.text_browser)
+        layout.addStretch()
     
     def _format_content(self, content: str) -> str:
         """Format the help content as HTML with dark theme styling."""
@@ -177,36 +247,44 @@ class HelpContentWidget(QWidget):
         <style>
             body {
                 font-family: 'Segoe UI', 'Arial', sans-serif;
-                font-size: 14px;
-                line-height: 1.7;
+                font-size: 15px;  /* Slightly larger base font size */
+                line-height: 1.8;  /* Increased line height for better readability */
                 color: #e2e8f0;
                 background-color: transparent;
                 padding: 0;
-                margin: 0;
+                margin: 0 0 0 5px;  /* Small left margin for text alignment */
+                max-width: 900px;  /* Limit line length for better readability */
+                margin: 0 auto;  /* Center content */
             }
             h1 {
                 color: #f7fafc;
-                font-size: 24px;
+                font-size: 28px;  /* Larger heading */
                 font-weight: 600;
-                margin: 0 0 15px 0;
-                padding-bottom: 10px;
-                border-bottom: 1px solid #2d3748;
+                margin: 0 0 25px 0;  /* More bottom margin */
+                padding: 10px 0 15px 0;  /* More vertical padding */
+                border-bottom: 1px solid #3a4556;  /* Slightly lighter border */
+                line-height: 1.3;  /* Tighter line height for headings */
             }
             h2 {
                 color: #90cdf4;
-                font-size: 20px;
+                font-size: 22px;  /* Slightly larger */
                 font-weight: 600;
-                margin: 1.5em 0 0.8em 0;
+                margin: 1.8em 0 1em 0;  /* More vertical spacing */
+                padding-top: 10px;  /* Extra space above */
+                line-height: 1.3;
             }
             h3 {
                 color: #a0aec0;
-                font-size: 16px;
+                font-size: 18px;  /* Slightly larger */
                 font-weight: 600;
-                margin: 1.3em 0 0.7em 0;
+                margin: 1.6em 0 0.9em 0;  /* More vertical spacing */
+                padding-top: 8px;  /* Extra space above */
+                line-height: 1.35;
             }
             p {
-                margin: 0.8em 0;
-                line-height: 1.7;
+                margin: 1.2em 0;  /* More vertical space between paragraphs */
+                line-height: 1.8;  /* Increased line height */
+                padding: 0 5px;  /* Small horizontal padding */
             }
             code {
                 font-family: 'Cascadia Code', 'Consolas', 'Monaco', monospace;
@@ -220,11 +298,11 @@ class HelpContentWidget(QWidget):
             pre {
                 background-color: #1a202c;
                 border: 1px solid #2d3748;
-                border-radius: 6px;
-                padding: 12px;
-                margin: 1em 0;
+                border-radius: 8px;  /* Slightly rounder corners */
+                padding: 16px 18px;  /* More padding */
+                margin: 1.5em 0;  /* More vertical space */
                 overflow-x: auto;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);  /* Deeper shadow */
             }
             pre code {
                 background-color: transparent;
@@ -233,6 +311,16 @@ class HelpContentWidget(QWidget):
                 color: #e2e8f0;
                 font-size: 0.9em;
                 line-height: 1.6;
+            }
+            blockquote {
+                margin: 1.8em 0;  /* More vertical space */
+                padding: 1.2em 1.5em;  /* More padding */
+                border-left: 5px solid #4a5568;  /* Thicker border */
+                color: #a0aec0;
+                background-color: rgba(74, 85, 104, 0.12);  /* Slightly more visible */
+                border-radius: 0 6px 6px 0;  /* Slightly rounder corners */
+                font-style: italic;
+                line-height: 1.7;  /* Better line height */
             }
             a {
                 color: #63b3ed;
@@ -244,33 +332,44 @@ class HelpContentWidget(QWidget):
                 color: #90cdf4;
                 text-decoration: underline;
             }
+            .note, .tip, .warning, .danger {
+                padding: 18px 22px;  /* More padding */
+                margin: 2em 0;  /* More vertical space */
+                border-radius: 0 6px 6px 0;  /* Slightly rounder corners */
+                line-height: 1.8;  /* Better line height */
+            }
+            
             .note, .tip {
-                background-color: rgba(66, 153, 225, 0.1);
-                border-left: 4px solid #4299e1;
-                padding: 14px;
-                margin: 1.5em 0;
-                border-radius: 0 4px 4px 0;
+                background-color: rgba(66, 153, 225, 0.12);  /* Slightly more visible */
+                border-left: 5px solid #4299e1;  /* Thicker border */
             }
             .warning {
-                background-color: rgba(237, 137, 54, 0.1);
-                border-left: 4px solid #ed8936;
-                padding: 14px;
-                margin: 1.5em 0;
-                border-radius: 0 4px 4px 0;
+                background-color: rgba(237, 137, 54, 0.12);  /* Slightly more visible */
+                border-left: 5px solid #ed8936;  /* Thicker border */
             }
             .danger {
+                background-color: rgba(229, 62, 62, 0.12);  /* Slightly more visible */
+                border-left: 5px solid #e53e3e;  /* Thicker border */
                 background-color: rgba(229, 62, 62, 0.1);
                 border-left: 4px solid #e53e3e;
                 padding: 14px;
                 margin: 1.5em 0;
                 border-radius: 0 4px 4px 0;
             }
-            blockquote {
-                border-left: 4px solid #4a5568;
-                margin: 1.5em 0;
-                padding: 0.5em 1em;
-                color: #a0aec0;
-                font-style: italic;
+            ul, ol {
+                margin: 1.2em 0 1.2em 1em;  /* More vertical space */
+                padding-left: 2.2em;  /* Slightly more indentation */
+            }
+            
+            li {
+                margin: 0.6em 0;  /* More space between list items */
+                line-height: 1.7;  /* Better line height for list items */
+                padding: 0 5px;  /* Small horizontal padding */
+            }
+            
+            /* Better spacing for nested lists */
+            li ul, li ol {
+                margin: 0.6em 0 0.6em 1em;
             }
             table {
                 border-collapse: collapse;

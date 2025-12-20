@@ -847,6 +847,14 @@ def main():
         app.setOrganizationName("Nsfr750")
         app.setOrganizationDomain("github.com/Nsfr750")
         
+        # Set application icon
+        icon_path = Path("assets/icon.ico")
+        if icon_path.exists():
+            app_icon = QIcon(str(icon_path))
+            app.setWindowIcon(app_icon)
+        else:
+            print(f"Warning: Icon file not found at {icon_path.absolute()}")
+        
         # Set style
         app.setStyle('Fusion')
         
